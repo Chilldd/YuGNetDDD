@@ -4,7 +4,7 @@ using Microsoft.Extensions.Configuration;
 using YuG.Application.DTOs.Resource.Responses;
 using YuG.Application.Queries.Resource;
 
-namespace YuG.Infrastructure.Queries;
+namespace YuG.Infrastructure.Read.Dapper;
 
 /// <summary>
 /// 资源查询服务实现（使用 Dapper）

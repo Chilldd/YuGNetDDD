@@ -1,8 +1,8 @@
 using YuG.Domain.Entities;
 using YuG.Domain.ValueObjects;
-using YuG.Infrastructure.Data.Entities.Auth;
+using YuG.Infrastructure.Persistence.Entities.Auth;
 
-namespace YuG.Infrastructure.Data.Mappings;
+namespace YuG.Infrastructure.Persistence.Mappings;
 
 /// <summary>
 /// 用户 ORM 实体与领域实体的映射转换器

@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using YuG.Application.Interfaces;
-using YuG.Infrastructure.Data.Entities;
-using YuG.Infrastructure.Data.Entities.Auth;
+using YuG.Infrastructure.Persistence.Entities;
+using YuG.Infrastructure.Persistence.Entities.Auth;
 
 namespace YuG.Infrastructure.Persistence;
 

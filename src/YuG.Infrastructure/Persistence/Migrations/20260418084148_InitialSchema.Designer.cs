@@ -20,7 +20,7 @@ namespace YuG.Infrastructure.Migrations
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "10.0.5");
 
-            modelBuilder.Entity("YuG.Infrastructure.Data.Entities.Auth.UserEntity", b =>
+            modelBuilder.Entity("YuG.Infrastructure.Persistence.Entities.Auth.UserEntity", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -54,7 +54,7 @@ namespace YuG.Infrastructure.Migrations
                     b.ToTable("Users", (string)null);
                 });
 
-            modelBuilder.Entity("YuG.Infrastructure.Data.Entities.ResourceEntity", b =>
+            modelBuilder.Entity("YuG.Infrastructure.Persistence.Entities.ResourceEntity", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -121,9 +121,9 @@ namespace YuG.Infrastructure.Migrations
                     b.ToTable("Resources", (string)null);
                 });
 
-            modelBuilder.Entity("YuG.Infrastructure.Data.Entities.Auth.UserEntity", b =>
+            modelBuilder.Entity("YuG.Infrastructure.Persistence.Entities.Auth.UserEntity", b =>
                 {
-                    b.OwnsMany("YuG.Infrastructure.Data.Entities.Auth.RefreshTokenEntity", "RefreshTokens", b1 =>
+                    b.OwnsMany("YuG.Infrastructure.Persistence.Entities.Auth.RefreshTokenEntity", "RefreshTokens", b1 =>
                         {
                             b1.Property<string>("Token")
                                 .HasMaxLength(500)
@@ -158,9 +158,9 @@ namespace YuG.Infrastructure.Migrations
                     b.Navigation("RefreshTokens");
                 });
 
-            modelBuilder.Entity("YuG.Infrastructure.Data.Entities.ResourceEntity", b =>
+            modelBuilder.Entity("YuG.Infrastructure.Persistence.Entities.ResourceEntity", b =>
                 {
-                    b.HasOne("YuG.Infrastructure.Data.Entities.ResourceEntity", null)
+                    b.HasOne("YuG.Infrastructure.Persistence.Entities.ResourceEntity", null)
                         .WithMany()
                         .HasForeignKey("ParentId")
                         .OnDelete(DeleteBehavior.Restrict);

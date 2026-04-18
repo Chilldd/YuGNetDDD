@@ -37,7 +37,14 @@
       "Bash(lark-cli base *)",
       "Bash(lark-cli drive *)",
       "Bash(lark-cli schema *)",
-      "Bash(chmod +x run-tests.sh)"
+      "Bash(chmod +x run-tests.sh)",
+      "Bash(mv Data/Configurations/* Persistence/Configurations/)",
+      "Bash(mv Repositories/* Persistence/Repositories/)",
+      "Bash(mv Data/Entities/* Persistence/Entities/)",
+      "Bash(mv Data/Entities/Auth/* Persistence/Entities/Auth/)",
+      "Bash(mv Migrations/* Persistence/Migrations/)",
+      "Bash(mv Data/Mappings/* Persistence/Mappings/)",
+      "Bash(mv Queries/* Read/Dapper/)"
     ]
   }
 }

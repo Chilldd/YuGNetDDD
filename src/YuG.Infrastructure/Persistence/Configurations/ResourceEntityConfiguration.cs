@@ -1,8 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using YuG.Infrastructure.Data.Entities;
+using YuG.Infrastructure.Persistence.Entities;
 
-namespace YuG.Infrastructure.Data.Configurations;
+namespace YuG.Infrastructure.Persistence.Configurations;
 
 /// <summary>
 /// ResourceEntity 实体 EF Core 配置

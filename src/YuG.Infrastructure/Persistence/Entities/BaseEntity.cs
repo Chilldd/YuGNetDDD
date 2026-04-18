@@ -1,4 +1,4 @@
-namespace YuG.Infrastructure.Data.Entities;
+namespace YuG.Infrastructure.Persistence.Entities;
 
 /// <summary>
 /// ORM 实体基类（与 Domain 聚合根完全独立）

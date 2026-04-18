@@ -13,14 +13,13 @@ paths:
 ### Application 层（接口定义）
 
 - 查询服务接口放在 `YuG.Application/Queries/` 目录下
-- 接口命名使用 `IXxxQueryService` 格式，如 `IResourceQueryService`
+- 接口命名使用 `IXxxReadService` 格式
 - 查询方法命名使用动词开头：`GetXxxAsync`、`SearchXxxAsync`、`ListXxxAsync`
 - 返回类型为 DTO（见 DTO 规范）
 
 ### Infrastructure 层（实现）
 
-- 查询服务实现放在 `YuG.Infrastructure/Queries/` 目录下
-- 实现类命名与接口对应，去掉 `I` 前缀
+- 查询服务实现放在 `YuG.Infrastructure/Read/` 目录下
 - 使用 Dapper 直接查询数据库，不使用 EF Core 或仓储
 - 查询结果映射为 DTO 返回
 

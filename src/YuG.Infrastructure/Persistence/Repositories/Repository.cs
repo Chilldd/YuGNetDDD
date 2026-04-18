@@ -3,8 +3,9 @@ using Microsoft.EntityFrameworkCore;
 using YuG.Domain.Common;
 using YuG.Domain.Repositories;
 using YuG.Infrastructure.Persistence;
+using YuG.Infrastructure.Persistence.Entities;
 
-namespace YuG.Infrastructure.Repositories;
+namespace YuG.Infrastructure.Persistence.Repositories;
 
 /// <summary>
 /// 通用仓储基类（为业务层提供统一接口，内部处理ORM实体的操作和映射）
@@ -13,7 +14,7 @@ namespace YuG.Infrastructure.Repositories;
 /// <typeparam name="TOrmEntity">ORM 实体类型（Infrastructure 层实体）</typeparam>
 public abstract class Repository<TAggregate, TOrmEntity> : IRepository<TAggregate> 
     where TAggregate : AggregateRoot
-    where TOrmEntity : Infrastructure.Data.Entities.BaseEntity
+    where TOrmEntity : Entities.BaseEntity
 {
     protected readonly ApplicationDbContext _context;
     protected readonly DbSet<TOrmEntity> _dbSet;

@@ -1,8 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using YuG.Infrastructure.Data.Entities.Auth;
+using YuG.Infrastructure.Persistence.Entities.Auth;
 
-namespace YuG.Infrastructure.Data.Configurations;
+namespace YuG.Infrastructure.Persistence.Configurations;
 
 /// <summary>
 /// UserEntity 实体 EF Core 配置

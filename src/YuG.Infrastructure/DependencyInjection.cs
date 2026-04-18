@@ -6,8 +6,8 @@ using YuG.Application.Queries.Resource;
 using YuG.Domain.Interfaces;
 using YuG.Domain.Repositories;
 using YuG.Infrastructure.Persistence;
-using YuG.Infrastructure.Queries;
-using YuG.Infrastructure.Repositories;
+using YuG.Infrastructure.Persistence.Repositories;
+using YuG.Infrastructure.Read.Dapper;
 using YuG.Infrastructure.Services;
 
 namespace YuG.Infrastructure;

@@ -2,11 +2,11 @@ using Microsoft.EntityFrameworkCore;
 using YuG.Application.Interfaces;
 using YuG.Domain.Entities;
 using YuG.Domain.Repositories;
-using YuG.Infrastructure.Data.Mappings;
+using YuG.Infrastructure.Persistence.Mappings;
 using YuG.Infrastructure.Persistence;
-using YuG.Infrastructure.Data.Entities.Auth;
+using YuG.Infrastructure.Persistence.Entities.Auth;
 
-namespace YuG.Infrastructure.Repositories;
+namespace YuG.Infrastructure.Persistence.Repositories;
 
 /// <summary>
 /// 用户仓储实现

@@ -1,4 +1,4 @@
-namespace YuG.Infrastructure.Data.Entities;
+namespace YuG.Infrastructure.Persistence.Entities;
 
 /// <summary>
 /// 资源数据库实体（ORM 模型，包含审计属性）
