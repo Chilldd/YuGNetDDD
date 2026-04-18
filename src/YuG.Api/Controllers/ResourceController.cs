@@ -7,8 +7,7 @@ using YuG.Application.Commands.Resource.Disable;
 using YuG.Application.Commands.Resource.Update;
 using YuG.Application.DTOs.Resource.Requests;
 using YuG.Application.DTOs.Resource.Responses;
-using YuG.Application.Queries.Resource.GetAll;
-using YuG.Application.Queries.Resource.GetById;
+using YuG.Application.Queries.Resource;
 
 namespace YuG.Api.Controllers;
 
@@ -20,14 +19,17 @@ namespace YuG.Api.Controllers;
 public class ResourceController : ControllerBase
 {
     private readonly IMediator _mediator;
+    private readonly IResourceQueryService _resourceQueryService;
 
     /// <summary>
     /// 初始化资源管理控制器
     /// </summary>
     /// <param name="mediator">MediatR 发送器</param>
-    public ResourceController(IMediator mediator)
+    /// <param name="resourceQueryService">资源查询服务</param>
+    public ResourceController(IMediator mediator, IResourceQueryService resourceQueryService)
     {
         _mediator = mediator;
+        _resourceQueryService = resourceQueryService;
     }
 
     /// <summary>
@@ -45,14 +47,7 @@ public class ResourceController : ControllerBase
         [FromQuery] Guid? parentId = null,
         [FromQuery] bool? activeOnly = null)
     {
-        var query = new GetAllResourcesQuery
-        {
-            HttpMethod = httpMethod,
-            ParentId = parentId,
-            ActiveOnly = activeOnly
-        };
-
-        var response = await _mediator.Send(query);
+        var response = await _resourceQueryService.GetAllAsync(httpMethod, parentId, activeOnly);
         return Ok(response);
     }
 
@@ -68,8 +63,11 @@ public class ResourceController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<ResourceResponse>> GetById(Guid id)
     {
-        var query = new GetResourceByIdQuery { Id = id };
-        var response = await _mediator.Send(query);
+        var response = await _resourceQueryService.GetByIdAsync(id);
+        if (response is null)
+        {
+            return NotFound();
+        }
         return Ok(response);
     }
 
@@ -172,7 +170,7 @@ public class ResourceController : ControllerBase
     /// </summary>
     /// <param name="id">资源标识</param>
     /// <returns>禁用后的资源</returns>
-    /// <response code="200">禁用成功</response>
+    /// <response code="200">这里成功</response>
     /// <response code="404">资源不存在</response>
     [HttpPost("{id}/disable")]
     [ProducesResponseType(typeof(ResourceResponse), StatusCodes.Status200OK)]

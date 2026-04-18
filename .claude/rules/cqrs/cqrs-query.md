@@ -1,24 +1,33 @@
 ---
 paths:
-  - "YuG.Application/**/*Query.cs"
+  - "YuG.Application/Queries/**/*.cs"
+  - "YuG.Infrastructure/Read/**/*.cs"
 ---
 
 # Query（查询）开发规范
 
+查询采用 Service + Dapper 模式，不使用 MediatR。
+
 ## 必须事项
 
-- 查询类必须继承 `QueryBase<TResponse>`，其中 `TResponse` 为返回的 DTO 类型
-- 查询类必须以 `Query` 后缀结尾，放在 `Queries/` 目录下
-- 查询应尽量简单，只包含必要的查询参数
-- 查询必须有对应的 Handler（继承 `IRequestHandler<TQuery, TResponse>`）
-- 查询命名使用动词开头：`GetXxx`、`SearchXxx`、`ListXxx`
-- 查询必须是不可变的，使用不可变类型规范（见 code-style.md）
-- 查询与其 Handler 必须放在同一目录下
+### Application 层（接口定义）
+
+- 查询服务接口放在 `YuG.Application/Queries/` 目录下
+- 接口命名使用 `IXxxQueryService` 格式，如 `IResourceQueryService`
+- 查询方法命名使用动词开头：`GetXxxAsync`、`SearchXxxAsync`、`ListXxxAsync`
+- 返回类型为 DTO（见 DTO 规范）
+
+### Infrastructure 层（实现）
+
+- 查询服务实现放在 `YuG.Infrastructure/Queries/` 目录下
+- 实现类命名与接口对应，去掉 `I` 前缀
+- 使用 Dapper 直接查询数据库，不使用 EF Core 或仓储
+- 查询结果映射为 DTO 返回
 
 ## 禁止事项
 
-- 禁止在 Query 中修改数据库状态
-- 禁止在 Query 中包含业务逻辑
-- 禁止在 Query 中注入 `DbContext` 或 `Repository`，这些应在 Handler 中注入
-- 禁止在 Query 中执行耗时操作（如复杂计算），这些应在应用服务或领域层完成
-- 禁止在 Query 中包含业务状态属性，只应包含查询参数
+- 禁止在查询服务中修改数据库状态（写操作）
+- 禁止在查询服务中包含业务逻辑
+- 禁止在查询服务中使用 Repository 或 DbContext
+- 禁止在查询服务中执行耗时操作（如复杂计算）
+- 禁止使用 MediatR Query/Handler 模式进行查询

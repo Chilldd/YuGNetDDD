@@ -2,9 +2,11 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using YuG.Application.Interfaces;
+using YuG.Application.Queries.Resource;
 using YuG.Domain.Interfaces;
 using YuG.Domain.Repositories;
 using YuG.Infrastructure.Persistence;
+using YuG.Infrastructure.Queries;
 using YuG.Infrastructure.Repositories;
 using YuG.Infrastructure.Services;
 
@@ -48,6 +50,9 @@ public static class DependencyInjection
 
         // 注册资源仓储
         services.AddScoped<IResourceRepository, ResourceRepository>();
+
+        // 注册资源查询服务
+        services.AddScoped<IResourceQueryService, ResourceQueryService>();
 
         return services;
     }

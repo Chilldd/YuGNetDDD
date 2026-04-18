@@ -44,7 +44,6 @@ paths:
 - 返回可能为 null 的引用类型时，使用 `T?` 标注可空性
 
 ### 异常处理
-- 业务规则违反使用自定义异常（`DomainException`、`ValidationException`、`NotFoundException`）
 - 捕获异常后必须记录日志，使用适当的日志级别（`LogError`、`LogWarning`）
 - 禁止在 Handler 中捕获 `DomainException`，由全局异常中间件统一处理
 
