@@ -17,3 +17,11 @@ obj/
 
 # Windows
 Thumbs.db
+
+# SQLite
+*.db
+*.db-shm
+*.db-wal
+
+# Claude Code
+settings.local.json

@@ -32,7 +32,6 @@ paths:
 
 ### 异步编程
 - 所有 I/O 操作（数据库、文件、网络）必须使用异步方法（`*Async`）
-- 异步方法必须接受 `CancellationToken` 参数
 - 异步方法返回类型必须是 `Task`、`Task<T>` 或 `ValueTask<T>`
 
 ### 依赖注入

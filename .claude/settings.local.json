@@ -24,7 +24,20 @@
       "Bash(git init *)",
       "Bash(git branch *)",
       "Bash(git remote *)",
-      "Bash(git add *)"
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(ssh-keygen *)",
+      "Bash(ssh -T git@github.com -o StrictHostKeyChecking=no)",
+      "Bash(git config *)",
+      "Bash(git push *)",
+      "Bash(lark-cli im *)",
+      "Bash(lark-cli contact *)",
+      "Bash(lark-cli auth *)",
+      "Bash(lark-cli task *)",
+      "Bash(lark-cli base *)",
+      "Bash(lark-cli drive *)",
+      "Bash(lark-cli schema *)",
+      "Bash(chmod +x run-tests.sh)"
     ]
   }
 }
