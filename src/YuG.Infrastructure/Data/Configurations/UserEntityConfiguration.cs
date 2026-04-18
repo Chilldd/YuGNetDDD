@@ -20,14 +20,14 @@ public class UserEntityConfiguration : IEntityTypeConfiguration<UserEntity>
         // 主键配置
         builder.HasKey(u => u.Id);
 
-        // 审计属性配置
+        // 审计属性配置（不使用 CURRENT_TIMESTAMP）
         builder.Property(u => u.CreatedAt)
             .ValueGeneratedOnAdd()
-            .HasDefaultValueSql("CURRENT_TIMESTAMP");
+            .HasDefaultValue(DateTime.UtcNow);
 
         builder.Property(u => u.UpdatedAt)
             .ValueGeneratedOnAddOrUpdate()
-            .HasDefaultValueSql("CURRENT_TIMESTAMP");
+            .HasDefaultValue(DateTime.UtcNow);
 
         // 用户名配置
         builder.Property(u => u.Username)
@@ -45,6 +45,8 @@ public class UserEntityConfiguration : IEntityTypeConfiguration<UserEntity>
         // 配置 Owned Type：RefreshToken
         builder.OwnsMany(u => u.RefreshTokens, rt =>
         {
+            rt.ToTable("RefreshToken");
+            
             rt.WithOwner()
                 .HasForeignKey("UserId");
 
@@ -63,7 +65,7 @@ public class UserEntityConfiguration : IEntityTypeConfiguration<UserEntity>
 
             rt.Property(r => r.CreatedAt)
                 .IsRequired()
-                .HasDefaultValueSql("CURRENT_TIMESTAMP");
+                .HasDefaultValue(DateTime.UtcNow);
         });
     }
 }

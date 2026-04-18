@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using YuG.Application.Interfaces;
+using YuG.Infrastructure.Data.Entities;
 using YuG.Infrastructure.Data.Entities.Auth;
 
 namespace YuG.Infrastructure.Persistence;
@@ -21,6 +22,11 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
     /// 用户数据集
     /// </summary>
     public DbSet<UserEntity> Users => Set<UserEntity>();
+
+    /// <summary>
+    /// 资源数据集
+    /// </summary>
+    public DbSet<ResourceEntity> Resources => Set<ResourceEntity>();
 
     /// <summary>
     /// 保存所有变更到数据库
@@ -51,5 +57,19 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
 
         // 应用实体配置
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(ApplicationDbContext).Assembly);
+    }
+
+    /// <summary>
+    /// 配置 DbContext 选项
+    /// </summary>
+    /// <param name="optionsBuilder">选项构建器</param>
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    {
+        base.OnConfiguring(optionsBuilder);
+
+        // 抑制 PendingModelChangesWarning 警告
+        // 因为我们使用了 DateTime.UtcNow 作为默认值
+        optionsBuilder.ConfigureWarnings(warnings =>
+            warnings.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.PendingModelChangesWarning));
     }
 }

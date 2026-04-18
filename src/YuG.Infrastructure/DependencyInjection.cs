@@ -46,6 +46,9 @@ public static class DependencyInjection
         // 注册用户仓储
         services.AddScoped<IUserRepository, UserRepository>();
 
+        // 注册资源仓储
+        services.AddScoped<IResourceRepository, ResourceRepository>();
+
         return services;
     }
 }
