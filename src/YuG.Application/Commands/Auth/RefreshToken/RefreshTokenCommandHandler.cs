@@ -1,5 +1,5 @@
 using MediatR;
-using YuG.Application.DTOs.Responses;
+using YuG.Application.DTOs.Auth.Responses;
 using YuG.Domain.Exceptions;
 using YuG.Domain.Interfaces;
 using YuG.Domain.Repositories;

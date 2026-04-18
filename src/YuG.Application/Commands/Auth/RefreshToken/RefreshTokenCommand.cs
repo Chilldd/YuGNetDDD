@@ -1,6 +1,6 @@
 using FluentValidation;
 using YuG.Application.Common;
-using YuG.Application.DTOs.Responses;
+using YuG.Application.DTOs.Auth.Responses;
 
 namespace YuG.Application.Commands.Auth.RefreshToken;
 

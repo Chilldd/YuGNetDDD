@@ -3,8 +3,8 @@ using Microsoft.AspNetCore.Mvc;
 using YuG.Application.Commands.Auth.Login;
 using YuG.Application.Commands.Auth.Logout;
 using YuG.Application.Commands.Auth.RefreshToken;
-using YuG.Application.DTOs.Requests;
-using YuG.Application.DTOs.Responses;
+using YuG.Application.DTOs.Auth.Requests;
+using YuG.Application.DTOs.Auth.Responses;
 
 namespace YuG.Api.Controllers;
 

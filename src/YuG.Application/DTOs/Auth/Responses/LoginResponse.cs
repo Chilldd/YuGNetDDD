@@ -1,9 +1,9 @@
-namespace YuG.Application.DTOs.Responses;
+namespace YuG.Application.DTOs.Auth.Responses;
 
 /// <summary>
-/// 刷新令牌响应
+/// 登录响应
 /// </summary>
-public record RefreshTokenResponse
+public record LoginResponse
 {
     /// <summary>
     /// 访问令牌

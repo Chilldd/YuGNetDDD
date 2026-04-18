@@ -1,9 +1,9 @@
-namespace YuG.Application.DTOs.Requests;
+namespace YuG.Application.DTOs.Auth.Requests;
 
 /// <summary>
-/// 登出请求
+/// 刷新令牌请求
 /// </summary>
-public record LogoutRequest
+public record RefreshTokenRequest
 {
     /// <summary>
     /// 刷新令牌

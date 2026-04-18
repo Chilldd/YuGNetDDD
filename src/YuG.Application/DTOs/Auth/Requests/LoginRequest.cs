@@ -1,4 +1,4 @@
-namespace YuG.Application.DTOs.Requests;
+namespace YuG.Application.DTOs.Auth.Requests;
 
 /// <summary>
 /// 登录请求

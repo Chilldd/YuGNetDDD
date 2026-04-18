@@ -1,11 +1,11 @@
-namespace YuG.Application.DTOs.Responses;
+namespace YuG.Application.DTOs.Auth.Responses;
 
 /// <summary>
-/// 登录响应
+/// 刷新令牌响应
 /// </summary>
-public record LoginResponse
+public record RefreshTokenResponse
 {
-    /// <summary>
+    /// /// <summary>
     /// 访问令牌
     /// </summary>
     public string AccessToken { get; init; } = string.Empty;
