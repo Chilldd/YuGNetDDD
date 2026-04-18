@@ -1,8 +1,8 @@
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using YuG.Application.Commands.Auth.Login;
-using YuG.Application.Commands.Auth.Logout;
-using YuG.Application.Commands.Auth.RefreshToken;
+using YuG.Application.Auth.Commands.Login;
+using YuG.Application.Auth.Commands.Logout;
+using YuG.Application.Auth.Commands.RefreshToken;
 using YuG.Application.DTOs.Auth.Requests;
 using YuG.Application.DTOs.Auth.Responses;
 

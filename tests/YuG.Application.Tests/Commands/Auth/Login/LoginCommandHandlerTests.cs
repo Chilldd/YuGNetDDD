@@ -1,6 +1,6 @@
 using MediatR;
 using Moq;
-using YuG.Application.Commands.Auth.Login;
+using YuG.Application.Auth.Commands.Login;
 using YuG.Domain.Entities;
 using YuG.Domain.Exceptions;
 using YuG.Domain.Interfaces;

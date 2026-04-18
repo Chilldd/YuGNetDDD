@@ -2,7 +2,7 @@ using MediatR;
 using YuG.Domain.Exceptions;
 using YuG.Domain.Repositories;
 
-namespace YuG.Application.Commands.Resource.Delete;
+namespace YuG.Application.Resource.Commands.Delete;
 
 /// <summary>
 /// 删除资源命令处理器

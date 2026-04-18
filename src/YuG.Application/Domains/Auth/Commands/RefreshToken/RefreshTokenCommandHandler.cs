@@ -5,7 +5,7 @@ using YuG.Domain.Interfaces;
 using YuG.Domain.Repositories;
 using DomainRefreshToken = YuG.Domain.ValueObjects.RefreshToken;
 
-namespace YuG.Application.Commands.Auth.RefreshToken;
+namespace YuG.Application.Auth.Commands.RefreshToken;
 
 /// <summary>
 /// 刷新令牌命令处理器

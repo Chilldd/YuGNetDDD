@@ -1,19 +1,15 @@
 using FluentValidation;
 using YuG.Application.Common;
+using YuG.Application.DTOs.Resource.Requests;
 using YuG.Application.DTOs.Resource.Responses;
 
-namespace YuG.Application.Commands.Resource.Update;
+namespace YuG.Application.Resource.Commands.Create;
 
 /// <summary>
-/// 更新资源命令
+/// 创建资源命令
 /// </summary>
-public class UpdateResourceCommand : CommandBase<ResourceResponse>
+public class CreateResourceCommand : CommandBase<ResourceResponse>
 {
-    /// <summary>
-    /// 资源标识
-    /// </summary>
-    public Guid Id { get; init; }
-
     /// <summary>
     /// 资源名称
     /// </summary>
@@ -56,18 +52,15 @@ public class UpdateResourceCommand : CommandBase<ResourceResponse>
 }
 
 /// <summary>
-/// 更新资源命令验证器
+/// 创建资源命令验证器
 /// </summary>
-public class UpdateResourceCommandValidator : AbstractValidator<UpdateResourceCommand>
+public class CreateResourceCommandValidator : AbstractValidator<CreateResourceCommand>
 {
     /// <summary>
-    /// 初始化更新资源命令验证器
+    /// 初始化创建资源命令验证器
     /// </summary>
-    public UpdateResourceCommandValidator()
+    public CreateResourceCommandValidator()
     {
-        RuleFor(x => x.Id)
-            .NotEmpty().WithMessage("资源标识不能为空");
-
         RuleFor(x => x.Name)
             .NotEmpty().WithMessage("资源名称不能为空")
             .MaximumLength(200).WithMessage("资源名称长度不能超过 200 个字符");

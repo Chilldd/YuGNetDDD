@@ -2,7 +2,7 @@ using FluentValidation;
 using YuG.Application.Common;
 using YuG.Application.DTOs.Auth.Responses;
 
-namespace YuG.Application.Commands.Auth.Login;
+namespace YuG.Application.Auth.Commands.Login;
 
 /// <summary>
 /// 登录命令

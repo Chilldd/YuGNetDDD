@@ -1,6 +1,6 @@
 using YuG.Application.DTOs.Resource.Responses;
 
-namespace YuG.Application.Queries.Resource;
+namespace YuG.Application.Resource.Queries;
 
 /// <summary>
 /// 资源查询服务接口

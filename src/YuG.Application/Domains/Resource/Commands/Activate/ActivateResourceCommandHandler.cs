@@ -3,31 +3,31 @@ using YuG.Application.DTOs.Resource.Responses;
 using YuG.Domain.Exceptions;
 using YuG.Domain.Repositories;
 
-namespace YuG.Application.Commands.Resource.Disable;
+namespace YuG.Application.Resource.Commands.Activate;
 
 /// <summary>
-/// 禁用资源命令处理器
+/// 激活资源命令处理器
 /// </summary>
-public class DisableResourceCommandHandler : IRequestHandler<DisableResourceCommand, ResourceResponse>
+public class ActivateResourceCommandHandler : IRequestHandler<ActivateResourceCommand, ResourceResponse>
 {
     private readonly IResourceRepository _resourceRepository;
 
     /// <summary>
-    /// 初始化禁用资源命令处理器
+    /// 初始化激活资源命令处理器
     /// </summary>
     /// <param name="resourceRepository">资源仓储</param>
-    public DisableResourceCommandHandler(IResourceRepository resourceRepository)
+    public ActivateResourceCommandHandler(IResourceRepository resourceRepository)
     {
         _resourceRepository = resourceRepository;
     }
 
     /// <summary>
-    /// 处理禁用资源命令
+    /// 处理激活资源命令
     /// </summary>
-    /// <param name="request">禁用资源命令</param>
+    /// <param name="request">激活资源命令</param>
     /// <param name="cancellationToken">取消令牌</param>
     /// <returns>资源响应</returns>
-    public async Task<ResourceResponse> Handle(DisableResourceCommand request, CancellationToken cancellationToken)
+    public async Task<ResourceResponse> Handle(ActivateResourceCommand request, CancellationToken cancellationToken)
     {
         // 获取资源
         var resource = await _resourceRepository.GetByIdAsync(request.Id, cancellationToken);
@@ -36,8 +36,8 @@ public class DisableResourceCommandHandler : IRequestHandler<DisableResourceComm
             throw new DomainException($"资源 '{request.Id}' 不存在");
         }
 
-        // 禁用资源
-        resource.Disable();
+        // 激活资源
+        resource.Activate();
 
         // 保存到数据库
         _resourceRepository.Update(resource);

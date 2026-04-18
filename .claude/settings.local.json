@@ -44,7 +44,15 @@
       "Bash(mv Data/Entities/Auth/* Persistence/Entities/Auth/)",
       "Bash(mv Migrations/* Persistence/Migrations/)",
       "Bash(mv Data/Mappings/* Persistence/Mappings/)",
-      "Bash(mv Queries/* Read/Dapper/)"
+      "Bash(mv Queries/* Read/Dapper/)",
+      "Bash(mv src/YuG.Application/Commands/Auth/Login/*.cs src/YuG.Application/Auth/Commands/Login/)",
+      "Bash(mv src/YuG.Application/Commands/Auth/Logout/*.cs src/YuG.Application/Auth/Commands/Logout/)",
+      "Bash(mv src/YuG.Application/Commands/Auth/RefreshToken/*.cs src/YuG.Application/Auth/Commands/RefreshToken/)",
+      "Bash(mv src/YuG.Application/Commands/Resource/Create/*.cs src/YuG.Application/Resource/Commands/Create/)",
+      "Bash(mv src/YuG.Application/Commands/Resource/Update/*.cs src/YuG.Application/Resource/Commands/Update/)",
+      "Bash(mv src/YuG.Application/Commands/Resource/Activate/*.cs src/YuG.Application/Resource/Commands/Activate/)",
+      "Bash(mv src/YuG.Application/Commands/Resource/Disable/*.cs src/YuG.Application/Resource/Commands/Disable/)",
+      "Bash(mv src/YuG.Application/Commands/Resource/Delete/*.cs src/YuG.Application/Resource/Commands/Delete/)"
     ]
   }
 }

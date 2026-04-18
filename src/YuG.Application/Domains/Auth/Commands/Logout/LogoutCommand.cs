@@ -2,7 +2,7 @@ using FluentValidation;
 using MediatR;
 using YuG.Application.Common;
 
-namespace YuG.Application.Commands.Auth.Logout;
+namespace YuG.Application.Auth.Commands.Logout;
 
 /// <summary>
 /// 登出命令

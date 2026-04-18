@@ -2,7 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using YuG.Application.Interfaces;
-using YuG.Application.Queries.Resource;
+using YuG.Application.Resource.Queries;
 using YuG.Domain.Interfaces;
 using YuG.Domain.Repositories;
 using YuG.Infrastructure.Persistence;

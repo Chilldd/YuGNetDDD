@@ -5,7 +5,7 @@ using YuG.Domain.Exceptions;
 using YuG.Domain.Repositories;
 using YuG.Domain.ValueObjects;
 
-namespace YuG.Application.Commands.Resource.Create;
+namespace YuG.Application.Resource.Commands.Create;
 
 /// <summary>
 /// 创建资源命令处理器
