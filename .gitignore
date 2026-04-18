@@ -1,0 +1,19 @@
+# .NET
+bin/
+obj/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+*.userprefs
+
+# IDE
+.idea/
+.vs/
+*.sln.DotSettings.user
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db

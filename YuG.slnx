@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="src/YuG.Api/YuG.Api.csproj" />
+  <Project Path="src/YuG.Domain/YuG.Domain.csproj" />
+  <Project Path="src/YuG.Application/YuG.Application.csproj" />
+  <Project Path="src/YuG.Infrastructure/YuG.Infrastructure.csproj" />
+</Solution>

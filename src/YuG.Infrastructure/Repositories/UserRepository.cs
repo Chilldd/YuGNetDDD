@@ -1,0 +1,73 @@
+using Microsoft.EntityFrameworkCore;
+using YuG.Application.Interfaces;
+using YuG.Domain.Entities;
+using YuG.Domain.Repositories;
+using YuG.Infrastructure.Data.Mappings;
+using YuG.Infrastructure.Persistence;
+using YuG.Infrastructure.Data.Entities.Auth;
+
+namespace YuG.Infrastructure.Repositories;
+
+/// <summary>
+/// 用户仓储实现
+/// </summary>
+public class UserRepository : Repository<Domain.Entities.User, UserEntity>, IUserRepository
+{
+    /// <summary>
+    /// 初始化用户仓储
+    /// </summary>
+    /// <param name="context">数据库上下文</param>
+    public UserRepository(ApplicationDbContext context)
+        : base(context)
+    {
+    }
+
+    /// <summary>
+    /// 将 ORM 实体映射到领域实体
+    /// </summary>
+    /// <param name="ormEntity">ORM 实体</param>
+    /// <returns>领域实体</returns>
+    protected override User MapToDomain(UserEntity ormEntity)
+    {
+        return ormEntity.ToDomain();
+    }
+
+    /// <summary>
+    /// 将领域实体映射到 ORM 实体
+    /// </summary>
+    /// <param name="aggregate">领域实体</param>
+    /// <returns>ORM 实体</returns>
+    protected override UserEntity MapToOrmEntity(User aggregate)
+    {
+        return aggregate.ToEntity();
+    }
+
+    /// <summary>
+    /// 根据用户名获取用户
+    /// </summary>
+    /// <param name="username">用户名</param>
+    /// <param name="cancellationToken">取消令牌</param>
+    /// <returns>用户实体，不存在则返回 null</returns>
+    public async Task<Domain.Entities.User?> GetByUsernameAsync(string username, CancellationToken cancellationToken = default)
+    {
+        var userEntity = await _context.Users
+            .AsNoTracking()
+            .FirstOrDefaultAsync(u => u.Username == username, cancellationToken);
+
+        return userEntity?.ToDomain();
+    }
+
+    /// <summary>
+    /// 检查用户名是否存在
+    /// </summary>
+    /// <param name="username">用户名</param>
+    /// <param name="cancellationToken">取消令牌</param>
+    /// <returns>用户名是否存在</returns>
+    public async Task<bool> UsernameExistsAsync(string username, CancellationToken cancellationToken = default)
+    {
+        return await _context.Users
+            .AsNoTracking()
+            .AnyAsync(u => u.Username == username, cancellationToken);
+    }
+}
+

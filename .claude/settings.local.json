@@ -1,0 +1,30 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__plugin_microsoft-docs_microsoft-learn__microsoft_docs_search",
+      "Bash(dotnet:*)",
+      "Bash(find /home/yug/workspace/YuGProject/YuG.Api -maxdepth 3 -type d -not -path \"*/obj/*\" -not -path \"*/bin/*\" -not -path \"*/.idea/*\" -exec echo {} \\\\;)",
+      "Bash(find /home/yug/workspace/YuGProject -name \"*.cs\" -type f -not -path \"*/obj/*\" -not -path \"*/bin/*\" -exec wc -l {} \\\\;)",
+      "Bash(find:*)",
+      "Bash(nuget search:*)",
+      "Bash(mv command.md cqrs-command.md)",
+      "Bash(mv handler.md cqrs-handler.md)",
+      "Bash(mv query.md cqrs-query.md)",
+      "Bash(mv validator.md cqrs-validator.md)",
+      "Bash(npm --version)",
+      "Bash(curl -fsSL https://deb.nodesource.com/setup_lts.x)",
+      "Bash(sudo -E bash -)",
+      "Bash(sudo apt-get:*)",
+      "WebSearch",
+      "Bash(grep:*)",
+      "mcp__plugin_microsoft-docs_microsoft-learn__microsoft_code_sample_search",
+      "Bash(curl:*)",
+      "Bash(pkill -f \"dotnet.*YuG.Api\")",
+      "Bash(netstat -tuln)",
+      "Bash(git init *)",
+      "Bash(git branch *)",
+      "Bash(git remote *)",
+      "Bash(git add *)"
+    ]
+  }
+}
