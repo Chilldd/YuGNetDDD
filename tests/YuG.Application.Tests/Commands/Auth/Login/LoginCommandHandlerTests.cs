@@ -1,10 +1,10 @@
 using MediatR;
 using Moq;
 using YuG.Application.Domains.Auth.Commands.Login;
-using YuG.Domain.Entities;
+using YuG.Domain.Identity.Entities;
+using YuG.Domain.Identity.Repositories;
 using YuG.Domain.Common;
-using YuG.Domain.Interfaces;
-using YuG.Domain.Repositories;
+using YuG.Domain.Common.Interfaces;
 
 namespace YuG.Application.Tests.Commands.Auth.Login;
 

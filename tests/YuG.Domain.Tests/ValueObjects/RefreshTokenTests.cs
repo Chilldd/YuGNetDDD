@@ -1,4 +1,4 @@
-using YuG.Domain.ValueObjects;
+using YuG.Domain.Identity.ValueObjects;
 
 namespace YuG.Domain.Tests.ValueObjects;
 

@@ -1,4 +1,4 @@
-namespace YuG.Domain.Interfaces;
+namespace YuG.Domain.Common.Interfaces;
 
 /// <summary>
 /// JWT 令牌服务接口

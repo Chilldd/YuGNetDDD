@@ -1,7 +1,7 @@
 using YuG.Domain.Common;
-using YuG.Domain.Enums;
+using YuG.Domain.Permission.Enums;
 
-namespace YuG.Domain.Entities;
+namespace YuG.Domain.Permission.Entities;
 
 /// <summary>
 /// 资源领域对象

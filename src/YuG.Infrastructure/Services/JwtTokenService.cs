@@ -3,7 +3,7 @@ using System.Security.Claims;
 using System.Text;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
-using YuG.Domain.Interfaces;
+using YuG.Domain.Common.Interfaces;
 
 namespace YuG.Infrastructure.Services;
 

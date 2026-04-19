@@ -1,7 +1,8 @@
-using YuG.Domain.Entities;
-using YuG.Domain.Enums;
+using YuG.Domain.Common;
+using YuG.Domain.Permission.Entities;
+using YuG.Domain.Permission.Enums;
 
-namespace YuG.Domain.Repositories;
+namespace YuG.Domain.Permission.Repositories;
 
 /// <summary>
 /// 资源仓储接口

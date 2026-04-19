@@ -1,8 +1,9 @@
 using MediatR;
 using YuG.Application.DTOs.Resource.Responses;
 using YuG.Domain.Common;
-using YuG.Domain.Repositories;
-using YuG.Domain.Enums;
+using YuG.Domain.Permission.Entities;
+using YuG.Domain.Permission.Enums;
+using YuG.Domain.Permission.Repositories;
 
 namespace YuG.Application.Domains.Resource.Commands.Update;
 

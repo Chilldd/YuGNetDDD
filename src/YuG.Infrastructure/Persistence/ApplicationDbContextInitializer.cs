@@ -1,9 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using YuG.Domain.Entities;
-using YuG.Domain.Interfaces;
+using YuG.Domain.Identity.Entities;
+using YuG.Domain.Common.Interfaces;
 using YuG.Infrastructure.Persistence.Mappings;
-using YuG.Infrastructure.Services;
 using YuG.Infrastructure.Persistence.Entities;
 
 namespace YuG.Infrastructure.Persistence;

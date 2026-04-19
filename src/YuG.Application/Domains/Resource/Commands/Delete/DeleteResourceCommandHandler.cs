@@ -1,6 +1,7 @@
 using MediatR;
 using YuG.Domain.Common;
-using YuG.Domain.Repositories;
+using YuG.Domain.Permission.Entities;
+using YuG.Domain.Permission.Repositories;
 
 namespace YuG.Application.Domains.Resource.Commands.Delete;
 

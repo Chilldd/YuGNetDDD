@@ -1,6 +1,7 @@
-using YuG.Domain.Entities;
+using YuG.Domain.Common;
+using YuG.Domain.Identity.Entities;
 
-namespace YuG.Domain.Repositories;
+namespace YuG.Domain.Identity.Repositories;
 
 /// <summary>
 /// 用户仓储接口

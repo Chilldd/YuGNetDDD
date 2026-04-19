@@ -1,4 +1,4 @@
-namespace YuG.Domain.Enums;
+namespace YuG.Domain.Permission.Enums;
 
 /// <summary>
 /// 资源状态枚举

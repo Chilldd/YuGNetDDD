@@ -1,6 +1,7 @@
 using MediatR;
-using YuG.Domain.Interfaces;
-using YuG.Domain.Repositories;
+using YuG.Domain.Identity.Entities;
+using YuG.Domain.Identity.Repositories;
+using YuG.Domain.Common.Interfaces;
 
 namespace YuG.Application.Domains.Auth.Commands.Logout;
 

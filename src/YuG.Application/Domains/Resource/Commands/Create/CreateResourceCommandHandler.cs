@@ -1,9 +1,10 @@
 using MediatR;
 using YuG.Application.DTOs.Resource.Responses;
-using YuG.Domain.Entities;
 using YuG.Domain.Common;
-using YuG.Domain.Repositories;
-using YuG.Domain.Enums;
+using YuG.Domain.Permission.Entities;
+using YuG.Domain.Permission.Enums;
+using YuG.Domain.Permission.Repositories;
+using ResourceEntity = YuG.Domain.Permission.Entities.Resource;
 
 namespace YuG.Application.Domains.Resource.Commands.Create;
 
@@ -44,7 +45,7 @@ public class CreateResourceCommandHandler : IRequestHandler<CreateResourceComman
         var status = string.IsNullOrEmpty(request.Status) ? ResourceStatus.Active : Enum.Parse<ResourceStatus>(request.Status, ignoreCase: true);
 
         // 创建资源
-        var resource = new Domain.Entities.Resource(
+        var resource = new ResourceEntity(
             request.Name,
             request.Code,
             request.Description,

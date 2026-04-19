@@ -1,4 +1,4 @@
-namespace YuG.Domain.Enums;
+namespace YuG.Domain.Permission.Enums;
 
 /// <summary>
 /// HTTP 方法枚举

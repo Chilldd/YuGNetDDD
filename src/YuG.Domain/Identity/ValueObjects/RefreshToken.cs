@@ -1,4 +1,4 @@
-namespace YuG.Domain.ValueObjects;
+namespace YuG.Domain.Identity.ValueObjects;
 
 /// <summary>
 /// 刷新令牌值对象（不可变）

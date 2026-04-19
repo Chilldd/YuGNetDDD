@@ -1,7 +1,7 @@
 using System.Linq.Expressions;
 using YuG.Domain.Common;
 
-namespace YuG.Domain.Repositories;
+namespace YuG.Domain.Common;
 
 /// <summary>
 /// 泛型仓储接口，定义实体的基本持久化操作

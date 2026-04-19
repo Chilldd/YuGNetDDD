@@ -1,9 +1,6 @@
 using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
 using YuG.Domain.Common;
-using YuG.Domain.Repositories;
-using YuG.Infrastructure.Persistence;
-using YuG.Infrastructure.Persistence.Entities;
 
 namespace YuG.Infrastructure.Persistence.Repositories;
 

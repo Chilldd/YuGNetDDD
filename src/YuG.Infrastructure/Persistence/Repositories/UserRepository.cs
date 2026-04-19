@@ -1,9 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using YuG.Domain.Common;
-using YuG.Domain.Entities;
-using YuG.Domain.Repositories;
+using YuG.Domain.Identity.Entities;
+using YuG.Domain.Identity.Repositories;
 using YuG.Infrastructure.Persistence.Mappings;
-using YuG.Infrastructure.Persistence;
 using YuG.Infrastructure.Persistence.Entities.Auth;
 
 namespace YuG.Infrastructure.Persistence.Repositories;
@@ -11,7 +10,7 @@ namespace YuG.Infrastructure.Persistence.Repositories;
 /// <summary>
 /// 用户仓储实现
 /// </summary>
-public class UserRepository : Repository<Domain.Entities.User, UserEntity>, IUserRepository
+public class UserRepository : Repository<User, UserEntity>, IUserRepository
 {
     /// <summary>
     /// 初始化用户仓储
@@ -29,7 +28,7 @@ public class UserRepository : Repository<Domain.Entities.User, UserEntity>, IUse
     /// <param name="username">用户名</param>
     /// <param name="cancellationToken">取消令牌</param>
     /// <returns>用户实体，不存在则返回 null</returns>
-    public async Task<Domain.Entities.User?> GetByUsernameAsync(string username, CancellationToken cancellationToken = default)
+    public async Task<User?> GetByUsernameAsync(string username, CancellationToken cancellationToken = default)
     {
         var userEntity = await _context.Users
             .AsNoTracking()

@@ -1,7 +1,7 @@
 using Moq;
-using YuG.Domain.Entities;
-using YuG.Domain.Interfaces;
-using YuG.Domain.ValueObjects;
+using YuG.Domain.Identity.Entities;
+using YuG.Domain.Identity.ValueObjects;
+using YuG.Domain.Common.Interfaces;
 
 namespace YuG.Domain.Tests.Entities;
 

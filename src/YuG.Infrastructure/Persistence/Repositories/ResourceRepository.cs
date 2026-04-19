@@ -1,18 +1,17 @@
 using Microsoft.EntityFrameworkCore;
 using YuG.Domain.Common;
-using YuG.Domain.Entities;
-using YuG.Domain.Enums;
-using YuG.Domain.Repositories;
+using YuG.Domain.Permission.Entities;
+using YuG.Domain.Permission.Enums;
+using YuG.Domain.Permission.Repositories;
 using YuG.Infrastructure.Persistence.Entities;
 using YuG.Infrastructure.Persistence.Mappings;
-using YuG.Infrastructure.Persistence;
 
 namespace YuG.Infrastructure.Persistence.Repositories;
 
 /// <summary>
 /// 资源仓储实现
 /// </summary>
-public class ResourceRepository : Repository<Domain.Entities.Resource, ResourceEntity>, IResourceRepository
+public class ResourceRepository : Repository<Resource, ResourceEntity>, IResourceRepository
 {
     /// <summary>
     /// 初始化资源仓储

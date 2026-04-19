@@ -1,4 +1,4 @@
-namespace YuG.Domain.Interfaces;
+namespace YuG.Domain.Common.Interfaces;
 
 /// <summary>
 /// 密码哈希服务接口

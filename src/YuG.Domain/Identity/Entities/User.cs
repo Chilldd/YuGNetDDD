@@ -1,8 +1,8 @@
 using YuG.Domain.Common;
-using YuG.Domain.Interfaces;
-using YuG.Domain.ValueObjects;
+using YuG.Domain.Common.Interfaces;
+using YuG.Domain.Identity.ValueObjects;
 
-namespace YuG.Domain.Entities;
+namespace YuG.Domain.Identity.Entities;
 
 /// <summary>
 /// 用户领域对象

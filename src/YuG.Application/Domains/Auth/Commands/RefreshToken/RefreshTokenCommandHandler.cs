@@ -1,9 +1,11 @@
 using MediatR;
 using YuG.Application.DTOs.Auth.Responses;
 using YuG.Domain.Common;
-using YuG.Domain.Interfaces;
-using YuG.Domain.Repositories;
-using DomainRefreshToken = YuG.Domain.ValueObjects.RefreshToken;
+using YuG.Domain.Identity.Entities;
+using YuG.Domain.Identity.Repositories;
+using YuG.Domain.Identity.ValueObjects;
+using YuG.Domain.Common.Interfaces;
+using DomainRefreshToken = YuG.Domain.Identity.ValueObjects.RefreshToken;
 
 namespace YuG.Application.Domains.Auth.Commands.RefreshToken;
 
