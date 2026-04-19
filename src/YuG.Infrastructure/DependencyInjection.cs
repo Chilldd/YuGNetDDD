@@ -2,9 +2,11 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using YuG.Application.Interfaces;
-using YuG.Application.Resource.Queries;
+using YuG.Application.Domains.Resource.Queries;
+using YuG.Domain.Common;
 using YuG.Domain.Interfaces;
 using YuG.Domain.Repositories;
+using YuG.Infrastructure.DomainEvents;
 using YuG.Infrastructure.Persistence;
 using YuG.Infrastructure.Persistence.Repositories;
 using YuG.Infrastructure.Read.Dapper;
@@ -35,6 +37,9 @@ public static class DependencyInjection
 
         // 注册数据库初始化器
         services.AddScoped<ApplicationDbContextInitializer>();
+
+        // 注册领域事件发布器
+        services.AddScoped<IDomainEventPublisher, DomainEventPublisher>();
 
         // 注册认证服务
         services.Configure<JwtOptions>(configuration.GetSection("Jwt"));
