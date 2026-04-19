@@ -1,6 +1,6 @@
 using MediatR;
 using YuG.Application.DTOs.Auth.Responses;
-using YuG.Domain.Exceptions;
+using YuG.Domain.Common;
 using YuG.Domain.Interfaces;
 using YuG.Domain.Repositories;
 using DomainRefreshToken = YuG.Domain.ValueObjects.RefreshToken;
@@ -42,14 +42,14 @@ public class RefreshTokenCommandHandler : IRequestHandler<RefreshTokenCommand, R
 
         if (user == null)
         {
-            throw new InvalidCredentialsException("无效的刷新令牌");
+            throw new DomainException("无效的刷新令牌");
         }
 
         // 验证刷新令牌是否有效
         var existingToken = user.GetValidRefreshToken(request.RefreshToken);
         if (existingToken == null)
         {
-            throw new InvalidCredentialsException("刷新令牌已过期或已撤销");
+            throw new DomainException("刷新令牌已过期或已撤销");
         }
 
         // 撤销旧的刷新令牌

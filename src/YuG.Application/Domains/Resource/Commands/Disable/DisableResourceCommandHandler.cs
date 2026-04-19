@@ -1,6 +1,6 @@
 using MediatR;
 using YuG.Application.DTOs.Resource.Responses;
-using YuG.Domain.Exceptions;
+using YuG.Domain.Common;
 using YuG.Domain.Repositories;
 
 namespace YuG.Application.Domains.Resource.Commands.Disable;

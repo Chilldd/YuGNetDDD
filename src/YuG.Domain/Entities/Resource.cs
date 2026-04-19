@@ -1,5 +1,4 @@
 using YuG.Domain.Common;
-using YuG.Domain.Exceptions;
 using YuG.Domain.ValueObjects;
 
 namespace YuG.Domain.Entities;

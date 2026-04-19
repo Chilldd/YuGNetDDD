@@ -1,6 +1,7 @@
 using System.Net;
 using System.Text.Json;
 using YuG.Application.Exceptions;
+using YuG.Domain.Common;
 
 namespace YuG.Api.Middleware;
 
@@ -60,7 +61,7 @@ public class ExceptionHandlingMiddleware
                     Message = exception.Message
                 }
             ),
-            Domain.Exceptions.DomainException => (
+            DomainException => (
                 HttpStatusCode.BadRequest,
                 new ErrorResponse
                 {

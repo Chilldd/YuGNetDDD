@@ -1,4 +1,4 @@
-namespace YuG.Domain.Exceptions;
+namespace YuG.Domain.Common;
 
 /// <summary>
 /// 领域异常基类，用于表示业务规则违反

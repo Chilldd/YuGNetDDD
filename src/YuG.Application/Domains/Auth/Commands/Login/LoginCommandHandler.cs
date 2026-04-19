@@ -1,6 +1,6 @@
 using MediatR;
 using YuG.Application.DTOs.Auth.Responses;
-using YuG.Domain.Exceptions;
+using YuG.Domain.Common;
 using YuG.Domain.Interfaces;
 using YuG.Domain.Repositories;
 using DomainRefreshToken = YuG.Domain.ValueObjects.RefreshToken;
@@ -44,13 +44,13 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, LoginResponse>
         var user = await _userRepository.GetByUsernameAsync(request.Username, cancellationToken);
         if (user == null)
         {
-            throw new InvalidCredentialsException();
+            throw new DomainException("用户名或密码不正确");
         }
 
         // 验证密码
         if (!user.VerifyPassword(_passwordHasher, request.Password))
         {
-            throw new InvalidCredentialsException();
+            throw new DomainException("用户名或密码不正确");
         }
 
         // 生成访问令牌

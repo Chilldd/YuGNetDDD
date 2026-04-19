@@ -1,7 +1,7 @@
 using MediatR;
 using YuG.Application.DTOs.Resource.Responses;
 using YuG.Domain.Entities;
-using YuG.Domain.Exceptions;
+using YuG.Domain.Common;
 using YuG.Domain.Repositories;
 using YuG.Domain.ValueObjects;
 

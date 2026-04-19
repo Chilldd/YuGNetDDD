@@ -2,7 +2,7 @@ using MediatR;
 using Moq;
 using YuG.Application.Domains.Auth.Commands.Login;
 using YuG.Domain.Entities;
-using YuG.Domain.Exceptions;
+using YuG.Domain.Common;
 using YuG.Domain.Interfaces;
 using YuG.Domain.Repositories;
 
@@ -28,20 +28,20 @@ public class LoginCommandHandlerTests
     }
 
     [Fact]
-    public async Task Handle_WhenUserNotFound_ThrowsInvalidCredentialsException()
+    public async Task Handle_WhenUserNotFound_ThrowsDomainException()
     {
         var command = new LoginCommand { Username = "nonexistent", Password = "password" };
         _userRepositoryMock
             .Setup(x => x.GetByUsernameAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync((User?)null);
 
-        await Assert.ThrowsAsync<InvalidCredentialsException>(() =>
+        await Assert.ThrowsAsync<DomainException>(() =>
             _handler.Handle(command, CancellationToken.None)
         );
     }
 
     [Fact]
-    public async Task Handle_WhenPasswordIncorrect_ThrowsInvalidCredentialsException()
+    public async Task Handle_WhenPasswordIncorrect_ThrowsDomainException()
     {
         var user = new User("testuser", "hashed_password");
         var command = new LoginCommand { Username = "testuser", Password = "wrong_password" };
@@ -54,7 +54,7 @@ public class LoginCommandHandlerTests
             .Setup(x => x.Verify(It.IsAny<string>(), It.IsAny<string>()))
             .Returns(false);
 
-        await Assert.ThrowsAsync<InvalidCredentialsException>(() =>
+        await Assert.ThrowsAsync<DomainException>(() =>
             _handler.Handle(command, CancellationToken.None)
         );
     }
