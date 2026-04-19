@@ -2,7 +2,7 @@ using MediatR;
 using YuG.Application.DTOs.Resource.Responses;
 using YuG.Domain.Common;
 using YuG.Domain.Repositories;
-using YuG.Domain.ValueObjects;
+using YuG.Domain.Enums;
 
 namespace YuG.Application.Domains.Resource.Commands.Update;
 
@@ -45,21 +45,28 @@ public class UpdateResourceCommandHandler : IRequestHandler<UpdateResourceComman
         }
 
         // 解析 HTTP 方法
-        var httpMethod = ResourceHttpMethod.FromString(request.HttpMethod);
+        var httpMethod = Enum.Parse<ResourceHttpMethod>(request.HttpMethod, ignoreCase: true);
 
         // 解析状态
-        var status = string.IsNullOrEmpty(request.Status) ? ResourceStatus.Active : ResourceStatus.FromString(request.Status);
+        var status = string.IsNullOrEmpty(request.Status) ? ResourceStatus.Active : Enum.Parse<ResourceStatus>(request.Status, ignoreCase: true);
 
         // 更新资源
-        resource.Update(
-            request.Name,
-            request.Code,
-            request.Description,
-            httpMethod,
-            request.Path,
-            request.ParentId,
-            request.SortOrder,
-            status);
+        resource.Rename(request.Name);
+        resource.ChangeCode(request.Code);
+        resource.ChangeDescription(request.Description);
+        resource.ChangeEndpoint(request.Path, httpMethod);
+        resource.MoveTo(request.ParentId);
+        resource.ChangeSortOrder(request.SortOrder);
+
+        // 根据目标状态执行对应业务动作
+        if (status == ResourceStatus.Active)
+        {
+            resource.Activate();
+        }
+        else
+        {
+            resource.Disable();
+        }
 
         // 保存到数据库
         _resourceRepository.Update(resource);

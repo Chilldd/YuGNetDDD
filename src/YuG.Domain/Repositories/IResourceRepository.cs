@@ -1,5 +1,5 @@
 using YuG.Domain.Entities;
-using YuG.Domain.ValueObjects;
+using YuG.Domain.Enums;
 
 namespace YuG.Domain.Repositories;
 

@@ -3,7 +3,7 @@ using YuG.Application.DTOs.Resource.Responses;
 using YuG.Domain.Entities;
 using YuG.Domain.Common;
 using YuG.Domain.Repositories;
-using YuG.Domain.ValueObjects;
+using YuG.Domain.Enums;
 
 namespace YuG.Application.Domains.Resource.Commands.Create;
 
@@ -38,10 +38,10 @@ public class CreateResourceCommandHandler : IRequestHandler<CreateResourceComman
         }
 
         // 解析 HTTP 方法
-        var httpMethod = ResourceHttpMethod.FromString(request.HttpMethod);
+        var httpMethod = Enum.Parse<ResourceHttpMethod>(request.HttpMethod, ignoreCase: true);
 
         // 解析状态
-        var status = string.IsNullOrEmpty(request.Status) ? ResourceStatus.Active : ResourceStatus.FromString(request.Status);
+        var status = string.IsNullOrEmpty(request.Status) ? ResourceStatus.Active : Enum.Parse<ResourceStatus>(request.Status, ignoreCase: true);
 
         // 创建资源
         var resource = new Domain.Entities.Resource(

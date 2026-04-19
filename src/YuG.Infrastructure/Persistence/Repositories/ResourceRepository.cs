@@ -1,8 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using YuG.Domain.Common;
 using YuG.Domain.Entities;
+using YuG.Domain.Enums;
 using YuG.Domain.Repositories;
-using YuG.Domain.ValueObjects;
 using YuG.Infrastructure.Persistence.Entities;
 using YuG.Infrastructure.Persistence.Mappings;
 using YuG.Infrastructure.Persistence;

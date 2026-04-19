@@ -1,5 +1,5 @@
 using YuG.Domain.Common;
-using YuG.Domain.ValueObjects;
+using YuG.Domain.Enums;
 
 namespace YuG.Domain.Entities;
 
@@ -69,28 +69,106 @@ public class Resource : AggregateRoot
     public Resource(
         string name,
         string code,
-        string description,
+        string? description,
         ResourceHttpMethod httpMethod,
         string path,
         Guid? parentId,
         int sortOrder,
         ResourceStatus status)
     {
-        UpdateName(name);
-        UpdateCode(code);
-        UpdateDescription(description);
-        UpdateHttpMethod(httpMethod);
-        UpdatePath(path);
-        UpdateParentId(parentId);
-        UpdateSortOrder(sortOrder);
-        UpdateStatus(status);
+        ValidateBasicInfo(name, code, description);
+        Name = name.Trim();
+        Code = code.Trim();
+        Description = description ?? string.Empty;
+
+        ValidateEndpoint(path);
+        HttpMethod = httpMethod;
+        Path = path.Trim();
+
+        // 初始设置父级不触发移动事件
+        if (parentId == Id)
+        {
+            throw new DomainException("不能将资源设置为自己的子资源");
+        }
+        ParentId = parentId;
+
+        SortOrder = sortOrder;
+        ChangeStatus(status);
     }
 
     /// <summary>
-    /// 更新资源名称
+    /// 重命名资源
     /// </summary>
-    /// <param name="name">新名称</param>
-    public void UpdateName(string name)
+    /// <param name="newName">新名称</param>
+    public void Rename(string newName)
+    {
+        if (string.IsNullOrWhiteSpace(newName))
+        {
+            throw new DomainException("资源名称不能为空");
+        }
+
+        if (newName.Length > 200)
+        {
+            throw new DomainException("资源名称长度不能超过 200 个字符");
+        }
+
+        Name = newName.Trim();
+    }
+
+    /// <summary>
+    /// 修改资源编码
+    /// </summary>
+    /// <param name="newCode">新编码</param>
+    public void ChangeCode(string newCode)
+    {
+        if (string.IsNullOrWhiteSpace(newCode))
+        {
+            throw new DomainException("资源编码不能为空");
+        }
+
+        if (newCode.Length > 100)
+        {
+            throw new DomainException("资源编码长度不能超过 100 个字符");
+        }
+
+        if (!System.Text.RegularExpressions.Regex.IsMatch(newCode, @"^[a-zA-Z0-9_-]+$"))
+        {
+            throw new DomainException("资源编码只能包含字母、数字、下划线和短横线");
+        }
+
+        Code = newCode.Trim();
+    }
+
+    /// <summary>
+    /// 修改资源描述
+    /// </summary>
+    /// <param name="newDescription">新描述</param>
+    public void ChangeDescription(string? newDescription)
+    {
+        if (newDescription?.Length > 500)
+        {
+            throw new DomainException("资源描述长度不能超过 500 个字符");
+        }
+
+        Description = newDescription ?? string.Empty;
+    }
+
+    /// <summary>
+    /// 修改 API 端点信息
+    /// </summary>
+    /// <param name="path">API 路径</param>
+    /// <param name="httpMethod">HTTP 方法</param>
+    public void ChangeEndpoint(string path, ResourceHttpMethod httpMethod)
+    {
+        ValidateEndpoint(path);
+        Path = path.Trim();
+        HttpMethod = httpMethod;
+    }
+
+    /// <summary>
+    /// 验证基础信息
+    /// </summary>
+    private static void ValidateBasicInfo(string name, string code, string? description)
     {
         if (string.IsNullOrWhiteSpace(name))
         {
@@ -102,15 +180,6 @@ public class Resource : AggregateRoot
             throw new DomainException("资源名称长度不能超过 200 个字符");
         }
 
-        Name = name.Trim();
-    }
-
-    /// <summary>
-    /// 更新资源编码
-    /// </summary>
-    /// <param name="code">新编码</param>
-    public void UpdateCode(string code)
-    {
         if (string.IsNullOrWhiteSpace(code))
         {
             throw new DomainException("资源编码不能为空");
@@ -127,37 +196,16 @@ public class Resource : AggregateRoot
             throw new DomainException("资源编码只能包含字母、数字、下划线和短横线");
         }
 
-        Code = code.Trim();
-    }
-
-    /// <summary>
-    /// 更新资源描述
-    /// </summary>
-    /// <param name="description">新描述</param>
-    public void UpdateDescription(string description)
-    {
-        if (description.Length > 500)
+        if (description?.Length > 500)
         {
             throw new DomainException("资源描述长度不能超过 500 个字符");
         }
-
-        Description = description;
     }
 
     /// <summary>
-    /// 更新 HTTP 方法
+    /// 验证端点信息
     /// </summary>
-    /// <param name="httpMethod">新 HTTP 方法</param>
-    public void UpdateHttpMethod(ResourceHttpMethod httpMethod)
-    {
-        HttpMethod = httpMethod;
-    }
-
-    /// <summary>
-    /// 更新 API 路径
-    /// </summary>
-    /// <param name="path">新路径</param>
-    public void UpdatePath(string path)
+    private static void ValidateEndpoint(string path)
     {
         if (string.IsNullOrWhiteSpace(path))
         {
@@ -168,15 +216,13 @@ public class Resource : AggregateRoot
         {
             throw new DomainException("API 路径长度不能超过 500 个字符");
         }
-
-        Path = path.Trim();
     }
 
     /// <summary>
-    /// 更新父级资源标识
+    /// 移动资源到新的父级下
     /// </summary>
     /// <param name="parentId">新的父级资源标识</param>
-    public void UpdateParentId(Guid? parentId)
+    public void MoveTo(Guid? parentId)
     {
         // 不能将资源设置为自己的子资源
         if (parentId == Id)
@@ -184,25 +230,19 @@ public class Resource : AggregateRoot
             throw new DomainException("不能将资源设置为自己的子资源");
         }
 
-        ParentId = parentId;
+        if (ParentId != parentId)
+        {
+            ParentId = parentId;
+        }
     }
 
     /// <summary>
-    /// 更新排序顺序
+    /// 变更排序顺序
     /// </summary>
     /// <param name="sortOrder">新的排序顺序</param>
-    public void UpdateSortOrder(int sortOrder)
+    public void ChangeSortOrder(int sortOrder)
     {
         SortOrder = sortOrder;
-    }
-
-    /// <summary>
-    /// 更新资源状态
-    /// </summary>
-    /// <param name="status">新状态</param>
-    public void UpdateStatus(ResourceStatus status)
-    {
-        Status = status;
     }
 
     /// <summary>
@@ -210,7 +250,7 @@ public class Resource : AggregateRoot
     /// </summary>
     public void Activate()
     {
-        Status = ResourceStatus.Active;
+        ChangeStatus(ResourceStatus.Active);
     }
 
     /// <summary>
@@ -218,37 +258,15 @@ public class Resource : AggregateRoot
     /// </summary>
     public void Disable()
     {
-        Status = ResourceStatus.Disabled;
+        ChangeStatus(ResourceStatus.Disabled);
     }
 
     /// <summary>
-    /// 批量更新资源属性
+    /// 变更资源状态（内部使用，外部通过 Activate/Disable 控制状态机）
     /// </summary>
-    /// <param name="name">新名称</param>
-    /// <param name="code">新编码</param>
-    /// <param name="description">新描述</param>
-    /// <param name="httpMethod">新 HTTP 方法</param>
-    /// <param name="path">新路径</param>
-    /// <param name="parentId">新父级资源标识</param>
-    /// <param name="sortOrder">新排序顺序</param>
     /// <param name="status">新状态</param>
-    public void Update(
-        string name,
-        string code,
-        string description,
-        ResourceHttpMethod httpMethod,
-        string path,
-        Guid? parentId,
-        int sortOrder,
-        ResourceStatus status)
+    private void ChangeStatus(ResourceStatus status)
     {
-        UpdateName(name);
-        UpdateCode(code);
-        UpdateDescription(description);
-        UpdateHttpMethod(httpMethod);
-        UpdatePath(path);
-        UpdateParentId(parentId);
-        UpdateSortOrder(sortOrder);
-        UpdateStatus(status);
+        Status = status;
     }
 }

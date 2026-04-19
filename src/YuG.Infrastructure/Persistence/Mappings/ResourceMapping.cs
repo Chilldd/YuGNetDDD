@@ -1,5 +1,5 @@
 using YuG.Domain.Entities;
-using YuG.Domain.ValueObjects;
+using YuG.Domain.Enums;
 using YuG.Infrastructure.Persistence.Entities;
 
 namespace YuG.Infrastructure.Persistence.Mappings;
@@ -20,11 +20,11 @@ public static class ResourceMapping
             entity.Name,
             entity.Code,
             entity.Description,
-            ResourceHttpMethod.FromString(entity.HttpMethod),
+            Enum.Parse<ResourceHttpMethod>(entity.HttpMethod, ignoreCase: true),
             entity.Path,
             entity.ParentId,
             entity.SortOrder,
-            ResourceStatus.FromString(entity.Status))
+            Enum.Parse<ResourceStatus>(entity.Status, ignoreCase: true))
         {
             Id = entity.Id
         };
