@@ -1,19 +1,20 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using YuG.Infrastructure.Persistence.Entities.Permission;
+using YuG.Domain.Permission.Entities;
+using YuG.Domain.Permission.Enums;
 
 namespace YuG.Infrastructure.Persistence.Configurations;
 
 /// <summary>
-/// ResourceEntity 实体 EF Core 配置
+/// Resource 领域实体 EF Core 配置
 /// </summary>
-public class ResourceEntityConfiguration : IEntityTypeConfiguration<ResourceEntity>
+public class ResourceConfiguration : IEntityTypeConfiguration<Resource>
 {
     /// <summary>
-    /// 配置 ResourceEntity 实体
+    /// 配置 Resource 实体
     /// </summary>
     /// <param name="builder">实体类型构建器</param>
-    public void Configure(EntityTypeBuilder<ResourceEntity> builder)
+    public void Configure(EntityTypeBuilder<Resource> builder)
     {
         builder.ToTable("Resource");
 
@@ -47,11 +48,14 @@ public class ResourceEntityConfiguration : IEntityTypeConfiguration<ResourceEnti
             .HasMaxLength(500)
             .IsRequired(false);
 
-        // HTTP 方法配置
+        // HTTP 方法配置（枚举转字符串）
         builder.Property(r => r.HttpMethod)
+            .HasConversion(
+                v => v.ToString(),
+                s => Enum.Parse<ResourceHttpMethod>(s, ignoreCase: true))
             .HasMaxLength(10)
             .IsRequired()
-            .HasDefaultValue("GET");
+            .HasDefaultValue(ResourceHttpMethod.Get);
 
         // API 路径配置
         builder.Property(r => r.Path)
@@ -65,14 +69,17 @@ public class ResourceEntityConfiguration : IEntityTypeConfiguration<ResourceEnti
         builder.Property(r => r.SortOrder)
             .HasDefaultValue(0);
 
-        // 资源状态配置
+        // 资源状态配置（枚举转字符串）
         builder.Property(r => r.Status)
+            .HasConversion(
+                v => v.ToString(),
+                s => Enum.Parse<ResourceStatus>(s, ignoreCase: true))
             .HasMaxLength(20)
             .IsRequired()
-            .HasDefaultValue("Active");
+            .HasDefaultValue(ResourceStatus.Active);
 
         // 配置自引用外键关系（父子关系）
-        builder.HasOne<ResourceEntity>()
+        builder.HasOne<Resource>()
             .WithMany()
             .HasForeignKey(r => r.ParentId)
             .OnDelete(DeleteBehavior.Restrict);

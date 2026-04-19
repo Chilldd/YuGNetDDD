@@ -1,8 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using YuG.Application.Common.Interfaces;
-using YuG.Infrastructure.Persistence.Entities.Identity;
-using YuG.Infrastructure.Persistence.Entities.Permission;
+using YuG.Domain.Identity.Entities;
+using YuG.Domain.Permission.Entities;
 
 namespace YuG.Infrastructure.Persistence;
 
@@ -22,12 +22,12 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
     /// <summary>
     /// 用户数据集
     /// </summary>
-    public DbSet<UserEntity> Users => Set<UserEntity>();
+    public DbSet<User> Users => Set<User>();
 
     /// <summary>
     /// 资源数据集
     /// </summary>
-    public DbSet<ResourceEntity> Resources => Set<ResourceEntity>();
+    public DbSet<Resource> Resources => Set<Resource>();
 
     /// <summary>
     /// 保存所有变更到数据库

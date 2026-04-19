@@ -2,8 +2,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using YuG.Domain.Identity.Entities;
 using YuG.Domain.Common.Interfaces;
-using YuG.Infrastructure.Persistence.Mappings;
-using YuG.Infrastructure.Persistence.Entities;
 
 namespace YuG.Infrastructure.Persistence;
 
@@ -68,13 +66,11 @@ public class ApplicationDbContextInitializer
                 return;
             }
 
-            // 创建默认管理员用户（领域实体）
+            // 创建默认管理员用户（领域实体，直接保存）
             var adminPasswordHash = _passwordHasher.Hash("admin123");
             var admin = new User("admin", adminPasswordHash);
 
-            // 转换为数据库实体并保存
-            var adminEntity = admin.ToEntity();
-            await _context.Users.AddAsync(adminEntity, cancellationToken);
+            await _context.Users.AddAsync(admin, cancellationToken);
             await _context.SaveChangesAsync(cancellationToken);
 
             _logger.LogInformation("种子数据填充完成：已创建默认管理员账户 (用户名: admin, 密码: admin123)");

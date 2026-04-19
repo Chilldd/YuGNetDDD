@@ -5,82 +5,53 @@ using YuG.Domain.Common;
 namespace YuG.Infrastructure.Persistence.Repositories;
 
 /// <summary>
-/// 通用仓储基类（为业务层提供统一接口，内部处理ORM实体的操作和映射）
+/// 通用仓储基类（直接使用 Domain 实体，无需映射）
 /// </summary>
 /// <typeparam name="TAggregate">聚合根类型（Domain 层实体）</typeparam>
-/// <typeparam name="TOrmEntity">ORM 实体类型（Infrastructure 层实体）</typeparam>
-public abstract class Repository<TAggregate, TOrmEntity> : IRepository<TAggregate>
+public abstract class Repository<TAggregate> : IRepository<TAggregate>
     where TAggregate : AggregateRoot
-    where TOrmEntity : Entities.BaseEntity
 {
     protected readonly ApplicationDbContext _context;
     private readonly IDomainEventPublisher _domainEventPublisher;
-    private readonly DbSet<TOrmEntity> _dbSet;
+    protected readonly DbSet<TAggregate> _dbSet;
     private readonly HashSet<TAggregate> _trackedAggregates = [];
-    private readonly Func<TOrmEntity, TAggregate> _mapToDomain;
-    private readonly Func<TAggregate, TOrmEntity> _mapToOrmEntity;
 
     /// <summary>
     /// 初始化仓储
     /// </summary>
     /// <param name="context">数据库上下文</param>
     /// <param name="domainEventPublisher">领域事件发布器</param>
-    /// <param name="mapToDomain">ORM 实体到聚合根的映射函数</param>
-    /// <param name="mapToOrmEntity">聚合根到 ORM 实体的映射函数</param>
     protected Repository(
         ApplicationDbContext context,
-        IDomainEventPublisher domainEventPublisher,
-        Func<TOrmEntity, TAggregate> mapToDomain,
-        Func<TAggregate, TOrmEntity> mapToOrmEntity)
+        IDomainEventPublisher domainEventPublisher)
     {
         _context = context;
         _domainEventPublisher = domainEventPublisher;
-        _mapToDomain = mapToDomain;
-        _mapToOrmEntity = mapToOrmEntity;
-        _dbSet = context.Set<TOrmEntity>();
+        _dbSet = context.Set<TAggregate>();
     }
-
-    /// <summary>
-    /// 将 ORM 实体映射到聚合根
-    /// </summary>
-    /// <param name="ormEntity">ORM 实体</param>
-    /// <returns>聚合根</returns>
-    protected TAggregate MapToDomain(TOrmEntity ormEntity) => _mapToDomain(ormEntity);
-
-    /// <summary>
-    /// 将聚合根映射到 ORM 实体
-    /// </summary>
-    /// <param name="aggregate">聚合根</param>
-    /// <returns>ORM 实体</returns>
-    protected TOrmEntity MapToOrmEntity(TAggregate aggregate) => _mapToOrmEntity(aggregate);
 
     /// <inheritdoc />
     public async Task<TAggregate?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        var ormEntity = await _dbSet.FirstOrDefaultAsync(e => e.Id == id, cancellationToken);
-        return ormEntity == null ? null : MapToDomain(ormEntity);
+        return await _dbSet.FirstOrDefaultAsync(e => e.Id == id, cancellationToken);
     }
 
     /// <inheritdoc />
     public async Task<IReadOnlyList<TAggregate>> GetAllAsync(CancellationToken cancellationToken = default)
     {
-        var ormEntities = await _dbSet.ToListAsync(cancellationToken);
-        return ormEntities.ConvertAll(MapToDomain);
+        return await _dbSet.ToListAsync(cancellationToken);
     }
 
     /// <inheritdoc />
     public async Task<IReadOnlyList<TAggregate>> FindAsync(Expression<Func<TAggregate, bool>> predicate, CancellationToken cancellationToken = default)
     {
-        // 注意：这是简化实现，实际应用中需要处理表达式树转换
-        var allEntities = await GetAllAsync(cancellationToken);
-        return allEntities.Where(predicate.Compile()).ToList();
+        return await _dbSet.Where(predicate).ToListAsync(cancellationToken);
     }
 
     /// <inheritdoc />
     public async Task<TAggregate> AddAsync(TAggregate aggregate, CancellationToken cancellationToken = default)
     {
-        var ormEntity = MapToOrmEntity(aggregate);
-        await _dbSet.AddAsync(ormEntity, cancellationToken);
+        await _dbSet.AddAsync(aggregate, cancellationToken);
         _trackedAggregates.Add(aggregate);
         return aggregate;
     }
@@ -88,24 +59,21 @@ public abstract class Repository<TAggregate, TOrmEntity> : IRepository<TAggregat
     /// <inheritdoc />
     public void Update(TAggregate aggregate)
     {
-        var ormEntity = MapToOrmEntity(aggregate);
-        _dbSet.Update(ormEntity);
+        _dbSet.Update(aggregate);
         _trackedAggregates.Add(aggregate);
     }
 
     /// <inheritdoc />
     public void Delete(TAggregate aggregate)
     {
-        var ormEntity = MapToOrmEntity(aggregate);
-        _dbSet.Remove(ormEntity);
+        _dbSet.Remove(aggregate);
         _trackedAggregates.Add(aggregate);
     }
 
     /// <inheritdoc />
     public async Task<bool> AnyAsync(Expression<Func<TAggregate, bool>> predicate, CancellationToken cancellationToken = default)
     {
-        var allEntities = await GetAllAsync(cancellationToken);
-        return allEntities.Any(predicate.Compile());
+        return await _dbSet.AnyAsync(predicate, cancellationToken);
     }
 
     /// <inheritdoc />

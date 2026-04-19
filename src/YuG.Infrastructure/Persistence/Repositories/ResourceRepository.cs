@@ -1,17 +1,15 @@
 using Microsoft.EntityFrameworkCore;
-using YuG.Domain.Common;
 using YuG.Domain.Permission.Entities;
 using YuG.Domain.Permission.Enums;
 using YuG.Domain.Permission.Repositories;
-using YuG.Infrastructure.Persistence.Entities.Permission;
-using YuG.Infrastructure.Persistence.Mappings;
+using YuG.Domain.Common;
 
 namespace YuG.Infrastructure.Persistence.Repositories;
 
 /// <summary>
 /// 资源仓储实现
 /// </summary>
-public class ResourceRepository : Repository<Resource, ResourceEntity>, IResourceRepository
+public class ResourceRepository : Repository<Resource>, IResourceRepository
 {
     /// <summary>
     /// 初始化资源仓储
@@ -19,7 +17,7 @@ public class ResourceRepository : Repository<Resource, ResourceEntity>, IResourc
     /// <param name="context">数据库上下文</param>
     /// <param name="domainEventPublisher">领域事件发布器</param>
     public ResourceRepository(ApplicationDbContext context, IDomainEventPublisher domainEventPublisher)
-        : base(context, domainEventPublisher, ResourceMapping.ToDomain, ResourceMapping.ToEntity)
+        : base(context, domainEventPublisher)
     {
     }
 
@@ -31,11 +29,9 @@ public class ResourceRepository : Repository<Resource, ResourceEntity>, IResourc
     /// <returns>资源实体，不存在则返回 null</returns>
     public async Task<Resource?> GetByCodeAsync(string code, CancellationToken cancellationToken = default)
     {
-        var resourceEntity = await _context.Resources
+        return await _context.Resources
             .AsNoTracking()
             .FirstOrDefaultAsync(r => r.Code == code, cancellationToken);
-
-        return resourceEntity?.ToDomain();
     }
 
     /// <summary>
@@ -59,13 +55,11 @@ public class ResourceRepository : Repository<Resource, ResourceEntity>, IResourc
     /// <returns>资源列表</returns>
     public async Task<IReadOnlyList<Resource>> GetByHttpMethodAsync(ResourceHttpMethod httpMethod, CancellationToken cancellationToken = default)
     {
-        var resourceEntities = await _context.Resources
+        return await _context.Resources
             .AsNoTracking()
-            .Where(r => r.HttpMethod == httpMethod.ToString())
+            .Where(r => r.HttpMethod == httpMethod)
             .OrderBy(r => r.SortOrder)
             .ToListAsync(cancellationToken);
-
-        return resourceEntities.ConvertAll(MapToDomain);
     }
 
     /// <summary>
@@ -76,13 +70,8 @@ public class ResourceRepository : Repository<Resource, ResourceEntity>, IResourc
     /// <returns>资源列表</returns>
     public async Task<IReadOnlyList<Resource>> GetByHttpMethodAsync(string httpMethod, CancellationToken cancellationToken = default)
     {
-        var resourceEntities = await _context.Resources
-            .AsNoTracking()
-            .Where(r => r.HttpMethod == httpMethod)
-            .OrderBy(r => r.SortOrder)
-            .ToListAsync(cancellationToken);
-
-        return resourceEntities.ConvertAll(MapToDomain);
+        var parsed = Enum.Parse<ResourceHttpMethod>(httpMethod, ignoreCase: true);
+        return await GetByHttpMethodAsync(parsed, cancellationToken);
     }
 
     /// <summary>
@@ -93,13 +82,11 @@ public class ResourceRepository : Repository<Resource, ResourceEntity>, IResourc
     /// <returns>子资源列表</returns>
     public async Task<IReadOnlyList<Resource>> GetByParentIdAsync(Guid parentId, CancellationToken cancellationToken = default)
     {
-        var resourceEntities = await _context.Resources
+        return await _context.Resources
             .AsNoTracking()
             .Where(r => r.ParentId == parentId)
             .OrderBy(r => r.SortOrder)
             .ToListAsync(cancellationToken);
-
-        return resourceEntities.ConvertAll(MapToDomain);
     }
 
     /// <summary>
@@ -109,12 +96,10 @@ public class ResourceRepository : Repository<Resource, ResourceEntity>, IResourc
     /// <returns>激活的资源列表</returns>
     public async Task<IReadOnlyList<Resource>> GetActiveAsync(CancellationToken cancellationToken = default)
     {
-        var resourceEntities = await _context.Resources
+        return await _context.Resources
             .AsNoTracking()
-            .Where(r => r.Status == "Active")
+            .Where(r => r.Status == ResourceStatus.Active)
             .OrderBy(r => r.SortOrder)
             .ToListAsync(cancellationToken);
-
-        return resourceEntities.ConvertAll(MapToDomain);
     }
 }

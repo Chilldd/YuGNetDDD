@@ -2,15 +2,13 @@ using Microsoft.EntityFrameworkCore;
 using YuG.Domain.Common;
 using YuG.Domain.Identity.Entities;
 using YuG.Domain.Identity.Repositories;
-using YuG.Infrastructure.Persistence.Entities.Identity;
-using YuG.Infrastructure.Persistence.Mappings;
 
 namespace YuG.Infrastructure.Persistence.Repositories;
 
 /// <summary>
 /// 用户仓储实现
 /// </summary>
-public class UserRepository : Repository<User, UserEntity>, IUserRepository
+public class UserRepository : Repository<User>, IUserRepository
 {
     /// <summary>
     /// 初始化用户仓储
@@ -18,7 +16,7 @@ public class UserRepository : Repository<User, UserEntity>, IUserRepository
     /// <param name="context">数据库上下文</param>
     /// <param name="domainEventPublisher">领域事件发布器</param>
     public UserRepository(ApplicationDbContext context, IDomainEventPublisher domainEventPublisher)
-        : base(context, domainEventPublisher, UserMapping.ToDomain, UserMapping.ToEntity)
+        : base(context, domainEventPublisher)
     {
     }
 
@@ -30,11 +28,10 @@ public class UserRepository : Repository<User, UserEntity>, IUserRepository
     /// <returns>用户实体，不存在则返回 null</returns>
     public async Task<User?> GetByUsernameAsync(string username, CancellationToken cancellationToken = default)
     {
-        var userEntity = await _context.Users
+        return await _context.Users
             .AsNoTracking()
+            .Include(u => u.RefreshTokens)
             .FirstOrDefaultAsync(u => u.Username == username, cancellationToken);
-
-        return userEntity?.ToDomain();
     }
 
     /// <summary>

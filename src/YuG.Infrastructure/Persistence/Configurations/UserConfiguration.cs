@@ -1,19 +1,20 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using YuG.Infrastructure.Persistence.Entities.Identity;
+using YuG.Domain.Identity.Entities;
+using YuG.Domain.Identity.ValueObjects;
 
 namespace YuG.Infrastructure.Persistence.Configurations;
 
 /// <summary>
-/// UserEntity 实体 EF Core 配置
+/// User 领域实体 EF Core 配置
 /// </summary>
-public class UserEntityConfiguration : IEntityTypeConfiguration<UserEntity>
+public class UserConfiguration : IEntityTypeConfiguration<User>
 {
     /// <summary>
-    /// 配置 UserEntity 实体
+    /// 配置 User 实体
     /// </summary>
     /// <param name="builder">实体类型构建器</param>
-    public void Configure(EntityTypeBuilder<UserEntity> builder)
+    public void Configure(EntityTypeBuilder<User> builder)
     {
         builder.ToTable("User");
 
@@ -42,7 +43,7 @@ public class UserEntityConfiguration : IEntityTypeConfiguration<UserEntity>
             .HasMaxLength(500)
             .IsRequired();
 
-        // 配置 Owned Type：RefreshToken
+        // 配置 Owned Type：RefreshToken（值对象）
         builder.OwnsMany(u => u.RefreshTokens, rt =>
         {
             rt.ToTable("RefreshToken");
@@ -50,7 +51,7 @@ public class UserEntityConfiguration : IEntityTypeConfiguration<UserEntity>
             rt.WithOwner()
                 .HasForeignKey("UserId");
 
-            rt.HasKey("Token");
+            rt.HasKey(r => r.Token);
 
             rt.Property(r => r.Token)
                 .HasMaxLength(500)

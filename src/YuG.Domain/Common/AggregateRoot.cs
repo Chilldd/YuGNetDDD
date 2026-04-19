@@ -10,6 +10,16 @@ public abstract class AggregateRoot
     /// </summary>
     public Guid Id { get; set; } = Guid.NewGuid();
 
+    /// <summary>
+    /// 创建时间（UTC）
+    /// </summary>
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+    /// <summary>
+    /// 最后更新时间（UTC）
+    /// </summary>
+    public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+
     private readonly List<IDomainEvent> _domainEvents = [];
 
     /// <summary>
