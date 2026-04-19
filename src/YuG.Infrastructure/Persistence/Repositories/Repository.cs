@@ -17,35 +17,45 @@ public abstract class Repository<TAggregate, TOrmEntity> : IRepository<TAggregat
     where TOrmEntity : Entities.BaseEntity
 {
     protected readonly ApplicationDbContext _context;
-    protected readonly IDomainEventPublisher _domainEventPublisher;
-    protected readonly DbSet<TOrmEntity> _dbSet;
+    private readonly IDomainEventPublisher _domainEventPublisher;
+    private readonly DbSet<TOrmEntity> _dbSet;
     private readonly HashSet<TAggregate> _trackedAggregates = [];
+    private readonly Func<TOrmEntity, TAggregate> _mapToDomain;
+    private readonly Func<TAggregate, TOrmEntity> _mapToOrmEntity;
 
     /// <summary>
     /// 初始化仓储
     /// </summary>
     /// <param name="context">数据库上下文</param>
     /// <param name="domainEventPublisher">领域事件发布器</param>
-    protected Repository(ApplicationDbContext context, IDomainEventPublisher domainEventPublisher)
+    /// <param name="mapToDomain">ORM 实体到聚合根的映射函数</param>
+    /// <param name="mapToOrmEntity">聚合根到 ORM 实体的映射函数</param>
+    protected Repository(
+        ApplicationDbContext context,
+        IDomainEventPublisher domainEventPublisher,
+        Func<TOrmEntity, TAggregate> mapToDomain,
+        Func<TAggregate, TOrmEntity> mapToOrmEntity)
     {
         _context = context;
         _domainEventPublisher = domainEventPublisher;
+        _mapToDomain = mapToDomain;
+        _mapToOrmEntity = mapToOrmEntity;
         _dbSet = context.Set<TOrmEntity>();
     }
 
     /// <summary>
-    /// 将 ORM 实体映射到聚合根（子类实现）
+    /// 将 ORM 实体映射到聚合根
     /// </summary>
     /// <param name="ormEntity">ORM 实体</param>
     /// <returns>聚合根</returns>
-    protected abstract TAggregate MapToDomain(TOrmEntity ormEntity);
+    protected TAggregate MapToDomain(TOrmEntity ormEntity) => _mapToDomain(ormEntity);
 
     /// <summary>
-    /// 将聚合根映射到 ORM 实体（子类实现）
+    /// 将聚合根映射到 ORM 实体
     /// </summary>
     /// <param name="aggregate">聚合根</param>
     /// <returns>ORM 实体</returns>
-    protected abstract TOrmEntity MapToOrmEntity(TAggregate aggregate);
+    protected TOrmEntity MapToOrmEntity(TAggregate aggregate) => _mapToOrmEntity(aggregate);
 
     /// <inheritdoc />
     public async Task<TAggregate?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)

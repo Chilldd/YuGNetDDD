@@ -19,28 +19,8 @@ public class UserRepository : Repository<Domain.Entities.User, UserEntity>, IUse
     /// <param name="context">数据库上下文</param>
     /// <param name="domainEventPublisher">领域事件发布器</param>
     public UserRepository(ApplicationDbContext context, IDomainEventPublisher domainEventPublisher)
-        : base(context, domainEventPublisher)
+        : base(context, domainEventPublisher, UserMapping.ToDomain, UserMapping.ToEntity)
     {
-    }
-
-    /// <summary>
-    /// 将 ORM 实体映射到领域实体
-    /// </summary>
-    /// <param name="ormEntity">ORM 实体</param>
-    /// <returns>领域实体</returns>
-    protected override User MapToDomain(UserEntity ormEntity)
-    {
-        return ormEntity.ToDomain();
-    }
-
-    /// <summary>
-    /// 将领域实体映射到 ORM 实体
-    /// </summary>
-    /// <param name="aggregate">领域实体</param>
-    /// <returns>ORM 实体</returns>
-    protected override UserEntity MapToOrmEntity(User aggregate)
-    {
-        return aggregate.ToEntity();
     }
 
     /// <summary>

@@ -20,28 +20,8 @@ public class ResourceRepository : Repository<Domain.Entities.Resource, ResourceE
     /// <param name="context">数据库上下文</param>
     /// <param name="domainEventPublisher">领域事件发布器</param>
     public ResourceRepository(ApplicationDbContext context, IDomainEventPublisher domainEventPublisher)
-        : base(context, domainEventPublisher)
+        : base(context, domainEventPublisher, ResourceMapping.ToDomain, ResourceMapping.ToEntity)
     {
-    }
-
-    /// <summary>
-    /// 将 ORM 实体映射到领域实体
-    /// </summary>
-    /// <param name="ormEntity">ORM 实体</param>
-    /// <returns>领域实体</returns>
-    protected override Domain.Entities.Resource MapToDomain(ResourceEntity ormEntity)
-    {
-        return ormEntity.ToDomain();
-    }
-
-    /// <summary>
-    /// 将领域实体映射到 ORM 实体
-    /// </summary>
-    /// <param name="aggregate">领域实体</param>
-    /// <returns>ORM 实体</returns>
-    protected override ResourceEntity MapToOrmEntity(Domain.Entities.Resource aggregate)
-    {
-        return aggregate.ToEntity();
     }
 
     /// <summary>
