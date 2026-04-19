@@ -52,7 +52,10 @@
       "Bash(mv src/YuG.Application/Commands/Resource/Update/*.cs src/YuG.Application/Resource/Commands/Update/)",
       "Bash(mv src/YuG.Application/Commands/Resource/Activate/*.cs src/YuG.Application/Resource/Commands/Activate/)",
       "Bash(mv src/YuG.Application/Commands/Resource/Disable/*.cs src/YuG.Application/Resource/Commands/Disable/)",
-      "Bash(mv src/YuG.Application/Commands/Resource/Delete/*.cs src/YuG.Application/Resource/Commands/Delete/)"
+      "Bash(mv src/YuG.Application/Commands/Resource/Delete/*.cs src/YuG.Application/Resource/Commands/Delete/)",
+      "Bash(git restore *)",
+      "Bash(git rm *)",
+      "Bash(python3 *)"
     ]
   }
 }
