@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using YuG.Infrastructure.Persistence.Entities.Auth;
+using YuG.Infrastructure.Persistence.Entities.Identity;
 
 namespace YuG.Infrastructure.Persistence.Configurations;
 

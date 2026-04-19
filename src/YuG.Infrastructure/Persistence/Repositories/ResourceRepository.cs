@@ -3,7 +3,7 @@ using YuG.Domain.Common;
 using YuG.Domain.Permission.Entities;
 using YuG.Domain.Permission.Enums;
 using YuG.Domain.Permission.Repositories;
-using YuG.Infrastructure.Persistence.Entities;
+using YuG.Infrastructure.Persistence.Entities.Permission;
 using YuG.Infrastructure.Persistence.Mappings;
 
 namespace YuG.Infrastructure.Persistence.Repositories;

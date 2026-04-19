@@ -1,4 +1,4 @@
-namespace YuG.Infrastructure.Persistence.Entities.Auth;
+namespace YuG.Infrastructure.Persistence.Entities.Identity;
 
 /// <summary>
 /// 刷新令牌数据库实体（Owned Type）

@@ -1,6 +1,6 @@
 using YuG.Domain.Identity.Entities;
 using YuG.Domain.Identity.ValueObjects;
-using YuG.Infrastructure.Persistence.Entities.Auth;
+using YuG.Infrastructure.Persistence.Entities.Identity;
 
 namespace YuG.Infrastructure.Persistence.Mappings;
 

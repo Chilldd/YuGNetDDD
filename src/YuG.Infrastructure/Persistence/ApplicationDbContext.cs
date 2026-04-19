@@ -1,8 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using YuG.Application.Common.Interfaces;
-using YuG.Infrastructure.Persistence.Entities;
-using YuG.Infrastructure.Persistence.Entities.Auth;
+using YuG.Infrastructure.Persistence.Entities.Identity;
+using YuG.Infrastructure.Persistence.Entities.Permission;
 
 namespace YuG.Infrastructure.Persistence;
 

@@ -2,8 +2,8 @@ using Microsoft.EntityFrameworkCore;
 using YuG.Domain.Common;
 using YuG.Domain.Identity.Entities;
 using YuG.Domain.Identity.Repositories;
+using YuG.Infrastructure.Persistence.Entities.Identity;
 using YuG.Infrastructure.Persistence.Mappings;
-using YuG.Infrastructure.Persistence.Entities.Auth;
 
 namespace YuG.Infrastructure.Persistence.Repositories;
 

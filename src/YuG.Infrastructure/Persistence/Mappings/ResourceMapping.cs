@@ -1,6 +1,6 @@
 using YuG.Domain.Permission.Entities;
 using YuG.Domain.Permission.Enums;
-using YuG.Infrastructure.Persistence.Entities;
+using YuG.Infrastructure.Persistence.Entities.Permission;
 
 namespace YuG.Infrastructure.Persistence.Mappings;
 
