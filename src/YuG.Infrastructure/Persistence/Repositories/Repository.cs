@@ -12,20 +12,24 @@ namespace YuG.Infrastructure.Persistence.Repositories;
 /// </summary>
 /// <typeparam name="TAggregate">聚合根类型（Domain 层实体）</typeparam>
 /// <typeparam name="TOrmEntity">ORM 实体类型（Infrastructure 层实体）</typeparam>
-public abstract class Repository<TAggregate, TOrmEntity> : IRepository<TAggregate> 
+public abstract class Repository<TAggregate, TOrmEntity> : IRepository<TAggregate>
     where TAggregate : AggregateRoot
     where TOrmEntity : Entities.BaseEntity
 {
     protected readonly ApplicationDbContext _context;
+    protected readonly IDomainEventPublisher _domainEventPublisher;
     protected readonly DbSet<TOrmEntity> _dbSet;
+    private readonly HashSet<TAggregate> _trackedAggregates = [];
 
     /// <summary>
     /// 初始化仓储
     /// </summary>
     /// <param name="context">数据库上下文</param>
-    protected Repository(ApplicationDbContext context)
+    /// <param name="domainEventPublisher">领域事件发布器</param>
+    protected Repository(ApplicationDbContext context, IDomainEventPublisher domainEventPublisher)
     {
         _context = context;
+        _domainEventPublisher = domainEventPublisher;
         _dbSet = context.Set<TOrmEntity>();
     }
 
@@ -70,6 +74,7 @@ public abstract class Repository<TAggregate, TOrmEntity> : IRepository<TAggregat
     {
         var ormEntity = MapToOrmEntity(aggregate);
         await _dbSet.AddAsync(ormEntity, cancellationToken);
+        _trackedAggregates.Add(aggregate);
         return aggregate;
     }
 
@@ -78,6 +83,7 @@ public abstract class Repository<TAggregate, TOrmEntity> : IRepository<TAggregat
     {
         var ormEntity = MapToOrmEntity(aggregate);
         _dbSet.Update(ormEntity);
+        _trackedAggregates.Add(aggregate);
     }
 
     /// <inheritdoc />
@@ -85,6 +91,7 @@ public abstract class Repository<TAggregate, TOrmEntity> : IRepository<TAggregat
     {
         var ormEntity = MapToOrmEntity(aggregate);
         _dbSet.Remove(ormEntity);
+        _trackedAggregates.Add(aggregate);
     }
 
     /// <inheritdoc />
@@ -97,7 +104,27 @@ public abstract class Repository<TAggregate, TOrmEntity> : IRepository<TAggregat
     /// <inheritdoc />
     public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
-        return await _context.SaveChangesAsync(cancellationToken);
+        // 保存变更到数据库
+        var result = await _context.SaveChangesAsync(cancellationToken);
+
+        // 收集所有已操作聚合根中的领域事件
+        var domainEvents = _trackedAggregates
+            .SelectMany(a => a.DomainEvents)
+            .ToList();
+
+        // 发布领域事件
+        if (domainEvents.Any())
+        {
+            await _domainEventPublisher.PublishAsync(domainEvents, cancellationToken);
+        }
+
+        // 清空所有领域事件和跟踪集合
+        foreach (var aggregate in _trackedAggregates)
+        {
+            aggregate.ClearDomainEvents();
+        }
+        _trackedAggregates.Clear();
+
+        return result;
     }
 }
-

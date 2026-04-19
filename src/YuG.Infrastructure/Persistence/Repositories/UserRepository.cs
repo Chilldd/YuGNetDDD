@@ -1,5 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using YuG.Application.Interfaces;
+using YuG.Domain.Common;
 using YuG.Domain.Entities;
 using YuG.Domain.Repositories;
 using YuG.Infrastructure.Persistence.Mappings;
@@ -17,8 +17,9 @@ public class UserRepository : Repository<Domain.Entities.User, UserEntity>, IUse
     /// 初始化用户仓储
     /// </summary>
     /// <param name="context">数据库上下文</param>
-    public UserRepository(ApplicationDbContext context)
-        : base(context)
+    /// <param name="domainEventPublisher">领域事件发布器</param>
+    public UserRepository(ApplicationDbContext context, IDomainEventPublisher domainEventPublisher)
+        : base(context, domainEventPublisher)
     {
     }
 

@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using YuG.Domain.Common;
 using YuG.Domain.Entities;
 using YuG.Domain.Repositories;
 using YuG.Domain.ValueObjects;
@@ -17,8 +18,9 @@ public class ResourceRepository : Repository<Domain.Entities.Resource, ResourceE
     /// 初始化资源仓储
     /// </summary>
     /// <param name="context">数据库上下文</param>
-    public ResourceRepository(ApplicationDbContext context)
-        : base(context)
+    /// <param name="domainEventPublisher">领域事件发布器</param>
+    public ResourceRepository(ApplicationDbContext context, IDomainEventPublisher domainEventPublisher)
+        : base(context, domainEventPublisher)
     {
     }
 
