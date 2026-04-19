@@ -1,7 +1,7 @@
 using FluentValidation;
 using MediatR;
-using Microsoft.Extensions.DependencyInjection;
-using YuG.Application.Behaviors;
+using YuG.Application.Common;
+using YuG.Application.Common.Behaviors;
 
 namespace YuG.Api.Extensions;
 
@@ -20,11 +20,11 @@ public static class ServiceCollectionExtensions
         // 注册 MediatR
         services.AddMediatR(cfg =>
         {
-            cfg.RegisterServicesFromAssembly(typeof(Application.Common.CommandBase<>).Assembly);
+            cfg.RegisterServicesFromAssembly(typeof(CommandBase<>).Assembly);
         });
 
         // 注册 FluentValidation
-        services.AddValidatorsFromAssembly(typeof(Application.Common.CommandBase<>).Assembly);
+        services.AddValidatorsFromAssembly(typeof(CommandBase<>).Assembly);
 
         // 注册 MediatR 管道行为
         services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));

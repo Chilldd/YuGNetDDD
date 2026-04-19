@@ -55,7 +55,10 @@
       "Bash(mv src/YuG.Application/Commands/Resource/Delete/*.cs src/YuG.Application/Resource/Commands/Delete/)",
       "Bash(git restore *)",
       "Bash(git rm *)",
-      "Bash(python3 *)"
+      "Bash(python3 *)",
+      "Bash(mv /home/yug/workspace/YuGProject/src/YuG.Application/Behaviors/* /home/yug/workspace/YuGProject/src/YuG.Application/Common/Behaviors/)",
+      "Bash(mv /home/yug/workspace/YuGProject/src/YuG.Application/Exceptions/* /home/yug/workspace/YuGProject/src/YuG.Application/Common/Exceptions/)",
+      "Bash(mv /home/yug/workspace/YuGProject/src/YuG.Application/Interfaces/* /home/yug/workspace/YuGProject/src/YuG.Application/Common/Interfaces/)"
     ]
   }
 }

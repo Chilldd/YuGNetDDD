@@ -1,5 +1,4 @@
-using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.DependencyInjection;
+using System.Reflection;
 using Microsoft.OpenApi.Models;
 
 namespace YuG.Api.Extensions;
@@ -56,12 +55,15 @@ public static class SwaggerExtensions
             });
 
             // 启用 XML 注释
-            var xmlFile = $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.xml";
+            var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
             var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
             if (File.Exists(xmlPath))
             {
                 options.IncludeXmlComments(xmlPath);
             }
+
+            // 自定义 schemaId，使用完整类型名称避免不同命名空间下同名类冲突
+            options.CustomSchemaIds(type => type.FullName?.Replace('.', '_'));
         });
 
         return services;

@@ -1,6 +1,6 @@
 using System.Net;
 using System.Text.Json;
-using YuG.Application.Exceptions;
+using YuG.Application.Common.Exceptions;
 using YuG.Domain.Common;
 
 namespace YuG.Api.Middleware;
@@ -10,8 +10,8 @@ namespace YuG.Api.Middleware;
 /// </summary>
 public class ExceptionHandlingMiddleware
 {
-    private readonly RequestDelegate _next;
     private readonly ILogger<ExceptionHandlingMiddleware> _logger;
+    private readonly RequestDelegate _next;
 
     /// <summary>
     /// 初始化异常处理中间件

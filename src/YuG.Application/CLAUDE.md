@@ -19,14 +19,13 @@ Application核心定位是用例编排层（Use Case Orchestration Layer）
 
 ## 二、目录规范
 Application
-├── 子域
-│    ├── 命令
-│    │   ├─ Command.cs  （包含命令参数，验证器）
-│    │   ├─ Handler.cs  （处理程序）
-│    ├── 查询命令
-│    │   ├─ Query.cs  （包含命令参数，验证器）
-│    │   ├─ Result.cs  （返回结果）
-│    │   ├─ Handler.cs  （处理程序）
+├── 子域  （比如Permission）
+│    ├── UseCase  （比如Role，Resource）
+│    │    ├── 命令名称 （比如CreateResource）
+│    │    │    ├── Command.cs  （命令参数，验证器。操作命令使用）
+│    │    │    ├── Query.cs  （命令参数，验证器。查询命令使用）
+│    │    │    ├── Result.cs  （查询命令返回对象）
+│    │    │    ├── Handler.cs  （处理程序）
 ├── Common （通用）
 │    ├── Behaviors  （MediatR管道）
 │    ├── Exceptions （异常）

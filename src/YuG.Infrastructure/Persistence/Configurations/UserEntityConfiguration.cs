@@ -15,7 +15,7 @@ public class UserEntityConfiguration : IEntityTypeConfiguration<UserEntity>
     /// <param name="builder">实体类型构建器</param>
     public void Configure(EntityTypeBuilder<UserEntity> builder)
     {
-        builder.ToTable("Users");
+        builder.ToTable("User");
 
         // 主键配置
         builder.HasKey(u => u.Id);
@@ -46,7 +46,7 @@ public class UserEntityConfiguration : IEntityTypeConfiguration<UserEntity>
         builder.OwnsMany(u => u.RefreshTokens, rt =>
         {
             rt.ToTable("RefreshToken");
-            
+
             rt.WithOwner()
                 .HasForeignKey("UserId");
 

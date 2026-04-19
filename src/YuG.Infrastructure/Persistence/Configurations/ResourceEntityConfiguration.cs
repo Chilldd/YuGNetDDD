@@ -15,7 +15,7 @@ public class ResourceEntityConfiguration : IEntityTypeConfiguration<ResourceEnti
     /// <param name="builder">实体类型构建器</param>
     public void Configure(EntityTypeBuilder<ResourceEntity> builder)
     {
-        builder.ToTable("Resources");
+        builder.ToTable("Resource");
 
         // 主键配置
         builder.HasKey(r => r.Id);

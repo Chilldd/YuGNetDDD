@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
-using YuG.Application.Interfaces;
+using Microsoft.EntityFrameworkCore.Diagnostics;
+using YuG.Application.Common.Interfaces;
 using YuG.Infrastructure.Persistence.Entities;
 using YuG.Infrastructure.Persistence.Entities.Auth;
 
@@ -70,6 +71,6 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
         // 抑制 PendingModelChangesWarning 警告
         // 因为我们使用了 DateTime.UtcNow 作为默认值
         optionsBuilder.ConfigureWarnings(warnings =>
-            warnings.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.PendingModelChangesWarning));
+            warnings.Ignore(RelationalEventId.PendingModelChangesWarning));
     }
 }
