@@ -2,7 +2,7 @@ using FluentValidation;
 using YuG.Application.Common;
 using YuG.Application.DTOs.Auth.Responses;
 
-namespace YuG.Application.Auth.Commands.RefreshToken;
+namespace YuG.Application.Domains.Auth.Commands.RefreshToken;
 
 /// <summary>
 /// 刷新令牌命令

@@ -3,7 +3,7 @@ using MediatR;
 using YuG.Application.Common;
 using YuG.Application.DTOs.Resource.Responses;
 
-namespace YuG.Application.Resource.Commands.Disable;
+namespace YuG.Application.Domains.Resource.Commands.Disable;
 
 /// <summary>
 /// 禁用资源命令

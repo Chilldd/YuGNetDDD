@@ -1,13 +1,13 @@
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using YuG.Application.Resource.Commands.Activate;
-using YuG.Application.Resource.Commands.Create;
-using YuG.Application.Resource.Commands.Delete;
-using YuG.Application.Resource.Commands.Disable;
-using YuG.Application.Resource.Commands.Update;
+using YuG.Application.Domains.Resource.Commands.Activate;
+using YuG.Application.Domains.Resource.Commands.Create;
+using YuG.Application.Domains.Resource.Commands.Delete;
+using YuG.Application.Domains.Resource.Commands.Disable;
+using YuG.Application.Domains.Resource.Commands.Update;
 using YuG.Application.DTOs.Resource.Requests;
 using YuG.Application.DTOs.Resource.Responses;
-using YuG.Application.Resource.Queries;
+using YuG.Application.Domains.Resource.Queries;
 
 namespace YuG.Api.Controllers;
 

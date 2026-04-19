@@ -3,7 +3,7 @@ using YuG.Application.Common;
 using YuG.Application.DTOs.Resource.Requests;
 using YuG.Application.DTOs.Resource.Responses;
 
-namespace YuG.Application.Resource.Commands.Create;
+namespace YuG.Application.Domains.Resource.Commands.Create;
 
 /// <summary>
 /// 创建资源命令

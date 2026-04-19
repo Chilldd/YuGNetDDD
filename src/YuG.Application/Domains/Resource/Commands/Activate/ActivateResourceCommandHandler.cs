@@ -3,7 +3,7 @@ using YuG.Application.DTOs.Resource.Responses;
 using YuG.Domain.Exceptions;
 using YuG.Domain.Repositories;
 
-namespace YuG.Application.Resource.Commands.Activate;
+namespace YuG.Application.Domains.Resource.Commands.Activate;
 
 /// <summary>
 /// 激活资源命令处理器

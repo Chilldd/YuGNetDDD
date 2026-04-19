@@ -3,7 +3,7 @@ using MediatR;
 using YuG.Application.Common;
 using YuG.Application.DTOs.Resource.Responses;
 
-namespace YuG.Application.Resource.Commands.Activate;
+namespace YuG.Application.Domains.Resource.Commands.Activate;
 
 /// <summary>
 /// 激活资源命令

@@ -2,7 +2,7 @@ using FluentValidation;
 using MediatR;
 using YuG.Application.Common;
 
-namespace YuG.Application.Resource.Commands.Delete;
+namespace YuG.Application.Domains.Resource.Commands.Delete;
 
 /// <summary>
 /// 删除资源命令

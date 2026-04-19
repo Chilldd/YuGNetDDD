@@ -2,7 +2,7 @@ using Dapper;
 using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.Configuration;
 using YuG.Application.DTOs.Resource.Responses;
-using YuG.Application.Resource.Queries;
+using YuG.Application.Domains.Resource.Queries;
 
 namespace YuG.Infrastructure.Read.Dapper;
 

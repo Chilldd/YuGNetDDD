@@ -2,7 +2,7 @@ using FluentValidation;
 using YuG.Application.Common;
 using YuG.Application.DTOs.Resource.Responses;
 
-namespace YuG.Application.Resource.Commands.Update;
+namespace YuG.Application.Domains.Resource.Commands.Update;
 
 /// <summary>
 /// 更新资源命令

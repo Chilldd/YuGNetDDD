@@ -2,7 +2,7 @@ using MediatR;
 using YuG.Domain.Interfaces;
 using YuG.Domain.Repositories;
 
-namespace YuG.Application.Auth.Commands.Logout;
+namespace YuG.Application.Domains.Auth.Commands.Logout;
 
 /// <summary>
 /// 登出命令处理器

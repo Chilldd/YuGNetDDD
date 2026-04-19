@@ -4,7 +4,7 @@ using YuG.Domain.Exceptions;
 using YuG.Domain.Repositories;
 using YuG.Domain.ValueObjects;
 
-namespace YuG.Application.Resource.Commands.Update;
+namespace YuG.Application.Domains.Resource.Commands.Update;
 
 /// <summary>
 /// 更新资源命令处理器
