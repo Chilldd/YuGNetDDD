@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using YuG.Domain.Identity.Entities;
 using YuG.Domain.Identity.ValueObjects;
 
-namespace YuG.Infrastructure.Persistence.Configurations;
+namespace YuG.Infrastructure.Persistence.Identity.Configurations;
 
 /// <summary>
 /// User 领域实体 EF Core 配置

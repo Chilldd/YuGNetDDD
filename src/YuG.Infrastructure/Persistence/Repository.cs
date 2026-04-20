@@ -2,7 +2,7 @@ using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
 using YuG.Domain.Common;
 
-namespace YuG.Infrastructure.Persistence.Repositories;
+namespace YuG.Infrastructure.Persistence;
 
 /// <summary>
 /// 通用仓储基类（直接使用 Domain 实体，无需映射）

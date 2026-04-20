@@ -19,7 +19,15 @@ Repository = 聚合根的持久化抽象（Persistence Boundary）
 
 ---
 
+## 二 目录结构
 
+Infrastructure
+├── Persistence   （持久化）
+│   ├── 子域
+│   │   ├── Configurations  （EF实体配置）
+│   │   ├── Repositories  （仓储）
+├── Service
+├── Migrations  （EF同步文件）
 
 ---
 

@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using YuG.Domain.Permission.Entities;
 using YuG.Domain.Permission.Enums;
 
-namespace YuG.Infrastructure.Persistence.Configurations;
+namespace YuG.Infrastructure.Persistence.Permission.Configurations;
 
 /// <summary>
 /// Resource 领域实体 EF Core 配置

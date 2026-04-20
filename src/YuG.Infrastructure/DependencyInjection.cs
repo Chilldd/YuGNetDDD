@@ -8,7 +8,8 @@ using YuG.Domain.Identity.Repositories;
 using YuG.Domain.Permission.Repositories;
 using YuG.Infrastructure.DomainEvents;
 using YuG.Infrastructure.Persistence;
-using YuG.Infrastructure.Persistence.Repositories;
+using YuG.Infrastructure.Persistence.Identity.Repositories;
+using YuG.Infrastructure.Persistence.Permission.Repositories;
 using YuG.Infrastructure.Services;
 
 namespace YuG.Infrastructure;

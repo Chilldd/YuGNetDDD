@@ -3,8 +3,9 @@ using YuG.Domain.Permission.Entities;
 using YuG.Domain.Permission.Enums;
 using YuG.Domain.Permission.Repositories;
 using YuG.Domain.Common;
+using YuG.Infrastructure.Persistence;
 
-namespace YuG.Infrastructure.Persistence.Repositories;
+namespace YuG.Infrastructure.Persistence.Permission.Repositories;
 
 /// <summary>
 /// 资源仓储实现
