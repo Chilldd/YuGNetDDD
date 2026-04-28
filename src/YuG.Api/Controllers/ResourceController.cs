@@ -1,4 +1,5 @@
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using YuG.Application.Permission.Resource.Delete;
 using YuG.Application.Permission.Resource.Get;
@@ -14,6 +15,7 @@ namespace YuG.Api.Controllers;
 /// 资源管理控制器
 /// </summary>
 [ApiController]
+[Authorize]
 [Route("api/management/resources")]
 public class ResourceController : ControllerBase
 {

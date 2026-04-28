@@ -1,5 +1,6 @@
 using FluentValidation;
 using MediatR;
+using YuG.Api.Helpers;
 using YuG.Application.Common;
 using YuG.Application.Common.Behaviors;
 
@@ -30,6 +31,18 @@ public static class ServiceCollectionExtensions
         services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
         services.AddTransient(typeof(IPipelineBehavior<,>), typeof(LoggingBehavior<,>));
 
+        return services;
+    }
+
+    /// <summary>
+    /// 注册 API 层工具服务
+    /// </summary>
+    /// <param name="services">服务集合</param>
+    /// <returns>服务集合（支持链式调用）</returns>
+    public static IServiceCollection AddApiTools(this IServiceCollection services)
+    {
+        // 注册 API 端点扫描器
+        services.AddScoped<IApiEndpointScanner, ApiEndpointScanner>();
         return services;
     }
 }

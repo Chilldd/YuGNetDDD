@@ -28,8 +28,8 @@ public static class DependencyInjection
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
         // 注册数据库上下文
-        services.AddDbContext<ApplicationDbContext>(options =>
-            options.UseSqlite(configuration.GetConnectionString("DefaultConnection")));
+        // options => options.UseSqlite(configuration.GetConnectionString("DefaultConnection"))
+        services.AddDbContext<ApplicationDbContext>();
 
         // 注册数据库上下文接口
         services.AddScoped<IApplicationDbContext>(sp =>

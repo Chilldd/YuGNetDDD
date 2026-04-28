@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore.Diagnostics;
 using YuG.Application.Common.Interfaces;
 using YuG.Domain.Identity.Entities;
 using YuG.Domain.Permission.Entities;
+using YuG.Infrastructure.Services;
 
 namespace YuG.Infrastructure.Persistence;
 
@@ -11,12 +12,32 @@ namespace YuG.Infrastructure.Persistence;
 /// </summary>
 public class ApplicationDbContext : DbContext, IApplicationDbContext
 {
+    private readonly HttpTenantProvider _tenantProvider;
+
     /// <summary>
     /// 初始化数据库上下文
     /// </summary>
     /// <param name="options">数据库上下文配置选项</param>
-    public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
+    public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options, HttpTenantProvider tenantProvider) : base(options)
     {
+        _tenantProvider = tenantProvider;
+    }
+
+    /// <summary>
+    /// 配置 DbContext 选项
+    /// </summary>
+    /// <param name="optionsBuilder">选项构建器</param>
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    {
+        base.OnConfiguring(optionsBuilder);
+        
+        var tenant = _tenantProvider.GetTenant();
+        optionsBuilder.UseSqlite(tenant.ConnectionString);
+        
+        // 抑制 PendingModelChangesWarning 警告
+        // 因为我们使用了 DateTime.UtcNow 作为默认值
+        optionsBuilder.ConfigureWarnings(warnings =>
+            warnings.Ignore(RelationalEventId.PendingModelChangesWarning));
     }
 
     /// <summary>
@@ -58,19 +79,5 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
 
         // 应用实体配置
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(ApplicationDbContext).Assembly);
-    }
-
-    /// <summary>
-    /// 配置 DbContext 选项
-    /// </summary>
-    /// <param name="optionsBuilder">选项构建器</param>
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    {
-        base.OnConfiguring(optionsBuilder);
-
-        // 抑制 PendingModelChangesWarning 警告
-        // 因为我们使用了 DateTime.UtcNow 作为默认值
-        optionsBuilder.ConfigureWarnings(warnings =>
-            warnings.Ignore(RelationalEventId.PendingModelChangesWarning));
     }
 }
