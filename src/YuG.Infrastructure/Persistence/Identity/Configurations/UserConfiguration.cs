@@ -69,5 +69,10 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
                 .IsRequired()
                 .HasDefaultValue(DateTime.UtcNow);
         });
+
+        // 配置 User ↔ Role 多对多关系
+        builder.HasMany(u => u.Roles)
+            .WithMany(r => r.Users)
+            .UsingEntity(j => j.ToTable("UserRole"));
     }
 }

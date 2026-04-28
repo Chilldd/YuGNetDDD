@@ -23,4 +23,12 @@ public interface IUserRepository : IRepository<User>
     /// <param name="cancellationToken">取消令牌</param>
     /// <returns>用户名是否存在</returns>
     Task<bool> UsernameExistsAsync(string username, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// 根据标识获取用户（包含角色导航）
+    /// </summary>
+    /// <param name="id">用户标识</param>
+    /// <param name="cancellationToken">取消令牌</param>
+    /// <returns>用户实体，不存在则返回 null</returns>
+    Task<User?> GetByIdWithRolesAsync(long id, CancellationToken cancellationToken = default);
 }

@@ -47,5 +47,13 @@ public class UserRepository : Repository<User>, IUserRepository
             .AsNoTracking()
             .AnyAsync(u => u.Username == username, cancellationToken);
     }
+
+    /// <inheritdoc />
+    public async Task<User?> GetByIdWithRolesAsync(long id, CancellationToken cancellationToken = default)
+    {
+        return await _context.Users
+            .Include(u => u.Roles)
+            .FirstOrDefaultAsync(u => u.Id == id, cancellationToken);
+    }
 }
 

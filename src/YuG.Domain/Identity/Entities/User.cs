@@ -10,6 +10,7 @@ namespace YuG.Domain.Identity.Entities;
 public class User : AggregateRoot
 {
     private readonly List<RefreshToken> _refreshTokens = [];
+    private readonly List<Role> _roles = [];
 
     /// <summary>
     /// 用户名
@@ -27,6 +28,11 @@ public class User : AggregateRoot
     public IReadOnlyCollection<RefreshToken> RefreshTokens => _refreshTokens.AsReadOnly();
 
     /// <summary>
+    /// 角色集合（多对多，只读）
+    /// </summary>
+    public IReadOnlyCollection<Role> Roles => _roles.AsReadOnly();
+
+    /// <summary>
     /// 创建用户（用于ORM）
     /// </summary>
     private User()
@@ -42,6 +48,23 @@ public class User : AggregateRoot
     {
         Username = username;
         PasswordHash = passwordHash;
+    }
+
+    /// <summary>
+    /// 设置用户角色（覆盖模式：删除旧角色，保存新角色）
+    /// </summary>
+    /// <param name="roles">新角色集合</param>
+    public void SetRoles(IEnumerable<Role> roles)
+    {
+        _roles.Clear();
+
+        foreach (var role in roles)
+        {
+            if (!_roles.Any(r => r.Id == role.Id))
+            {
+                _roles.Add(role);
+            }
+        }
     }
 
     /// <summary>

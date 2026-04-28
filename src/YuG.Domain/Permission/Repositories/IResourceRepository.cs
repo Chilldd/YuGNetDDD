@@ -71,4 +71,12 @@ public interface IResourceRepository : IRepository<Resource>
     /// <param name="cancellationToken">取消令牌</param>
     /// <returns>激活的资源列表</returns>
     Task<IReadOnlyList<Resource>> GetActiveAsync(CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// 根据标识列表获取资源
+    /// </summary>
+    /// <param name="ids">资源标识列表</param>
+    /// <param name="cancellationToken">取消令牌</param>
+    /// <returns>资源列表</returns>
+    Task<IReadOnlyList<Resource>> GetByIdsAsync(IEnumerable<long> ids, CancellationToken cancellationToken = default);
 }

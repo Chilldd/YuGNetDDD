@@ -51,6 +51,11 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
     public DbSet<Resource> Resources => Set<Resource>();
 
     /// <summary>
+    /// 角色数据集
+    /// </summary>
+    public DbSet<Role> Roles => Set<Role>();
+
+    /// <summary>
     /// 保存所有变更到数据库
     /// </summary>
     /// <param name="cancellationToken">取消令牌</param>

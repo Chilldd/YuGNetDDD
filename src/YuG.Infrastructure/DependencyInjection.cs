@@ -56,6 +56,9 @@ public static class DependencyInjection
         // 注册资源仓储
         services.AddScoped<IResourceRepository, ResourceRepository>();
 
+        // 注册角色仓储
+        services.AddScoped<IRoleRepository, RoleRepository>();
+
         return services;
     }
 }

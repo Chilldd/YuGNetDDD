@@ -131,4 +131,19 @@ public class ResourceRepository : Repository<Resource>, IResourceRepository
             .OrderBy(r => r.SortOrder)
             .ToListAsync(cancellationToken);
     }
+
+    /// <inheritdoc />
+    public async Task<IReadOnlyList<Resource>> GetByIdsAsync(IEnumerable<long> ids, CancellationToken cancellationToken = default)
+    {
+        var idList = ids.ToList();
+        if (idList.Count == 0)
+        {
+            return [];
+        }
+
+        return await _context.Resources
+            .AsNoTracking()
+            .Where(r => idList.Contains(r.Id))
+            .ToListAsync(cancellationToken);
+    }
 }

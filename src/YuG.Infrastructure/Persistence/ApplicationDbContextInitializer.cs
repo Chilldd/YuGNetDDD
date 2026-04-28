@@ -74,6 +74,18 @@ public class ApplicationDbContextInitializer
             await _context.SaveChangesAsync(cancellationToken);
 
             _logger.LogInformation("种子数据填充完成：已创建默认管理员账户 (用户名: admin, 密码: admin123)");
+
+            // 创建默认角色
+            if (!await _context.Roles.AnyAsync(cancellationToken))
+            {
+                var adminRole = new Role("管理员", "admin", "系统管理员，拥有所有权限");
+                var userRole = new Role("普通用户", "user", "普通用户，拥有基础权限");
+
+                await _context.Roles.AddRangeAsync([adminRole, userRole], cancellationToken);
+                await _context.SaveChangesAsync(cancellationToken);
+
+                _logger.LogInformation("种子数据填充完成：已创建默认角色 (admin, user)");
+            }
         }
         catch (Exception ex)
         {
