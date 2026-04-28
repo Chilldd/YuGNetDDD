@@ -11,7 +11,7 @@ using YuG.Infrastructure.Persistence;
 namespace YuG.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260419090326_InitialCreate")]
+    [Migration("20260428074738_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -20,16 +20,15 @@ namespace YuG.Infrastructure.Migrations
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "10.0.5");
 
-            modelBuilder.Entity("YuG.Infrastructure.Persistence.Entities.Auth.UserEntity", b =>
+            modelBuilder.Entity("YuG.Domain.Identity.Entities.User", b =>
                 {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT");
+                    b.Property<long>("Id")
+                        .HasColumnType("INTEGER");
 
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT")
-                        .HasDefaultValue(new DateTime(2026, 4, 19, 9, 3, 25, 967, DateTimeKind.Utc).AddTicks(4257));
+                        .HasDefaultValue(new DateTime(2026, 4, 28, 7, 47, 37, 625, DateTimeKind.Utc).AddTicks(2349));
 
                     b.Property<string>("PasswordHash")
                         .IsRequired()
@@ -39,7 +38,7 @@ namespace YuG.Infrastructure.Migrations
                     b.Property<DateTime>("UpdatedAt")
                         .ValueGeneratedOnAddOrUpdate()
                         .HasColumnType("TEXT")
-                        .HasDefaultValue(new DateTime(2026, 4, 19, 9, 3, 25, 967, DateTimeKind.Utc).AddTicks(4508));
+                        .HasDefaultValue(new DateTime(2026, 4, 28, 7, 47, 37, 627, DateTimeKind.Utc).AddTicks(4888));
 
                     b.Property<string>("Username")
                         .IsRequired()
@@ -54,10 +53,13 @@ namespace YuG.Infrastructure.Migrations
                     b.ToTable("User", (string)null);
                 });
 
-            modelBuilder.Entity("YuG.Infrastructure.Persistence.Entities.ResourceEntity", b =>
+            modelBuilder.Entity("YuG.Domain.Permission.Entities.Resource", b =>
                 {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
+                    b.Property<long>("Id")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Badge")
+                        .HasMaxLength(50)
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Code")
@@ -65,32 +67,49 @@ namespace YuG.Infrastructure.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("Component")
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
+
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT")
-                        .HasDefaultValue(new DateTime(2026, 4, 19, 9, 3, 25, 950, DateTimeKind.Utc).AddTicks(8636));
+                        .HasDefaultValue(new DateTime(2026, 4, 28, 7, 47, 37, 658, DateTimeKind.Utc).AddTicks(7673));
 
                     b.Property<string>("Description")
                         .HasMaxLength(500)
                         .HasColumnType("TEXT");
 
                     b.Property<string>("HttpMethod")
-                        .IsRequired()
-                        .ValueGeneratedOnAdd()
                         .HasMaxLength(10)
-                        .HasColumnType("TEXT")
-                        .HasDefaultValue("GET");
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Icon")
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsHidden")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasDefaultValue(false);
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("TEXT");
 
-                    b.Property<Guid?>("ParentId")
-                        .HasColumnType("TEXT");
+                    b.Property<long?>("ParentId")
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Path")
-                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("PermissionCode")
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Route")
                         .HasMaxLength(500)
                         .HasColumnType("TEXT");
 
@@ -106,10 +125,17 @@ namespace YuG.Infrastructure.Migrations
                         .HasColumnType("TEXT")
                         .HasDefaultValue("Active");
 
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(20)
+                        .HasColumnType("TEXT")
+                        .HasDefaultValue("Api");
+
                     b.Property<DateTime>("UpdatedAt")
                         .ValueGeneratedOnAddOrUpdate()
                         .HasColumnType("TEXT")
-                        .HasDefaultValue(new DateTime(2026, 4, 19, 9, 3, 25, 952, DateTimeKind.Utc).AddTicks(8930));
+                        .HasDefaultValue(new DateTime(2026, 4, 28, 7, 47, 37, 658, DateTimeKind.Utc).AddTicks(7868));
 
                     b.HasKey("Id");
 
@@ -118,12 +144,15 @@ namespace YuG.Infrastructure.Migrations
 
                     b.HasIndex("ParentId");
 
+                    b.HasIndex("PermissionCode")
+                        .IsUnique();
+
                     b.ToTable("Resource", (string)null);
                 });
 
-            modelBuilder.Entity("YuG.Infrastructure.Persistence.Entities.Auth.UserEntity", b =>
+            modelBuilder.Entity("YuG.Domain.Identity.Entities.User", b =>
                 {
-                    b.OwnsMany("YuG.Infrastructure.Persistence.Entities.Auth.RefreshTokenEntity", "RefreshTokens", b1 =>
+                    b.OwnsMany("YuG.Domain.Identity.ValueObjects.RefreshToken", "RefreshTokens", b1 =>
                         {
                             b1.Property<string>("Token")
                                 .HasMaxLength(500)
@@ -132,7 +161,7 @@ namespace YuG.Infrastructure.Migrations
                             b1.Property<DateTime>("CreatedAt")
                                 .ValueGeneratedOnAdd()
                                 .HasColumnType("TEXT")
-                                .HasDefaultValue(new DateTime(2026, 4, 19, 9, 3, 25, 983, DateTimeKind.Utc).AddTicks(9261));
+                                .HasDefaultValue(new DateTime(2026, 4, 28, 7, 47, 37, 657, DateTimeKind.Utc).AddTicks(1601));
 
                             b1.Property<DateTime>("ExpiresAt")
                                 .HasColumnType("TEXT");
@@ -142,8 +171,8 @@ namespace YuG.Infrastructure.Migrations
                                 .HasColumnType("INTEGER")
                                 .HasDefaultValue(false);
 
-                            b1.Property<Guid>("UserId")
-                                .HasColumnType("TEXT");
+                            b1.Property<long>("UserId")
+                                .HasColumnType("INTEGER");
 
                             b1.HasKey("Token");
 
@@ -158,9 +187,9 @@ namespace YuG.Infrastructure.Migrations
                     b.Navigation("RefreshTokens");
                 });
 
-            modelBuilder.Entity("YuG.Infrastructure.Persistence.Entities.ResourceEntity", b =>
+            modelBuilder.Entity("YuG.Domain.Permission.Entities.Resource", b =>
                 {
-                    b.HasOne("YuG.Infrastructure.Persistence.Entities.ResourceEntity", null)
+                    b.HasOne("YuG.Domain.Permission.Entities.Resource", null)
                         .WithMany()
                         .HasForeignKey("ParentId")
                         .OnDelete(DeleteBehavior.Restrict);

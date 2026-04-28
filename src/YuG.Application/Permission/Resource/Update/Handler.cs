@@ -43,21 +43,39 @@ public class Handler : IRequestHandler<UpdateResourceCommand, ResourceResult>
             throw new DomainException($"资源编码 '{request.Code}' 已被其他资源使用");
         }
 
-        // 解析 HTTP 方法
-        var httpMethod = Enum.Parse<ResourceHttpMethod>(request.HttpMethod, ignoreCase: true);
-
-        // 解析状态
-        var status = string.IsNullOrEmpty(request.Status) ? ResourceStatus.Active : Enum.Parse<ResourceStatus>(request.Status, ignoreCase: true);
-
-        // 更新资源
+        // 更新基础字段
         resource.Rename(request.Name);
         resource.ChangeCode(request.Code);
         resource.ChangeDescription(request.Description);
-        resource.ChangeEndpoint(request.Path, httpMethod);
         resource.MoveTo(request.ParentId);
         resource.ChangeSortOrder(request.SortOrder);
 
+        // 解析类型，根据类型更新特有字段
+        var type = Enum.Parse<ResourceType>(request.Type, ignoreCase: true);
+
+        switch (type)
+        {
+            case ResourceType.Api:
+                var httpMethod = Enum.Parse<ResourceHttpMethod>(request.HttpMethod!, ignoreCase: true);
+                resource.ChangeEndpoint(request.Path!, httpMethod);
+                break;
+
+            case ResourceType.Menu:
+                resource.ConfigureMenu(
+                    request.Icon,
+                    request.Route,
+                    request.Component,
+                    request.IsHidden,
+                    request.Badge);
+                break;
+
+            case ResourceType.Button:
+                resource.ConfigureButton(request.PermissionCode);
+                break;
+        }
+
         // 根据目标状态执行对应业务动作
+        var status = string.IsNullOrEmpty(request.Status) ? ResourceStatus.Active : Enum.Parse<ResourceStatus>(request.Status, ignoreCase: true);
         if (status == ResourceStatus.Active)
         {
             resource.Activate();
@@ -78,13 +96,20 @@ public class Handler : IRequestHandler<UpdateResourceCommand, ResourceResult>
             Name = resource.Name,
             Code = resource.Code,
             Description = resource.Description,
-            HttpMethod = resource.HttpMethod.ToString(),
+            Type = resource.Type.ToString(),
+            HttpMethod = resource.HttpMethod?.ToString(),
             Path = resource.Path,
+            Icon = resource.Icon,
+            Route = resource.Route,
+            Component = resource.Component,
+            IsHidden = resource.IsHidden,
+            Badge = resource.Badge,
+            PermissionCode = resource.PermissionCode,
             ParentId = resource.ParentId,
             SortOrder = resource.SortOrder,
             Status = resource.Status.ToString(),
-            CreatedAt = DateTime.UtcNow,
-            UpdatedAt = DateTime.UtcNow
+            CreatedAt = resource.CreatedAt,
+            UpdatedAt = resource.UpdatedAt
         };
     }
 }

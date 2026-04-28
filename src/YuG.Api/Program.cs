@@ -5,6 +5,16 @@ using YuG.Infrastructure.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddMcpServer()
+    .WithHttpTransport(options =>
+    {
+        // Stateless mode is recommended for servers that don't need
+        // server-to-client requests like sampling or elicitation.
+        // See the Sessions documentation for details.
+        options.Stateless = true;
+    })
+    .WithToolsFromAssembly();
+
 // 显式配置 Kestrel 监听地址（解决 WSL2 端口转发问题）
 builder.WebHost.ConfigureKestrel(options =>
 {
@@ -36,6 +46,8 @@ builder.Services.AddSwaggerServices();
 builder.Services.AddInfrastructure(builder.Configuration);
 
 var app = builder.Build();
+
+app.MapMcp();
 
 // 初始化数据库
 await app.InitializeDatabaseAsync();

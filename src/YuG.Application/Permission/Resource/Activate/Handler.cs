@@ -49,13 +49,20 @@ public class Handler : IRequestHandler<ActivateResourceCommand, ResourceResult>
             Name = resource.Name,
             Code = resource.Code,
             Description = resource.Description,
-            HttpMethod = resource.HttpMethod.ToString(),
+            Type = resource.Type.ToString(),
+            HttpMethod = resource.HttpMethod?.ToString(),
             Path = resource.Path,
+            Icon = resource.Icon,
+            Route = resource.Route,
+            Component = resource.Component,
+            IsHidden = resource.IsHidden,
+            Badge = resource.Badge,
+            PermissionCode = resource.PermissionCode,
             ParentId = resource.ParentId,
             SortOrder = resource.SortOrder,
             Status = resource.Status.ToString(),
-            CreatedAt = DateTime.UtcNow,
-            UpdatedAt = DateTime.UtcNow
+            CreatedAt = resource.CreatedAt,
+            UpdatedAt = resource.UpdatedAt
         };
     }
 }

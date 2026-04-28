@@ -11,7 +11,7 @@ public class GetResourceQuery : IRequest<GetResourceResult?>
     /// <summary>
     /// 资源标识
     /// </summary>
-    public Guid Id { get; init; }
+    public long Id { get; init; }
 }
 
 /// <summary>

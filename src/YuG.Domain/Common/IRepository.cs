@@ -15,7 +15,7 @@ public interface IRepository<TEntity> where TEntity : AggregateRoot
     /// <param name="id">实体标识</param>
     /// <param name="cancellationToken">取消令牌</param>
     /// <returns>实体实例，不存在则返回 null</returns>
-    Task<TEntity?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
+    Task<TEntity?> GetByIdAsync(long id, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// 获取所有实体

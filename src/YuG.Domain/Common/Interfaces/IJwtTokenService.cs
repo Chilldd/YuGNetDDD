@@ -11,7 +11,7 @@ public interface IJwtTokenService
     /// <param name="userId">用户ID</param>
     /// <param name="username">用户名</param>
     /// <returns>JWT 访问令牌</returns>
-    string GenerateAccessToken(Guid userId, string username);
+    string GenerateAccessToken(long userId, string username);
 
     /// <summary>
     /// 生成刷新令牌
@@ -25,7 +25,7 @@ public interface IJwtTokenService
     /// </summary>
     /// <param name="token">JWT 令牌</param>
     /// <returns>用户ID</returns>
-    Guid? GetUserIdFromToken(string token);
+    long? GetUserIdFromToken(string token);
 
     /// <summary>
     /// 验证令牌是否有效

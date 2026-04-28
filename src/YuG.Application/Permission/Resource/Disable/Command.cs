@@ -11,7 +11,7 @@ public record ResourceResult
     /// <summary>
     /// 资源标识
     /// </summary>
-    public Guid Id { get; init; }
+    public long Id { get; init; }
 
     /// <summary>
     /// 资源名称
@@ -29,19 +29,54 @@ public record ResourceResult
     public string Description { get; init; } = string.Empty;
 
     /// <summary>
-    /// HTTP 方法（GET/POST/PUT/DELETE）
+    /// 资源类型（Menu/Api/Button）
     /// </summary>
-    public string HttpMethod { get; init; } = "GET";
+    public string Type { get; init; } = "Api";
 
     /// <summary>
-    /// API 路径（如 /api/users）
+    /// HTTP 方法（仅 API 类型，GET/POST/PUT/DELETE）
     /// </summary>
-    public string Path { get; init; } = string.Empty;
+    public string? HttpMethod { get; init; }
+
+    /// <summary>
+    /// API 路径（仅 API 类型，如 /api/users）
+    /// </summary>
+    public string? Path { get; init; }
+
+    /// <summary>
+    /// 菜单图标（仅菜单类型）
+    /// </summary>
+    public string? Icon { get; init; }
+
+    /// <summary>
+    /// 前端路由（仅菜单类型）
+    /// </summary>
+    public string? Route { get; init; }
+
+    /// <summary>
+    /// 组件路径（仅菜单类型）
+    /// </summary>
+    public string? Component { get; init; }
+
+    /// <summary>
+    /// 是否隐藏（仅菜单类型）
+    /// </summary>
+    public bool IsHidden { get; init; }
+
+    /// <summary>
+    /// 菜单角标（仅菜单类型）
+    /// </summary>
+    public string? Badge { get; init; }
+
+    /// <summary>
+    /// 权限编码（仅按钮类型，如 user:create）
+    /// </summary>
+    public string? PermissionCode { get; init; }
 
     /// <summary>
     /// 父级资源标识（支持资源树结构）
     /// </summary>
-    public Guid? ParentId { get; init; }
+    public long? ParentId { get; init; }
 
     /// <summary>
     /// 排序顺序
@@ -72,7 +107,7 @@ public class DisableResourceCommand : CommandBase<ResourceResult>
     /// <summary>
     /// 资源标识
     /// </summary>
-    public Guid Id { get; init; }
+    public long Id { get; init; }
 }
 
 /// <summary>

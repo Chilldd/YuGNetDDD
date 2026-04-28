@@ -15,17 +15,24 @@ namespace YuG.Infrastructure.Migrations
                 name: "Resource",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "TEXT", nullable: false),
+                    Id = table.Column<long>(type: "INTEGER", nullable: false),
                     Name = table.Column<string>(type: "TEXT", maxLength: 200, nullable: false),
                     Code = table.Column<string>(type: "TEXT", maxLength: 100, nullable: false),
                     Description = table.Column<string>(type: "TEXT", maxLength: 500, nullable: true),
-                    HttpMethod = table.Column<string>(type: "TEXT", maxLength: 10, nullable: false, defaultValue: "GET"),
-                    Path = table.Column<string>(type: "TEXT", maxLength: 500, nullable: false),
-                    ParentId = table.Column<Guid>(type: "TEXT", nullable: true),
+                    Type = table.Column<string>(type: "TEXT", maxLength: 20, nullable: false, defaultValue: "Api"),
+                    HttpMethod = table.Column<string>(type: "TEXT", maxLength: 10, nullable: true),
+                    Path = table.Column<string>(type: "TEXT", maxLength: 500, nullable: true),
+                    Icon = table.Column<string>(type: "TEXT", maxLength: 100, nullable: true),
+                    Route = table.Column<string>(type: "TEXT", maxLength: 500, nullable: true),
+                    Component = table.Column<string>(type: "TEXT", maxLength: 500, nullable: true),
+                    IsHidden = table.Column<bool>(type: "INTEGER", nullable: false, defaultValue: false),
+                    Badge = table.Column<string>(type: "TEXT", maxLength: 50, nullable: true),
+                    PermissionCode = table.Column<string>(type: "TEXT", maxLength: 100, nullable: true),
+                    ParentId = table.Column<long>(type: "INTEGER", nullable: true),
                     SortOrder = table.Column<int>(type: "INTEGER", nullable: false, defaultValue: 0),
                     Status = table.Column<string>(type: "TEXT", maxLength: 20, nullable: false, defaultValue: "Active"),
-                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false, defaultValue: new DateTime(2026, 4, 19, 9, 3, 25, 950, DateTimeKind.Utc).AddTicks(8636)),
-                    UpdatedAt = table.Column<DateTime>(type: "TEXT", nullable: false, defaultValue: new DateTime(2026, 4, 19, 9, 3, 25, 952, DateTimeKind.Utc).AddTicks(8930))
+                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false, defaultValue: new DateTime(2026, 4, 28, 7, 47, 37, 658, DateTimeKind.Utc).AddTicks(7673)),
+                    UpdatedAt = table.Column<DateTime>(type: "TEXT", nullable: false, defaultValue: new DateTime(2026, 4, 28, 7, 47, 37, 658, DateTimeKind.Utc).AddTicks(7868))
                 },
                 constraints: table =>
                 {
@@ -42,11 +49,11 @@ namespace YuG.Infrastructure.Migrations
                 name: "User",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "TEXT", nullable: false),
+                    Id = table.Column<long>(type: "INTEGER", nullable: false),
                     Username = table.Column<string>(type: "TEXT", maxLength: 50, nullable: false),
                     PasswordHash = table.Column<string>(type: "TEXT", maxLength: 500, nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false, defaultValue: new DateTime(2026, 4, 19, 9, 3, 25, 967, DateTimeKind.Utc).AddTicks(4257)),
-                    UpdatedAt = table.Column<DateTime>(type: "TEXT", nullable: false, defaultValue: new DateTime(2026, 4, 19, 9, 3, 25, 967, DateTimeKind.Utc).AddTicks(4508))
+                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false, defaultValue: new DateTime(2026, 4, 28, 7, 47, 37, 625, DateTimeKind.Utc).AddTicks(2349)),
+                    UpdatedAt = table.Column<DateTime>(type: "TEXT", nullable: false, defaultValue: new DateTime(2026, 4, 28, 7, 47, 37, 627, DateTimeKind.Utc).AddTicks(4888))
                 },
                 constraints: table =>
                 {
@@ -58,10 +65,10 @@ namespace YuG.Infrastructure.Migrations
                 columns: table => new
                 {
                     Token = table.Column<string>(type: "TEXT", maxLength: 500, nullable: false),
-                    UserId = table.Column<Guid>(type: "TEXT", nullable: false),
                     ExpiresAt = table.Column<DateTime>(type: "TEXT", nullable: false),
                     IsRevoked = table.Column<bool>(type: "INTEGER", nullable: false, defaultValue: false),
-                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false, defaultValue: new DateTime(2026, 4, 19, 9, 3, 25, 983, DateTimeKind.Utc).AddTicks(9261))
+                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false, defaultValue: new DateTime(2026, 4, 28, 7, 47, 37, 657, DateTimeKind.Utc).AddTicks(1601)),
+                    UserId = table.Column<long>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -89,6 +96,12 @@ namespace YuG.Infrastructure.Migrations
                 name: "IX_Resource_ParentId",
                 table: "Resource",
                 column: "ParentId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Resource_PermissionCode",
+                table: "Resource",
+                column: "PermissionCode",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_User_Username",

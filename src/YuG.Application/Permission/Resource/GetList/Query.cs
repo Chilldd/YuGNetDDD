@@ -9,6 +9,11 @@ namespace YuG.Application.Permission.Resource.GetList;
 public class GetResourceListQuery : IRequest<GetResourceListResult>
 {
     /// <summary>
+    /// 资源类型筛选（可选，Menu/Api/Button）
+    /// </summary>
+    public string? Type { get; init; }
+
+    /// <summary>
     /// HTTP 方法筛选（可选）
     /// </summary>
     public string? HttpMethod { get; init; }
@@ -16,7 +21,7 @@ public class GetResourceListQuery : IRequest<GetResourceListResult>
     /// <summary>
     /// 父级资源标识筛选（可选）
     /// </summary>
-    public Guid? ParentId { get; init; }
+    public long? ParentId { get; init; }
 
     /// <summary>
     /// 是否只返回激活状态（可选）
@@ -34,6 +39,11 @@ public class GetResourceListQueryValidator : AbstractValidator<GetResourceListQu
     /// </summary>
     public GetResourceListQueryValidator()
     {
+        RuleFor(x => x.Type)
+            .Must(type => string.IsNullOrEmpty(type)
+                || new[] { "Menu", "Api", "Button" }.Contains(type))
+            .WithMessage("资源类型必须是 Menu、Api 或 Button");
+
         RuleFor(x => x.HttpMethod)
             .Must(method => string.IsNullOrEmpty(method)
                 || new[] { "GET", "POST", "PUT", "DELETE" }.Contains(method.ToUpperInvariant()))

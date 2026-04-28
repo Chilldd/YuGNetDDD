@@ -12,7 +12,7 @@ public class DeleteResourceCommand : CommandBase<Unit>
     /// <summary>
     /// 资源标识
     /// </summary>
-    public Guid Id { get; init; }
+    public long Id { get; init; }
 }
 
 /// <summary>

@@ -60,7 +60,8 @@
       "Bash(mv /home/yug/workspace/YuGProject/src/YuG.Application/Exceptions/* /home/yug/workspace/YuGProject/src/YuG.Application/Common/Exceptions/)",
       "Bash(mv /home/yug/workspace/YuGProject/src/YuG.Application/Interfaces/* /home/yug/workspace/YuGProject/src/YuG.Application/Common/Interfaces/)",
       "Bash(rm -f /home/yug/workspace/YuGProject/src/YuG.Infrastructure/Persistence/Mappings/*.cs)",
-      "Bash(rm -f /home/yug/workspace/YuGProject/src/YuG.Infrastructure/Persistence/Entities/**/*.cs)"
+      "Bash(rm -f /home/yug/workspace/YuGProject/src/YuG.Infrastructure/Persistence/Entities/**/*.cs)",
+      "Bash(sqlite3 *)"
     ]
   }
 }

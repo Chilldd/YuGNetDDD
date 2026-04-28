@@ -33,6 +33,12 @@ public class Handler : IRequestHandler<GetResourceListQuery, GetResourceListResu
         // 应用筛选
         var filtered = resources.AsEnumerable();
 
+        if (!string.IsNullOrEmpty(query.Type))
+        {
+            var type = Enum.Parse<ResourceType>(query.Type, ignoreCase: true);
+            filtered = filtered.Where(r => r.Type == type);
+        }
+
         if (!string.IsNullOrEmpty(query.HttpMethod))
         {
             var method = Enum.Parse<ResourceHttpMethod>(query.HttpMethod, ignoreCase: true);
@@ -57,8 +63,15 @@ public class Handler : IRequestHandler<GetResourceListQuery, GetResourceListResu
             Id = r.Id,
             Name = r.Name,
             Code = r.Code,
-            HttpMethod = r.HttpMethod.ToString(),
+            Type = r.Type.ToString(),
+            HttpMethod = r.HttpMethod?.ToString(),
             Path = r.Path,
+            Icon = r.Icon,
+            Route = r.Route,
+            Component = r.Component,
+            IsHidden = r.IsHidden,
+            Badge = r.Badge,
+            PermissionCode = r.PermissionCode,
             ParentId = r.ParentId,
             SortOrder = r.SortOrder,
             Status = r.Status.ToString()

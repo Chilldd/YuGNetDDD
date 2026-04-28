@@ -31,7 +31,7 @@ public abstract class Repository<TAggregate> : IRepository<TAggregate>
     }
 
     /// <inheritdoc />
-    public async Task<TAggregate?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
+    public async Task<TAggregate?> GetByIdAsync(long id, CancellationToken cancellationToken = default)
     {
         return await _dbSet.FirstOrDefaultAsync(e => e.Id == id, cancellationToken);
     }

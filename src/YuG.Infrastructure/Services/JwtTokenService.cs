@@ -55,7 +55,7 @@ public class JwtTokenService : IJwtTokenService
     /// <param name="userId">用户ID</param>
     /// <param name="username">用户名</param>
     /// <returns>JWT 访问令牌</returns>
-    public string GenerateAccessToken(Guid userId, string username)
+    public string GenerateAccessToken(long userId, string username)
     {
         var tokenHandler = new JwtSecurityTokenHandler();
         var key = Encoding.UTF8.GetBytes(_options.SecretKey);
@@ -98,7 +98,7 @@ public class JwtTokenService : IJwtTokenService
     /// </summary>
     /// <param name="token">JWT 令牌</param>
     /// <returns>用户ID</returns>
-    public Guid? GetUserIdFromToken(string token)
+    public long? GetUserIdFromToken(string token)
     {
         try
         {
@@ -106,7 +106,7 @@ public class JwtTokenService : IJwtTokenService
             var jsonToken = tokenHandler.ReadJwtToken(token);
             var subClaim = jsonToken.Claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Sub);
 
-            if (subClaim != null && Guid.TryParse(subClaim.Value, out var userId))
+            if (subClaim != null && long.TryParse(subClaim.Value, out var userId))
             {
                 return userId;
             }

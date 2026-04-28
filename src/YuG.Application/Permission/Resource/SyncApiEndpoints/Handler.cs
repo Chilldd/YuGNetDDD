@@ -32,15 +32,16 @@ public class Handler : IRequestHandler<SyncApiEndpointsCommand, SyncApiEndpoints
         SyncApiEndpointsCommand request,
         CancellationToken cancellationToken)
     {
-        // 1. 获取现有资源
+        // 1. 获取现有 API 资源（只处理 API 类型）
         var existingResources = await _resourceRepository.GetAllAsync(cancellationToken);
-        var existingDict = existingResources
-            .ToDictionary(r => (r.Path.ToLowerInvariant(), r.HttpMethod), r => r);
+        var apiResources = existingResources.Where(r => r.Type == ResourceType.Api).ToList();
+        var existingDict = apiResources
+            .ToDictionary(r => (r.Path!.ToLowerInvariant(), r.HttpMethod!.Value), r => r);
         var existingByCodeDict = existingResources
             .ToDictionary(r => r.Code.ToLowerInvariant(), r => r);
 
         // 2. 处理控制器（作为父资源）
-        var controllerMapping = new Dictionary<string, Guid>();
+        var controllerMapping = new Dictionary<string, long>();
         int addedCount = 0;
         int updatedCount = 0;
         var sortOrder = 1;
@@ -51,16 +52,16 @@ public class Handler : IRequestHandler<SyncApiEndpointsCommand, SyncApiEndpoints
 
             if (!existingByCodeDict.TryGetValue(code, out var existingResource))
             {
-                // 新增控制器资源
+                // 新增控制器资源（Api 类型）
                 var resource = new ResourceEntity(
                     name: controller.DisplayName,
                     code: controller.GeneratedCode,
+                    type: ResourceType.Api,
                     description: controller.Description,
-                    httpMethod: ResourceHttpMethod.Get,
-                    path: GenerateControllerPath(controller.ControllerName),
                     parentId: null,
                     sortOrder: sortOrder++,
                     status: ResourceStatus.Active);
+                resource.ChangeEndpoint(GenerateControllerPath(controller.ControllerName), ResourceHttpMethod.Get);
 
                 await _resourceRepository.AddAsync(resource, cancellationToken);
                 controllerMapping.Add(controller.ControllerName, resource.Id);
@@ -104,16 +105,16 @@ public class Handler : IRequestHandler<SyncApiEndpointsCommand, SyncApiEndpoints
 
             if (!existingDict.TryGetValue(key, out var existingResource))
             {
-                // 新增端点资源
+                // 新增端点资源（Api 类型）
                 var resource = new ResourceEntity(
                     name: endpoint.DisplayName,
                     code: endpoint.GeneratedCode,
+                    type: ResourceType.Api,
                     description: endpoint.Description,
-                    httpMethod: endpoint.HttpMethod,
-                    path: endpoint.Path,
                     parentId: parentId,
                     sortOrder: sortOrder++,
                     status: ResourceStatus.Active);
+                resource.ChangeEndpoint(endpoint.Path, endpoint.HttpMethod);
 
                 await _resourceRepository.AddAsync(resource, cancellationToken);
                 addedCount++;

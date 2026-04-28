@@ -36,41 +36,77 @@ public class Handler : IRequestHandler<CreateResourceCommand, ResourceResult>
             throw new DomainException($"资源编码 '{request.Code}' 已存在");
         }
 
-        // 解析 HTTP 方法
-        var httpMethod = Enum.Parse<ResourceHttpMethod>(request.HttpMethod, ignoreCase: true);
+        // 解析资源类型
+        var type = Enum.Parse<ResourceType>(request.Type, ignoreCase: true);
 
         // 解析状态
         var status = string.IsNullOrEmpty(request.Status) ? ResourceStatus.Active : Enum.Parse<ResourceStatus>(request.Status, ignoreCase: true);
 
-        // 创建资源
+        // 创建资源（共用基础字段）
         var resource = new ResourceEntity(
             request.Name,
             request.Code,
+            type,
             request.Description,
-            httpMethod,
-            request.Path,
             request.ParentId,
             request.SortOrder,
             status);
+
+        // 根据类型配置特有信息
+        switch (type)
+        {
+            case ResourceType.Api:
+                var httpMethod = Enum.Parse<ResourceHttpMethod>(request.HttpMethod!, ignoreCase: true);
+                resource.ChangeEndpoint(request.Path!, httpMethod);
+                break;
+
+            case ResourceType.Menu:
+                resource.ConfigureMenu(
+                    request.Icon,
+                    request.Route,
+                    request.Component,
+                    request.IsHidden,
+                    request.Badge);
+                break;
+
+            case ResourceType.Button:
+                resource.ConfigureButton(request.PermissionCode);
+                break;
+        }
 
         // 保存到数据库
         await _resourceRepository.AddAsync(resource, cancellationToken);
         await _resourceRepository.SaveChangesAsync(cancellationToken);
 
         // 返回响应
+        return MapToResult(resource);
+    }
+
+    /// <summary>
+    /// 将资源实体映射为响应结果
+    /// </summary>
+    internal static ResourceResult MapToResult(ResourceEntity resource)
+    {
         return new ResourceResult
         {
             Id = resource.Id,
             Name = resource.Name,
             Code = resource.Code,
             Description = resource.Description,
-            HttpMethod = resource.HttpMethod.ToString(),
+            Type = resource.Type.ToString(),
+            HttpMethod = resource.HttpMethod?.ToString(),
             Path = resource.Path,
+            Icon = resource.Icon,
+            Route = resource.Route,
+            Component = resource.Component,
+            IsHidden = resource.IsHidden,
+            Badge = resource.Badge,
+            PermissionCode = resource.PermissionCode,
             ParentId = resource.ParentId,
             SortOrder = resource.SortOrder,
             Status = resource.Status.ToString(),
-            CreatedAt = DateTime.UtcNow,
-            UpdatedAt = DateTime.UtcNow
+            CreatedAt = resource.CreatedAt,
+            UpdatedAt = resource.UpdatedAt
         };
     }
 }

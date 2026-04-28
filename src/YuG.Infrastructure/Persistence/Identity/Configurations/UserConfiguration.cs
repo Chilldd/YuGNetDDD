@@ -18,8 +18,9 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
     {
         builder.ToTable("User");
 
-        // 主键配置
+        // 主键配置（雪花 ID 由应用层生成，非数据库自增）
         builder.HasKey(u => u.Id);
+        builder.Property(u => u.Id).ValueGeneratedNever();
 
         // 审计属性配置（不使用 CURRENT_TIMESTAMP）
         builder.Property(u => u.CreatedAt)

@@ -5,10 +5,29 @@ namespace YuG.Domain.Common;
 /// </summary>
 public abstract class AggregateRoot
 {
+    private static SnowflakeIdGenerator _idGenerator = new(0);
+
     /// <summary>
-    /// 实体唯一标识
+    /// 配置雪花ID生成器（应用启动时调用）
     /// </summary>
-    public Guid Id { get; set; } = Guid.NewGuid();
+    /// <param name="generator">雪花ID生成器实例</param>
+    public static void ConfigureIdGenerator(SnowflakeIdGenerator generator)
+    {
+        _idGenerator = generator ?? throw new ArgumentNullException(nameof(generator));
+    }
+
+    /// <summary>
+    /// 实体唯一标识（雪花ID）
+    /// </summary>
+    public long Id { get; protected set; }
+
+    /// <summary>
+    /// 创建聚合根时自动生成雪花ID
+    /// </summary>
+    protected AggregateRoot()
+    {
+        Id = _idGenerator.NextId();
+    }
 
     /// <summary>
     /// 创建时间（UTC）

@@ -49,6 +49,34 @@ public class ResourceRepository : Repository<Resource>, IResourceRepository
     }
 
     /// <summary>
+    /// 根据资源类型获取资源列表
+    /// </summary>
+    /// <param name="type">资源类型</param>
+    /// <param name="cancellationToken">取消令牌</param>
+    /// <returns>资源列表</returns>
+    public async Task<IReadOnlyList<Resource>> GetByTypeAsync(ResourceType type, CancellationToken cancellationToken = default)
+    {
+        return await _context.Resources
+            .AsNoTracking()
+            .Where(r => r.Type == type)
+            .OrderBy(r => r.SortOrder)
+            .ToListAsync(cancellationToken);
+    }
+
+    /// <summary>
+    /// 根据权限编码获取按钮资源
+    /// </summary>
+    /// <param name="permissionCode">权限编码</param>
+    /// <param name="cancellationToken">取消令牌</param>
+    /// <returns>资源实体，不存在则返回 null</returns>
+    public async Task<Resource?> GetByPermissionCodeAsync(string permissionCode, CancellationToken cancellationToken = default)
+    {
+        return await _context.Resources
+            .AsNoTracking()
+            .FirstOrDefaultAsync(r => r.PermissionCode == permissionCode, cancellationToken);
+    }
+
+    /// <summary>
     /// 根据 HTTP 方法获取资源列表
     /// </summary>
     /// <param name="httpMethod">HTTP 方法</param>
@@ -81,7 +109,7 @@ public class ResourceRepository : Repository<Resource>, IResourceRepository
     /// <param name="parentId">父级资源标识</param>
     /// <param name="cancellationToken">取消令牌</param>
     /// <returns>子资源列表</returns>
-    public async Task<IReadOnlyList<Resource>> GetByParentIdAsync(Guid parentId, CancellationToken cancellationToken = default)
+    public async Task<IReadOnlyList<Resource>> GetByParentIdAsync(long parentId, CancellationToken cancellationToken = default)
     {
         return await _context.Resources
             .AsNoTracking()

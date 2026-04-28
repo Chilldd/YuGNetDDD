@@ -94,7 +94,7 @@ public class ResourceController : ControllerBase
     [ProducesResponseType(typeof(UpdateResourceCommands.ResourceResult), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult<UpdateResourceCommands.ResourceResult>> Update(Guid id, [FromBody] UpdateResourceCommands.UpdateResourceCommand command)
+    public async Task<ActionResult<UpdateResourceCommands.ResourceResult>> Update(long id, [FromBody] UpdateResourceCommands.UpdateResourceCommand command)
     {
         if (id != command.Id)
         {
@@ -115,7 +115,7 @@ public class ResourceController : ControllerBase
     [HttpDelete("{id}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> Delete(Guid id)
+    public async Task<IActionResult> Delete(long id)
     {
         var command = new DeleteResourceCommand { Id = id };
         await _mediator.Send(command);
@@ -132,7 +132,7 @@ public class ResourceController : ControllerBase
     [HttpPost("{id}/activate")]
     [ProducesResponseType(typeof(ActivateResourceCommands.ResourceResult), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult<ActivateResourceCommands.ResourceResult>> Activate(Guid id)
+    public async Task<ActionResult<ActivateResourceCommands.ResourceResult>> Activate(long id)
     {
         var command = new ActivateResourceCommands.ActivateResourceCommand { Id = id };
         var response = await _mediator.Send(command);
@@ -149,7 +149,7 @@ public class ResourceController : ControllerBase
     [HttpPost("{id}/disable")]
     [ProducesResponseType(typeof(DisableResourceCommands.ResourceResult), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult<DisableResourceCommands.ResourceResult>> Disable(Guid id)
+    public async Task<ActionResult<DisableResourceCommands.ResourceResult>> Disable(long id)
     {
         var command = new DisableResourceCommands.DisableResourceCommand { Id = id };
         var response = await _mediator.Send(command);

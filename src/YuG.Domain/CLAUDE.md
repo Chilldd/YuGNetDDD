@@ -8,6 +8,7 @@
 - **边界清晰**：一个聚合只负责一个一致性边界，避免“万能对象”
 - **统一语言**：命名体现业务语义，避免技术导向命名（如 Update、Process）
 - **领域事件边界清晰**：仅用于跨聚合或跨限界上下文的业务事实传播
+- **实体标识采用雪花 ID**：所有聚合根主键使用 `long` 类型，由 `SnowflakeIdGenerator` 自动生成。外键引用（如 `ParentId`）统一使用 `long?` / `long`
 
 ---
 
@@ -63,6 +64,10 @@ Domain
   - 业务规则优先下沉到领域模型
   - Application Service / Handler 只负责协调流程
   - 跨聚合规则使用 Domain Service
+- 实体标识
+  - `Id` 为 `long` 类型（雪花 ID），在 `AggregateRoot` 构造时由 `SnowflakeIdGenerator` 自动生成
+  - 外键引用（如 `ParentId`、`UserId`）统一使用 `long?` / `long`
+  - `Id` 使用 `protected set`，外部不可直接赋值
 
 ---
 
