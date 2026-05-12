@@ -36,13 +36,13 @@ public class ToolController : ControllerBase
     /// <response code="200">同步成功</response>
     [AllowAnonymous]
     [HttpPost("sync-api-resources")]
+    [ApiDescription("同步扫描到的 API 端点到资源表")]
     [ProducesResponseType(typeof(SyncApiEndpointsResult), StatusCodes.Status200OK)]
     public async Task<ActionResult<SyncApiEndpointsResult>> SyncApiResources()
     {
         var scanResult = _endpointScanner.Scan();
         var command = new SyncApiEndpointsCommand
         {
-            Controllers = scanResult.Controllers,
             Endpoints = scanResult.Endpoints
         };
         var response = await _mediator.Send(command);

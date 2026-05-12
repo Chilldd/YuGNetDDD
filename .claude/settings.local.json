@@ -61,7 +61,8 @@
       "Bash(mv /home/yug/workspace/YuGProject/src/YuG.Application/Interfaces/* /home/yug/workspace/YuGProject/src/YuG.Application/Common/Interfaces/)",
       "Bash(rm -f /home/yug/workspace/YuGProject/src/YuG.Infrastructure/Persistence/Mappings/*.cs)",
       "Bash(rm -f /home/yug/workspace/YuGProject/src/YuG.Infrastructure/Persistence/Entities/**/*.cs)",
-      "Bash(sqlite3 *)"
+      "Bash(sqlite3 *)",
+      "Bash(git checkout *)"
     ]
   }
 }

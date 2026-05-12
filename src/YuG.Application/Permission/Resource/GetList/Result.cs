@@ -21,7 +21,12 @@ public record ResourceListItem
     public string Code { get; init; } = string.Empty;
 
     /// <summary>
-    /// 资源类型（Menu/Api/Button）
+    /// 资源描述
+    /// </summary>
+    public string Description { get; init; } = string.Empty;
+
+    /// <summary>
+    /// 资源类型（Menu/Page/Api）
     /// </summary>
     public string Type { get; init; } = "Api";
 
@@ -41,12 +46,12 @@ public record ResourceListItem
     public string? Icon { get; init; }
 
     /// <summary>
-    /// 前端路由（仅菜单类型）
+    /// 前端路由（菜单/页面类型有效）
     /// </summary>
     public string? Route { get; init; }
 
     /// <summary>
-    /// 组件路径（仅菜单类型）
+    /// 组件路径（菜单/页面类型有效）
     /// </summary>
     public string? Component { get; init; }
 
@@ -61,7 +66,7 @@ public record ResourceListItem
     public string? Badge { get; init; }
 
     /// <summary>
-    /// 权限编码（仅按钮类型）
+    /// 权限编码（页面/API 类型有效）
     /// </summary>
     public string? PermissionCode { get; init; }
 

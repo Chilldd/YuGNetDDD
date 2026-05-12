@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using YuG.Api.Helpers;
 
 namespace YuG.Api.Controllers;
 
@@ -18,6 +19,7 @@ public class WeatherController : ControllerBase
     /// <response code="200">成功返回用户信息</response>
     /// <response code="401">未授权</response>
     [HttpGet("me")]
+    [ApiDescription("获取当前用户信息")]
     [ProducesResponseType(typeof(UserInfo), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public IActionResult GetCurrentUser()

@@ -1,6 +1,7 @@
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using YuG.Api.Helpers;
 using YuG.Application.Identity.UserRole.SetUserRoles;
 
 namespace YuG.Api.Controllers;
@@ -34,6 +35,7 @@ public class UserController : ControllerBase
     /// <response code="400">请求参数无效</response>
     /// <response code="404">用户或角色不存在</response>
     [HttpPut("{userId}/roles")]
+    [ApiDescription("设置用户角色")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]

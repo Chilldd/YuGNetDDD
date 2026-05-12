@@ -63,6 +63,7 @@ public class Handler : IRequestHandler<GetResourceListQuery, GetResourceListResu
             Id = r.Id,
             Name = r.Name,
             Code = r.Code,
+            Description = r.Description,
             Type = r.Type.ToString(),
             HttpMethod = r.HttpMethod?.ToString(),
             Path = r.Path,

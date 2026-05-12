@@ -4,7 +4,7 @@ using YuG.Domain.Permission.Enums;
 namespace YuG.Domain.Permission.Entities;
 
 /// <summary>
-/// 资源领域对象（支持菜单、API、按钮三种资源类型）
+/// 资源领域对象（支持三层树形结构：菜单 Menu → 页面 Page → API Api）
 /// </summary>
 public class Resource : AggregateRoot
 {
@@ -44,12 +44,12 @@ public class Resource : AggregateRoot
     public string? Icon { get; private set; }
 
     /// <summary>
-    /// 前端路由（仅菜单类型资源有效）
+    /// 前端路由（菜单/页面类型有效）
     /// </summary>
     public string? Route { get; private set; }
 
     /// <summary>
-    /// 组件路径（仅菜单类型资源有效）
+    /// 组件路径（菜单/页面类型有效）
     /// </summary>
     public string? Component { get; private set; }
 
@@ -64,7 +64,7 @@ public class Resource : AggregateRoot
     public string? Badge { get; private set; }
 
     /// <summary>
-    /// 权限编码（仅按钮类型资源有效，如 user:create）
+    /// 权限编码（页面/API 类型有效，如 user:create、user:export）
     /// </summary>
     public string? PermissionCode { get; private set; }
 
@@ -188,14 +188,47 @@ public class Resource : AggregateRoot
     }
 
     /// <summary>
-    /// 配置按钮权限编码（仅按钮类型可调用）
+    /// 配置页面资源信息（仅页面类型可调用）
+    /// </summary>
+    /// <param name="route">前端路由（可选）</param>
+    /// <param name="component">组件路径（可选）</param>
+    /// <param name="permissionCode">页面权限编码（可选，如 user:manage）</param>
+    public void ConfigurePage(string? route, string? component, string? permissionCode)
+    {
+        if (Type != ResourceType.Page)
+        {
+            throw new DomainException("只有页面类型资源可以配置页面信息");
+        }
+
+        if (route?.Length > 500)
+        {
+            throw new DomainException("前端路由长度不能超过 500 个字符");
+        }
+
+        if (component?.Length > 500)
+        {
+            throw new DomainException("组件路径长度不能超过 500 个字符");
+        }
+
+        if (permissionCode?.Length > 100)
+        {
+            throw new DomainException("权限编码长度不能超过 100 个字符");
+        }
+
+        Route = route;
+        Component = component;
+        PermissionCode = permissionCode;
+    }
+
+    /// <summary>
+    /// 配置 API 权限编码（仅 API 类型可调用）
     /// </summary>
     /// <param name="permissionCode">权限编码（如 user:create）</param>
-    public void ConfigureButton(string? permissionCode)
+    public void ConfigureApiPermission(string? permissionCode)
     {
-        if (Type != ResourceType.Button)
+        if (Type != ResourceType.Api)
         {
-            throw new DomainException("只有按钮类型资源可以配置权限编码");
+            throw new DomainException("只有 API 类型资源可以配置权限编码");
         }
 
         if (permissionCode?.Length > 100)

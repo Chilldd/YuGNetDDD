@@ -81,6 +81,7 @@ public static class SwaggerExtensions
         {
             options.SwaggerEndpoint("/swagger/v1/swagger.json", "YuG API v1");
             options.RoutePrefix = "swagger";
+            options.ConfigObject.PersistAuthorization = true;
         });
 
         return app;

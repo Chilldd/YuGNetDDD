@@ -58,6 +58,11 @@ public class Handler : IRequestHandler<UpdateResourceCommand, ResourceResult>
             case ResourceType.Api:
                 var httpMethod = Enum.Parse<ResourceHttpMethod>(request.HttpMethod!, ignoreCase: true);
                 resource.ChangeEndpoint(request.Path!, httpMethod);
+
+                if (!string.IsNullOrEmpty(request.PermissionCode))
+                {
+                    resource.ConfigureApiPermission(request.PermissionCode);
+                }
                 break;
 
             case ResourceType.Menu:
@@ -69,8 +74,11 @@ public class Handler : IRequestHandler<UpdateResourceCommand, ResourceResult>
                     request.Badge);
                 break;
 
-            case ResourceType.Button:
-                resource.ConfigureButton(request.PermissionCode);
+            case ResourceType.Page:
+                resource.ConfigurePage(
+                    request.Route,
+                    request.Component,
+                    request.PermissionCode);
                 break;
         }
 

@@ -33,8 +33,12 @@ builder.Services.AddScoped<HttpTenantProvider>();
 // 注册 API 层工具服务
 builder.Services.AddApiTools();
 
-// 注册控制器服务
-builder.Services.AddControllers();
+// 注册控制器服务（配置 JSON 序列化，解决雪花 ID 精度丢失）
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.Converters.Add(new YuG.Api.Helpers.LongToStringConverterFactory());
+    });
 
 // 添加 JWT 认证
 builder.Services.AddJwtAuthentication(builder.Configuration);
@@ -45,6 +49,9 @@ builder.Services.AddSwaggerServices();
 // 注册基础设施层服务（数据库、仓储等）
 builder.Services.AddInfrastructure(builder.Configuration);
 
+// 注册 CORS 策略
+builder.Services.AddCorsConfiguration(builder.Configuration);
+
 var app = builder.Build();
 
 app.MapMcp();
@@ -53,6 +60,7 @@ app.MapMcp();
 await app.InitializeDatabaseAsync();
 
 // 配置 HTTP 请求管道
+app.UseCors("DefaultCorsPolicy");
 app.UseExceptionHandling();
 
 if (app.Environment.IsDevelopment())

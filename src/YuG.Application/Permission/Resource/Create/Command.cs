@@ -29,7 +29,7 @@ public record ResourceResult
     public string Description { get; init; } = string.Empty;
 
     /// <summary>
-    /// 资源类型（Menu/Api/Button）
+    /// 资源类型（Menu/Page/Api）
     /// </summary>
     public string Type { get; init; } = "Api";
 
@@ -49,12 +49,12 @@ public record ResourceResult
     public string? Icon { get; init; }
 
     /// <summary>
-    /// 前端路由（仅菜单类型）
+    /// 前端路由（菜单/页面类型有效）
     /// </summary>
     public string? Route { get; init; }
 
     /// <summary>
-    /// 组件路径（仅菜单类型）
+    /// 组件路径（菜单/页面类型有效）
     /// </summary>
     public string? Component { get; init; }
 
@@ -69,7 +69,7 @@ public record ResourceResult
     public string? Badge { get; init; }
 
     /// <summary>
-    /// 权限编码（仅按钮类型，如 user:create）
+    /// 权限编码（页面/API 类型有效，如 user:create）
     /// </summary>
     public string? PermissionCode { get; init; }
 
@@ -120,7 +120,7 @@ public class CreateResourceCommand : CommandBase<ResourceResult>
     public string Description { get; init; } = string.Empty;
 
     /// <summary>
-    /// 资源类型（Menu/Api/Button）
+    /// 资源类型（Menu/Page/Api）
     /// </summary>
     public string Type { get; init; } = "Api";
 
@@ -140,12 +140,12 @@ public class CreateResourceCommand : CommandBase<ResourceResult>
     public string? Icon { get; init; }
 
     /// <summary>
-    /// 前端路由（仅菜单类型）
+    /// 前端路由（菜单/页面类型有效）
     /// </summary>
     public string? Route { get; init; }
 
     /// <summary>
-    /// 组件路径（仅菜单类型）
+    /// 组件路径（菜单/页面类型有效）
     /// </summary>
     public string? Component { get; init; }
 
@@ -160,7 +160,7 @@ public class CreateResourceCommand : CommandBase<ResourceResult>
     public string? Badge { get; init; }
 
     /// <summary>
-    /// 权限编码（仅按钮类型，如 user:create）
+    /// 权限编码（页面/API 类型有效，如 user:create）
     /// </summary>
     public string? PermissionCode { get; init; }
 
@@ -204,27 +204,19 @@ public class CreateResourceCommandValidator : AbstractValidator<CreateResourceCo
 
         RuleFor(x => x.Type)
             .NotEmpty().WithMessage("资源类型不能为空")
-            .Must(type => new[] { "Menu", "Api", "Button" }.Contains(type))
-            .WithMessage("资源类型必须是 Menu、Api 或 Button");
+            .Must(type => new[] { "Menu", "Page", "Api" }.Contains(type))
+            .WithMessage("资源类型必须是 Menu、Page 或 Api");
 
-        // API 类型的条件验证
-        When(x => x.Type == "Api", () =>
+        // 页面类型的条件验证
+        When(x => x.Type == "Page", () =>
         {
-            RuleFor(x => x.HttpMethod)
-                .NotEmpty().WithMessage("API 类型的 HTTP 方法不能为空")
-                .Must(method => new[] { "GET", "POST", "PUT", "DELETE" }.Contains(method!.ToUpperInvariant()))
-                .WithMessage("HTTP 方法必须是 GET、POST、PUT 或 DELETE");
+            RuleFor(x => x.Route)
+                .MaximumLength(500).WithMessage("前端路由长度不能超过 500 个字符");
 
-            RuleFor(x => x.Path)
-                .NotEmpty().WithMessage("API 类型的路径不能为空")
-                .MaximumLength(500).WithMessage("API 路径长度不能超过 500 个字符");
-        });
+            RuleFor(x => x.Component)
+                .MaximumLength(500).WithMessage("组件路径长度不能超过 500 个字符");
 
-        // 按钮类型的条件验证
-        When(x => x.Type == "Button", () =>
-        {
             RuleFor(x => x.PermissionCode)
-                .NotEmpty().WithMessage("按钮类型的权限编码不能为空")
                 .MaximumLength(100).WithMessage("权限编码长度不能超过 100 个字符");
         });
 
@@ -242,6 +234,22 @@ public class CreateResourceCommandValidator : AbstractValidator<CreateResourceCo
 
             RuleFor(x => x.Badge)
                 .MaximumLength(50).WithMessage("菜单角标长度不能超过 50 个字符");
+        });
+
+        // API 类型的条件验证
+        When(x => x.Type == "Api", () =>
+        {
+            RuleFor(x => x.HttpMethod)
+                .NotEmpty().WithMessage("API 类型的 HTTP 方法不能为空")
+                .Must(method => new[] { "GET", "POST", "PUT", "DELETE" }.Contains(method!.ToUpperInvariant()))
+                .WithMessage("HTTP 方法必须是 GET、POST、PUT 或 DELETE");
+
+            RuleFor(x => x.Path)
+                .NotEmpty().WithMessage("API 类型的路径不能为空")
+                .MaximumLength(500).WithMessage("API 路径长度不能超过 500 个字符");
+
+            RuleFor(x => x.PermissionCode)
+                .MaximumLength(100).WithMessage("权限编码长度不能超过 100 个字符");
         });
 
         RuleFor(x => x.Status)

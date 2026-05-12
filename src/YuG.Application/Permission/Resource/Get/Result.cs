@@ -26,7 +26,7 @@ public record GetResourceResult
     public string Description { get; init; } = string.Empty;
 
     /// <summary>
-    /// 资源类型（Menu/Api/Button）
+    /// 资源类型（Menu/Page/Api）
     /// </summary>
     public string Type { get; init; } = "Api";
 
@@ -46,12 +46,12 @@ public record GetResourceResult
     public string? Icon { get; init; }
 
     /// <summary>
-    /// 前端路由（仅菜单类型）
+    /// 前端路由（菜单/页面类型有效）
     /// </summary>
     public string? Route { get; init; }
 
     /// <summary>
-    /// 组件路径（仅菜单类型）
+    /// 组件路径（菜单/页面类型有效）
     /// </summary>
     public string? Component { get; init; }
 
@@ -66,7 +66,7 @@ public record GetResourceResult
     public string? Badge { get; init; }
 
     /// <summary>
-    /// 权限编码（仅按钮类型，如 user:create）
+    /// 权限编码（页面/API 类型有效，如 user:create）
     /// </summary>
     public string? PermissionCode { get; init; }
 

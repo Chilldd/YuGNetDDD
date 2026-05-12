@@ -32,86 +32,31 @@ public class Handler : IRequestHandler<SyncApiEndpointsCommand, SyncApiEndpoints
         SyncApiEndpointsCommand request,
         CancellationToken cancellationToken)
     {
-        // 1. 获取现有 API 资源（只处理 API 类型）
+        // 1. 获取现有 API 资源
         var existingResources = await _resourceRepository.GetAllAsync(cancellationToken);
-        var apiResources = existingResources.Where(r => r.Type == ResourceType.Api).ToList();
-        var existingDict = apiResources
+        var existingDict = existingResources
+            .Where(r => r.Type == ResourceType.Api)
             .ToDictionary(r => (r.Path!.ToLowerInvariant(), r.HttpMethod!.Value), r => r);
-        var existingByCodeDict = existingResources
-            .ToDictionary(r => r.Code.ToLowerInvariant(), r => r);
 
-        // 2. 处理控制器（作为父资源）
-        var controllerMapping = new Dictionary<string, long>();
         int addedCount = 0;
         int updatedCount = 0;
         var sortOrder = 1;
 
-        foreach (var controller in request.Controllers)
-        {
-            var code = controller.GeneratedCode.ToLowerInvariant();
-
-            if (!existingByCodeDict.TryGetValue(code, out var existingResource))
-            {
-                // 新增控制器资源（Api 类型）
-                var resource = new ResourceEntity(
-                    name: controller.DisplayName,
-                    code: controller.GeneratedCode,
-                    type: ResourceType.Api,
-                    description: controller.Description,
-                    parentId: null,
-                    sortOrder: sortOrder++,
-                    status: ResourceStatus.Active);
-                resource.ChangeEndpoint(GenerateControllerPath(controller.ControllerName), ResourceHttpMethod.Get);
-
-                await _resourceRepository.AddAsync(resource, cancellationToken);
-                controllerMapping.Add(controller.ControllerName, resource.Id);
-                addedCount++;
-            }
-            else
-            {
-                // 检查是否需要更新
-                var needUpdate = false;
-
-                if (existingResource.Name != controller.DisplayName)
-                {
-                    existingResource.Rename(controller.DisplayName);
-                    needUpdate = true;
-                }
-
-                if (existingResource.Description != (controller.Description ?? string.Empty))
-                {
-                    existingResource.ChangeDescription(controller.Description);
-                    needUpdate = true;
-                }
-
-                if (needUpdate)
-                {
-                    _resourceRepository.Update(existingResource);
-                    updatedCount++;
-                }
-
-                controllerMapping.Add(controller.ControllerName, existingResource.Id);
-            }
-        }
-
-        // 3. 处理端点（作为子资源）
+        // 2. 处理端点（平铺，不含父级分组）
         foreach (var endpoint in request.Endpoints)
         {
             var normalizedPath = endpoint.Path.ToLowerInvariant();
             var key = (normalizedPath, endpoint.HttpMethod);
 
-            // 获取父级控制器 ID
-            controllerMapping.TryGetValue(endpoint.ControllerName, out var parentId);
-
             if (!existingDict.TryGetValue(key, out var existingResource))
             {
-                // 新增端点资源（Api 类型）
+                // 新增 API 资源
                 var resource = new ResourceEntity(
                     name: endpoint.DisplayName,
                     code: endpoint.GeneratedCode,
                     type: ResourceType.Api,
                     description: endpoint.Description,
-                    parentId: parentId,
+                    parentId: null,
                     sortOrder: sortOrder++,
                     status: ResourceStatus.Active);
                 resource.ChangeEndpoint(endpoint.Path, endpoint.HttpMethod);
@@ -149,12 +94,6 @@ public class Handler : IRequestHandler<SyncApiEndpointsCommand, SyncApiEndpoints
                     needUpdate = true;
                 }
 
-                if (existingResource.ParentId != parentId)
-                {
-                    existingResource.MoveTo(parentId);
-                    needUpdate = true;
-                }
-
                 if (needUpdate)
                 {
                     _resourceRepository.Update(existingResource);
@@ -163,25 +102,15 @@ public class Handler : IRequestHandler<SyncApiEndpointsCommand, SyncApiEndpoints
             }
         }
 
-        // 4. 保存变更
+        // 3. 保存变更
         await _resourceRepository.SaveChangesAsync(cancellationToken);
 
-        // 5. 返回统计结果
+        // 4. 返回统计结果
         return new SyncApiEndpointsResult
         {
             AddedCount = addedCount,
             UpdatedCount = updatedCount,
-            TotalEndpoints = request.Controllers.Count + request.Endpoints.Count
+            TotalEndpoints = request.Endpoints.Count
         };
-    }
-
-    /// <summary>
-    /// 生成控制器路径
-    /// </summary>
-    private static string GenerateControllerPath(string controllerName)
-    {
-        // 移除 Controller 后缀，转为 kebab-case 路径
-        var name = controllerName.Replace("Controller", string.Empty, StringComparison.Ordinal);
-        return $"/api/{name}".ToLowerInvariant();
     }
 }

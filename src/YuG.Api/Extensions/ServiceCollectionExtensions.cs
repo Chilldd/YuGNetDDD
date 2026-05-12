@@ -45,4 +45,38 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IApiEndpointScanner, ApiEndpointScanner>();
         return services;
     }
+
+    /// <summary>
+    /// 添加 CORS 策略配置
+    /// </summary>
+    /// <param name="services">服务集合</param>
+    /// <param name="configuration">应用配置</param>
+    /// <returns>服务集合（支持链式调用）</returns>
+    public static IServiceCollection AddCorsConfiguration(this IServiceCollection services, IConfiguration configuration)
+    {
+        var corsSettings = configuration.GetSection("Cors");
+        var allowedOrigins = corsSettings.GetSection("AllowedOrigins").Get<string[]>() ?? [];
+
+        services.AddCors(options =>
+        {
+            options.AddPolicy("DefaultCorsPolicy", policy =>
+            {
+                if (allowedOrigins.Length != 0)
+                {
+                    policy.WithOrigins(allowedOrigins)
+                        .AllowAnyHeader()
+                        .AllowAnyMethod()
+                        .AllowCredentials();
+                }
+                else
+                {
+                    policy.AllowAnyOrigin()
+                        .AllowAnyHeader()
+                        .AllowAnyMethod();
+                }
+            });
+        });
+
+        return services;
+    }
 }

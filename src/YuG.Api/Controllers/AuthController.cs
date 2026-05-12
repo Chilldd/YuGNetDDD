@@ -1,5 +1,6 @@
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using YuG.Api.Helpers;
 using YuG.Application.Identity.UserLogin.Login;
 using YuG.Application.Identity.UserLogin.Logout;
 using YuG.Application.Identity.UserLogin.RefreshToken;
@@ -33,6 +34,7 @@ public class AuthController : ControllerBase
     /// <response code="401">用户名或密码错误</response>
     [HttpPost]
     [Route("login")]
+    [ApiDescription("用户登录")]
     [ProducesResponseType(typeof(LoginResult), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<ActionResult<LoginResult>> Login([FromBody] LoginCommand command)
@@ -50,6 +52,7 @@ public class AuthController : ControllerBase
     /// <response code="401">刷新令牌无效或已过期</response>
     [HttpPost]
     [Route("refresh")]
+    [ApiDescription("刷新令牌")]
     [ProducesResponseType(typeof(RefreshTokenResult), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<ActionResult<RefreshTokenResult>> Refresh([FromBody] RefreshTokenCommand command)
@@ -66,6 +69,7 @@ public class AuthController : ControllerBase
     /// <response code="204">登出成功</response>
     [HttpPost]
     [Route("logout")]
+    [ApiDescription("用户登出")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     public async Task<IActionResult> Logout([FromBody] LogoutCommand command)
     {

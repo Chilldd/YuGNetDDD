@@ -1,5 +1,4 @@
 using System.Reflection;
-using System.Xml;
 using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Routing;
@@ -14,27 +13,20 @@ namespace YuG.Api.Helpers;
 public class ApiEndpointScanner : IApiEndpointScanner
 {
     private readonly IActionDescriptorCollectionProvider _actionDescriptorProvider;
-    private readonly IHostEnvironment _hostEnvironment;
-    private XmlDocument? _xmlDoc;
 
     /// <summary>
     /// 初始化 API 端点扫描器
     /// </summary>
     /// <param name="actionDescriptorProvider">端点描述符提供者</param>
-    /// <param name="hostEnvironment">主机环境</param>
     public ApiEndpointScanner(
-        IActionDescriptorCollectionProvider actionDescriptorProvider,
-        IHostEnvironment hostEnvironment)
+        IActionDescriptorCollectionProvider actionDescriptorProvider)
     {
         _actionDescriptorProvider = actionDescriptorProvider;
-        _hostEnvironment = hostEnvironment;
     }
 
     /// <inheritdoc />
     public DiscoveredApiScanResult Scan()
     {
-        var controllerSet = new HashSet<string>();
-        var controllers = new List<DiscoveredControllerInfo>();
         var endpointSet = new HashSet<(string NormalizedPath, ResourceHttpMethod Method)>();
         var endpoints = new List<DiscoveredEndpointInfo>();
 
@@ -47,22 +39,9 @@ public class ApiEndpointScanner : IApiEndpointScanner
                 !IsApiIgnored(ad))
             .ToList();
 
-        // 提前加载 XML 注释文件
-        LoadXmlDocumentation();
-
         foreach (var action in actions)
         {
             var controllerName = action.ControllerName;
-            var controllerType = action.ControllerTypeInfo;
-
-            // 添加控制器（去重）
-            if (controllerSet.Add(controllerName))
-            {
-                var controllerDescription = GetTypeSummary(controllerType);
-                var displayName = controllerName;
-                var generatedCode = GenerateControllerCode(controllerName);
-                controllers.Add(new DiscoveredControllerInfo(controllerName, displayName, generatedCode, controllerDescription));
-            }
 
             // 获取 HTTP 方法
             var httpMethodNames = action.EndpointMetadata
@@ -79,14 +58,9 @@ public class ApiEndpointScanner : IApiEndpointScanner
             // 获取路由模板
             var routeTemplates = GetRouteTemplates(action);
 
-            // 获取动作的总结描述
-            var endpointDescription = GetMethodSummary(action.MethodInfo);
-
-            // 如果动作没有注释，尝试获取控制器的注释
-            if (string.IsNullOrWhiteSpace(endpointDescription))
-            {
-                endpointDescription = GetTypeSummary(action.ControllerTypeInfo);
-            }
+            // 从 ApiDescription 特性读取描述
+            var apiDescAttr = action.MethodInfo.GetCustomAttribute<ApiDescriptionAttribute>(false);
+            var endpointDescription = apiDescAttr?.Description;
 
             foreach (var httpMethodName in httpMethodNames)
             {
@@ -114,108 +88,12 @@ public class ApiEndpointScanner : IApiEndpointScanner
                         httpMethod,
                         displayName,
                         generatedCode,
-                        endpointDescription ?? string.Empty,
-                        controllerName));
+                        endpointDescription ?? string.Empty));
                 }
             }
         }
 
-        return new DiscoveredApiScanResult(controllers, endpoints);
-    }
-
-    /// <summary>
-    /// 加载 XML 文档注释文件
-    /// </summary>
-    private void LoadXmlDocumentation()
-    {
-        if (_xmlDoc != null)
-        {
-            return;
-        }
-
-        try
-        {
-            var assembly = Assembly.GetExecutingAssembly();
-            var assemblyLocation = Path.GetDirectoryName(assembly.Location);
-            if (string.IsNullOrEmpty(assemblyLocation))
-            {
-                return;
-            }
-
-            var assemblyName = assembly.GetName().Name;
-            var xmlFilePath = Path.Combine(assemblyLocation, $"{assemblyName}.xml");
-
-            if (File.Exists(xmlFilePath))
-            {
-                _xmlDoc = new XmlDocument();
-                _xmlDoc.Load(xmlFilePath);
-            }
-        }
-        catch
-        {
-            // 加载失败不影响功能，只是没有描述
-            _xmlDoc = null;
-        }
-    }
-
-    /// <summary>
-    /// 获取方法的 summary 注释
-    /// </summary>
-    private string? GetMethodSummary(MethodInfo method)
-    {
-        if (_xmlDoc == null || method.DeclaringType == null)
-        {
-            return null;
-        }
-
-        var memberName = $"M:{method.DeclaringType.FullName}.{method.Name}";
-        var node = _xmlDoc.SelectSingleNode($"//member[@name='{memberName}']/summary");
-        if (node?.InnerText == null)
-        {
-            return null;
-        }
-
-        // 清理 XML 中的换行和空白字符
-        return CleanXmlSummary(node.InnerText);
-    }
-
-    /// <summary>
-    /// 获取类型的 summary 注释
-    /// </summary>
-    private string? GetTypeSummary(Type type)
-    {
-        if (_xmlDoc == null)
-        {
-            return null;
-        }
-
-        var memberName = $"T:{type.FullName}";
-        var node = _xmlDoc.SelectSingleNode($"//member[@name='{memberName}']/summary");
-        if (node?.InnerText == null)
-        {
-            return null;
-        }
-
-        // 清理 XML 中的换行和空白字符
-        return CleanXmlSummary(node.InnerText);
-    }
-
-    /// <summary>
-    /// 清理 summary 文本中的空白字符
-    /// </summary>
-    private static string CleanXmlSummary(string summary)
-    {
-        if (string.IsNullOrWhiteSpace(summary))
-        {
-            return string.Empty;
-        }
-
-        // 替换换行、制表符为单个空格，去除首尾空白
-        var cleaned = System.Text.RegularExpressions.Regex
-            .Replace(summary, @"\s+", " ")
-            .Trim();
-
-        return cleaned;
+        return new DiscoveredApiScanResult(endpoints);
     }
 
     /// <summary>
@@ -354,20 +232,6 @@ public class ApiEndpointScanner : IApiEndpointScanner
             _ => ResourceHttpMethod.Get
         };
         return normalized is "GET" or "POST" or "PUT" or "DELETE";
-    }
-
-    /// <summary>
-    /// 生成控制器资源编码
-    /// </summary>
-    private static string GenerateControllerCode(string controllerName)
-    {
-        // 移除 Controller 后缀
-        var code = controllerName.Replace("Controller", string.Empty, StringComparison.Ordinal);
-        // 只保留允许字符
-        var chars = code
-            .Where(c => char.IsLetterOrDigit(c) || c == '_' || c == '-')
-            .ToArray();
-        return new string(chars).ToLowerInvariant();
     }
 
     /// <summary>
