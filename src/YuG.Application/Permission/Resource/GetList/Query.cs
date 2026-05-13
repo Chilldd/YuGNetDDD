@@ -1,5 +1,6 @@
 using FluentValidation;
 using MediatR;
+using YuG.Domain.Permission.Enums;
 
 namespace YuG.Application.Permission.Resource.GetList;
 
@@ -24,9 +25,9 @@ public class GetResourceListQuery : IRequest<GetResourceListResult>
     public long? ParentId { get; init; }
 
     /// <summary>
-    /// 是否只返回激活状态（可选）
+    /// 资源状态筛选（可选，Active/Disabled）
     /// </summary>
-    public bool? ActiveOnly { get; init; }
+    public ResourceStatus? Status { get; init; }
 }
 
 /// <summary>

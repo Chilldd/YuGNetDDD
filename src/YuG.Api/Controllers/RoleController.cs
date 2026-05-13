@@ -42,6 +42,7 @@ public class RoleController : ControllerBase
     /// <response code="200">查询成功</response>
     [HttpGet]
     [ApiDescription("获取角色列表")]
+    [Authorize(Policy = "role:get")]
     [ProducesResponseType(typeof(GetRoleListResult), StatusCodes.Status200OK)]
     public async Task<ActionResult<GetRoleListResult>> Get([FromQuery] GetRoleListQuery query)
     {
@@ -58,6 +59,7 @@ public class RoleController : ControllerBase
     /// <response code="404">角色不存在</response>
     [HttpGet("{id}")]
     [ApiDescription("获取单个角色")]
+    [Authorize(Policy = "role:getbyid")]
     [ProducesResponseType(typeof(GetRoleResult), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<GetRoleResult>> GetById(long id)
@@ -80,6 +82,7 @@ public class RoleController : ControllerBase
     /// <response code="400">请求参数无效</response>
     [HttpPost]
     [ApiDescription("创建角色")]
+    [Authorize(Policy = "role:create")]
     [ProducesResponseType(typeof(CreateRoleCommands.RoleResult), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<CreateRoleCommands.RoleResult>> Create([FromBody] CreateRoleCommand command)
@@ -99,6 +102,7 @@ public class RoleController : ControllerBase
     /// <response code="404">角色不存在</response>
     [HttpPut("{id}")]
     [ApiDescription("更新角色")]
+    [Authorize(Policy = "role:update")]
     [ProducesResponseType(typeof(CreateRoleCommands.RoleResult), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -122,6 +126,7 @@ public class RoleController : ControllerBase
     /// <response code="404">角色不存在</response>
     [HttpDelete("{id}")]
     [ApiDescription("删除角色")]
+    [Authorize(Policy = "role:delete")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Delete(long id)
@@ -140,6 +145,7 @@ public class RoleController : ControllerBase
     /// <response code="404">角色不存在</response>
     [HttpPost("{id}/activate")]
     [ApiDescription("激活角色")]
+    [Authorize(Policy = "role:activate")]
     [ProducesResponseType(typeof(CreateRoleCommands.RoleResult), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<CreateRoleCommands.RoleResult>> Activate(long id)
@@ -158,6 +164,7 @@ public class RoleController : ControllerBase
     /// <response code="404">角色不存在</response>
     [HttpPost("{id}/disable")]
     [ApiDescription("禁用角色")]
+    [Authorize(Policy = "role:disable")]
     [ProducesResponseType(typeof(CreateRoleCommands.RoleResult), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<CreateRoleCommands.RoleResult>> Disable(long id)
@@ -178,6 +185,7 @@ public class RoleController : ControllerBase
     /// <response code="404">角色不存在</response>
     [HttpPost("{id}/resources")]
     [ApiDescription("给角色分配资源")]
+    [Authorize(Policy = "role:assignresources")]
     [ProducesResponseType(typeof(CreateRoleCommands.RoleResult), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -202,6 +210,7 @@ public class RoleController : ControllerBase
     /// <response code="404">角色或资源不存在</response>
     [HttpDelete("{roleId}/resources/{resourceId}")]
     [ApiDescription("从角色移除资源")]
+    [Authorize(Policy = "role:unassignresource")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> UnassignResource(long roleId, long resourceId)

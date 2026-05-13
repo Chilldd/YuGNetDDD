@@ -41,6 +41,7 @@ public class ResourceController : ControllerBase
     /// <response code="200">查询成功</response>
     [HttpGet]
     [ApiDescription("获取资源列表")]
+    [Authorize(Policy = "resource:get")]
     [ProducesResponseType(typeof(GetResourceListResult), StatusCodes.Status200OK)]
     public async Task<ActionResult<GetResourceListResult>> Get(
         [FromQuery] GetResourceListQuery query)
@@ -57,6 +58,7 @@ public class ResourceController : ControllerBase
     /// <response code="200">查询成功</response>
     [HttpGet("tree")]
     [ApiDescription("获取资源树")]
+    [Authorize(Policy = "resource:gettree")]
     [ProducesResponseType(typeof(GetResourceTreeResult), StatusCodes.Status200OK)]
     public async Task<ActionResult<GetResourceTreeResult>> GetTree(
         [FromQuery] GetResourceTreeQuery query)
@@ -74,6 +76,7 @@ public class ResourceController : ControllerBase
     /// <response code="404">资源不存在</response>
     [HttpGet("{id}")]
     [ApiDescription("获取单个资源")]
+    [Authorize(Policy = "resource:getbyid")]
     [ProducesResponseType(typeof(GetResourceResult), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<GetResourceResult>> GetById([FromRoute] GetResourceQuery query)
@@ -95,6 +98,7 @@ public class ResourceController : ControllerBase
     /// <response code="400">请求参数无效</response>
     [HttpPost]
     [ApiDescription("创建资源")]
+    [Authorize(Policy = "resource:create")]
     [ProducesResponseType(typeof(CreateResourceCommands.ResourceResult), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<CreateResourceCommands.ResourceResult>> Create([FromBody] CreateResourceCommands.CreateResourceCommand command)
@@ -113,6 +117,7 @@ public class ResourceController : ControllerBase
     /// <response code="404">资源不存在</response>
     [HttpPut]
     [ApiDescription("更新资源")]
+    [Authorize(Policy = "resource:update")]
     [ProducesResponseType(typeof(UpdateResourceCommands.ResourceResult), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -131,6 +136,7 @@ public class ResourceController : ControllerBase
     /// <response code="404">资源不存在</response>
     [HttpDelete("{id}")]
     [ApiDescription("删除资源")]
+    [Authorize(Policy = "resource:delete")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Delete(long id)
@@ -149,6 +155,7 @@ public class ResourceController : ControllerBase
     /// <response code="404">资源不存在</response>
     [HttpPost("{id}/activate")]
     [ApiDescription("激活资源")]
+    [Authorize(Policy = "resource:activate")]
     [ProducesResponseType(typeof(ActivateResourceCommands.ResourceResult), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<ActivateResourceCommands.ResourceResult>> Activate(long id)
@@ -167,6 +174,7 @@ public class ResourceController : ControllerBase
     /// <response code="404">资源不存在</response>
     [HttpPost("{id}/disable")]
     [ApiDescription("禁用资源")]
+    [Authorize(Policy = "resource:disable")]
     [ProducesResponseType(typeof(DisableResourceCommands.ResourceResult), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<DisableResourceCommands.ResourceResult>> Disable(long id)
@@ -187,6 +195,7 @@ public class ResourceController : ControllerBase
     /// <response code="404">资源不存在</response>
     [HttpPut("{id}/move")]
     [ApiDescription("移动资源")]
+    [Authorize(Policy = "resource:move")]
     [ProducesResponseType(typeof(MoveResourceCommands.ResourceResult), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]

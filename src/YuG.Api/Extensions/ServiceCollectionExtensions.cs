@@ -1,8 +1,10 @@
 using FluentValidation;
 using MediatR;
 using YuG.Api.Helpers;
+using YuG.Api.Services;
 using YuG.Application.Common;
 using YuG.Application.Common.Behaviors;
+using YuG.Application.Common.Interfaces;
 
 namespace YuG.Api.Extensions;
 
@@ -43,6 +45,10 @@ public static class ServiceCollectionExtensions
     {
         // 注册 API 端点扫描器
         services.AddScoped<IApiEndpointScanner, ApiEndpointScanner>();
+
+        // 注册当前用户身份信息（Scoped，每个请求解析一次）
+        services.AddScoped<IUserIdentity, UserIdentity>();
+
         return services;
     }
 

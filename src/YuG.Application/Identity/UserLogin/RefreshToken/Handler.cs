@@ -13,18 +13,22 @@ public class Handler : IRequestHandler<RefreshTokenCommand, RefreshTokenResult>
 {
     private readonly IJwtTokenService _jwtTokenService;
     private readonly IUserRepository _userRepository;
+    private readonly IRoleRepository _roleRepository;
 
     /// <summary>
     /// 初始化刷新令牌命令处理器
     /// </summary>
     /// <param name="userRepository">用户仓储</param>
     /// <param name="jwtTokenService">JWT令牌服务</param>
+    /// <param name="roleRepository">角色仓储</param>
     public Handler(
         IUserRepository userRepository,
-        IJwtTokenService jwtTokenService)
+        IJwtTokenService jwtTokenService,
+        IRoleRepository roleRepository)
     {
         _userRepository = userRepository;
         _jwtTokenService = jwtTokenService;
+        _roleRepository = roleRepository;
     }
 
     /// <summary>
@@ -54,8 +58,12 @@ public class Handler : IRequestHandler<RefreshTokenCommand, RefreshTokenResult>
         // 撤销旧的刷新令牌
         user.RevokeRefreshToken(request.RefreshToken);
 
-        // 生成新的访问令牌
-        var accessToken = _jwtTokenService.GenerateAccessToken(user.Id, user.Username);
+        // 查询用户角色
+        var roles = await _roleRepository.GetByUserIdAsync(user.Id, cancellationToken);
+        var roleCodes = roles.Select(r => r.Code).ToList();
+
+        // 生成新的访问令牌（包含角色信息）
+        var accessToken = _jwtTokenService.GenerateAccessToken(user.Id, user.Username, roleCodes);
 
         // 生成新的刷新令牌
         var newRefreshTokenValue = _jwtTokenService.GenerateRefreshToken();
@@ -77,7 +85,8 @@ public class Handler : IRequestHandler<RefreshTokenCommand, RefreshTokenResult>
         {
             AccessToken = accessToken,
             RefreshToken = newRefreshTokenValue,
-            ExpiresAt = expiresAt
+            ExpiresAt = expiresAt,
+            Roles = roleCodes
         };
     }
 }

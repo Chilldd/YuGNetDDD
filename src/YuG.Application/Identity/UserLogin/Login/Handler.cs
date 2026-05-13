@@ -14,6 +14,7 @@ public class Handler : IRequestHandler<LoginCommand, LoginResult>
     private readonly IJwtTokenService _jwtTokenService;
     private readonly IPasswordHasher _passwordHasher;
     private readonly IUserRepository _userRepository;
+    private readonly IRoleRepository _roleRepository;
 
     /// <summary>
     /// 初始化登录命令处理器
@@ -21,14 +22,17 @@ public class Handler : IRequestHandler<LoginCommand, LoginResult>
     /// <param name="userRepository">用户仓储</param>
     /// <param name="passwordHasher">密码哈希服务</param>
     /// <param name="jwtTokenService">JWT令牌服务</param>
+    /// <param name="roleRepository">角色仓储</param>
     public Handler(
         IUserRepository userRepository,
         IPasswordHasher passwordHasher,
-        IJwtTokenService jwtTokenService)
+        IJwtTokenService jwtTokenService,
+        IRoleRepository roleRepository)
     {
         _userRepository = userRepository;
         _passwordHasher = passwordHasher;
         _jwtTokenService = jwtTokenService;
+        _roleRepository = roleRepository;
     }
 
     /// <summary>
@@ -52,8 +56,12 @@ public class Handler : IRequestHandler<LoginCommand, LoginResult>
             throw new DomainException("用户名或密码不正确");
         }
 
-        // 生成访问令牌
-        var accessToken = _jwtTokenService.GenerateAccessToken(user.Id, user.Username);
+        // 查询用户角色
+        var roles = await _roleRepository.GetByUserIdAsync(user.Id, cancellationToken);
+        var roleCodes = roles.Select(r => r.Code).ToList();
+
+        // 生成访问令牌（包含角色信息）
+        var accessToken = _jwtTokenService.GenerateAccessToken(user.Id, user.Username, roleCodes);
 
         // 生成刷新令牌
         var refreshTokenValue = _jwtTokenService.GenerateRefreshToken();
@@ -75,7 +83,8 @@ public class Handler : IRequestHandler<LoginCommand, LoginResult>
         {
             AccessToken = accessToken,
             RefreshToken = refreshTokenValue,
-            ExpiresAt = expiresAt
+            ExpiresAt = expiresAt,
+            Roles = roleCodes
         };
     }
 }

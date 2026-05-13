@@ -50,9 +50,9 @@ public class Handler : IRequestHandler<GetResourceListQuery, GetResourceListResu
             filtered = filtered.Where(r => r.ParentId == query.ParentId);
         }
 
-        if (query.ActiveOnly == true)
+        if (query.Status.HasValue)
         {
-            filtered = filtered.Where(r => r.Status == ResourceStatus.Active);
+            filtered = filtered.Where(r => r.Status == query.Status.Value);
         }
 
         var list = filtered.ToList();

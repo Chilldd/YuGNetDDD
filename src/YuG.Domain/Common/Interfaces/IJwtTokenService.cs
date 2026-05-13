@@ -10,8 +10,9 @@ public interface IJwtTokenService
     /// </summary>
     /// <param name="userId">用户ID</param>
     /// <param name="username">用户名</param>
+    /// <param name="roles">用户角色编码列表</param>
     /// <returns>JWT 访问令牌</returns>
-    string GenerateAccessToken(long userId, string username);
+    string GenerateAccessToken(long userId, string username, IReadOnlyList<string> roles);
 
     /// <summary>
     /// 生成刷新令牌

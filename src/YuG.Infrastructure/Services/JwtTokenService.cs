@@ -54,8 +54,9 @@ public class JwtTokenService : IJwtTokenService
     /// </summary>
     /// <param name="userId">用户ID</param>
     /// <param name="username">用户名</param>
+    /// <param name="roles">用户角色编码列表</param>
     /// <returns>JWT 访问令牌</returns>
-    public string GenerateAccessToken(long userId, string username)
+    public string GenerateAccessToken(long userId, string username, IReadOnlyList<string> roles)
     {
         var tokenHandler = new JwtSecurityTokenHandler();
         var key = Encoding.UTF8.GetBytes(_options.SecretKey);
@@ -67,6 +68,9 @@ public class JwtTokenService : IJwtTokenService
             new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
             new(JwtRegisteredClaimNames.Iat, DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString())
         };
+
+        // 将角色编码写入 claims（每个角色一个独立的 ClaimTypes.Role claim）
+        claims.AddRange(roles.Select(r => new Claim(ClaimTypes.Role, r)));
 
         var tokenDescriptor = new SecurityTokenDescriptor
         {

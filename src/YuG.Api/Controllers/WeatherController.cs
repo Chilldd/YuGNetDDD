@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using YuG.Api.Helpers;
+using YuG.Application.Common.Interfaces;
 
 namespace YuG.Api.Controllers;
 
@@ -12,6 +13,17 @@ namespace YuG.Api.Controllers;
 [Authorize]
 public class WeatherController : ControllerBase
 {
+    private readonly IUserIdentity _userIdentity;
+
+    /// <summary>
+    /// 初始化测试控制器
+    /// </summary>
+    /// <param name="userIdentity">当前用户身份信息</param>
+    public WeatherController(IUserIdentity userIdentity)
+    {
+        _userIdentity = userIdentity;
+    }
+
     /// <summary>
     /// 获取当前用户信息
     /// </summary>
@@ -24,13 +36,10 @@ public class WeatherController : ControllerBase
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public IActionResult GetCurrentUser()
     {
-        var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-        var username = User.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value;
-
         return Ok(new UserInfo
         {
-            UserId = userId ?? string.Empty,
-            Username = username ?? string.Empty
+            UserId = _userIdentity.UserId,
+            Username = _userIdentity.Username
         });
     }
 }
@@ -43,7 +52,7 @@ public record UserInfo
     /// <summary>
     /// 用户 ID
     /// </summary>
-    public string UserId { get; init; } = string.Empty;
+    public long UserId { get; init; }
 
     /// <summary>
     /// 用户名

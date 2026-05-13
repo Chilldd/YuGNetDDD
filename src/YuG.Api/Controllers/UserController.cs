@@ -36,6 +36,7 @@ public class UserController : ControllerBase
     /// <response code="404">用户或角色不存在</response>
     [HttpPut("{userId}/roles")]
     [ApiDescription("设置用户角色")]
+    [Authorize(Policy = "user:setroles")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]

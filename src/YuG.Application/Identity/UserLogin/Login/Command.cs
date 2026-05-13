@@ -22,6 +22,11 @@ public record LoginResult
     /// 过期时间（UTC）
     /// </summary>
     public DateTime ExpiresAt { get; init; }
+
+    /// <summary>
+    /// 用户角色编码列表
+    /// </summary>
+    public IReadOnlyList<string> Roles { get; init; } = [];
 }
 
 /// <summary>

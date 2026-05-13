@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.Extensions.DependencyInjection;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.IdentityModel.Tokens;
+using YuG.Api.Authorization;
 
 namespace YuG.Api.Extensions;
 
@@ -10,7 +11,7 @@ namespace YuG.Api.Extensions;
 public static class AuthenticationExtensions
 {
     /// <summary>
-    /// 添加 JWT 认证服务
+    /// 添加 JWT 认证服务和权限鉴权
     /// </summary>
     /// <param name="services">服务集合</param>
     /// <param name="configuration">配置对象</param>
@@ -34,6 +35,12 @@ public static class AuthenticationExtensions
             });
 
         services.AddAuthorization();
+
+        // 注册权限编码鉴权处理器（Scoped，单次请求内可缓存权限列表）
+        services.AddScoped<IAuthorizationHandler, PermissionAuthorizationHandler>();
+
+        // 注册动态策略提供者，支持 [RequirePermission("code")] 自动创建策略
+        services.AddSingleton<IAuthorizationPolicyProvider, PermissionPolicyProvider>();
 
         return services;
     }

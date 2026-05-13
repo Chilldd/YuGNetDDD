@@ -18,6 +18,9 @@ src/
 ### 依赖方向
 Api → Infrastructure → Application → Domain（Domain 无外部依赖）
 
+### 参考文档
+- [权限系统设计](docs/permission-system.md) — RBAC 权限模型、JWT 设计、后端鉴权、前端权限接口
+
 ## 常用命令
 
 ### 构建和运行
