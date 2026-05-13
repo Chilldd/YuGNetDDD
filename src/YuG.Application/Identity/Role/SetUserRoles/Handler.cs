@@ -4,7 +4,7 @@ using YuG.Domain.Common;
 using YuG.Domain.Identity.Repositories;
 using UserEntity = YuG.Domain.Identity.Entities.User;
 
-namespace YuG.Application.Identity.UserRole.SetUserRoles;
+namespace YuG.Application.Identity.Role.SetUserRoles;
 
 /// <summary>
 /// 设置用户角色命令处理器

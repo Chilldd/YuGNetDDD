@@ -2,7 +2,7 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using YuG.Api.Helpers;
-using YuG.Application.Identity.UserRole.SetUserRoles;
+using YuG.Application.Identity.Role.SetUserRoles;
 
 namespace YuG.Api.Controllers;
 

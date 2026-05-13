@@ -1,7 +1,7 @@
 using FluentValidation;
 using MediatR;
 
-namespace YuG.Application.Identity.UserRole.SetUserRoles;
+namespace YuG.Application.Identity.Role.SetUserRoles;
 
 /// <summary>
 /// 设置用户角色命令（覆盖模式：删除旧角色，保存新角色）
