@@ -81,7 +81,9 @@ public class Handler : IRequestHandler<GetResourceListQuery, GetResourceListResu
         return new GetResourceListResult
         {
             Items = items,
-            TotalCount = totalCount
+            TotalCount = totalCount,
+            Page = 1,
+            PageSize = totalCount
         };
     }
 }

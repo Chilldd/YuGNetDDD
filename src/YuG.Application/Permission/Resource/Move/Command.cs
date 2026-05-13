@@ -1,11 +1,12 @@
+using FluentValidation;
 using YuG.Application.Common;
 
-namespace YuG.Application.Permission.Resource.GetList;
+namespace YuG.Application.Permission.Resource.Move;
 
 /// <summary>
-/// 资源列表项
+/// 移动资源响应
 /// </summary>
-public record ResourceListItem
+public record ResourceResult
 {
     /// <summary>
     /// 资源标识
@@ -18,7 +19,7 @@ public record ResourceListItem
     public string Name { get; init; } = string.Empty;
 
     /// <summary>
-    /// 资源编码
+    /// 资源编码（唯一，用于权限系统引用）
     /// </summary>
     public string Code { get; init; } = string.Empty;
 
@@ -33,12 +34,12 @@ public record ResourceListItem
     public string Type { get; init; } = "Api";
 
     /// <summary>
-    /// HTTP 方法（仅 API 类型）
+    /// HTTP 方法（仅 API 类型，GET/POST/PUT/DELETE）
     /// </summary>
     public string? HttpMethod { get; init; }
 
     /// <summary>
-    /// API 路径（仅 API 类型）
+    /// API 路径（仅 API 类型，如 /api/users）
     /// </summary>
     public string? Path { get; init; }
 
@@ -68,12 +69,12 @@ public record ResourceListItem
     public string? Badge { get; init; }
 
     /// <summary>
-    /// 权限编码（页面/API 类型有效）
+    /// 权限编码（页面/API 类型有效，如 user:create）
     /// </summary>
     public string? PermissionCode { get; init; }
 
     /// <summary>
-    /// 父级资源标识
+    /// 父级资源标识（支持资源树结构）
     /// </summary>
     public long? ParentId { get; init; }
 
@@ -83,12 +84,48 @@ public record ResourceListItem
     public int SortOrder { get; init; }
 
     /// <summary>
-    /// 资源状态
+    /// 资源状态（Active/Disabled）
     /// </summary>
-    public string Status { get; init; } = string.Empty;
+    public string Status { get; init; } = "Active";
+
+    /// <summary>
+    /// 创建时间（UTC）
+    /// </summary>
+    public DateTime CreatedAt { get; init; }
+
+    /// <summary>
+    /// 最后更新时间（UTC）
+    /// </summary>
+    public DateTime UpdatedAt { get; init; }
 }
 
 /// <summary>
-/// 获取资源列表响应
+/// 移动资源命令
 /// </summary>
-public record GetResourceListResult : PageResult<ResourceListItem>;
+public class MoveResourceCommand : CommandBase<ResourceResult>
+{
+    /// <summary>
+    /// 资源标识
+    /// </summary>
+    public long Id { get; init; }
+
+    /// <summary>
+    /// 新的父级资源标识（null 表示移到根级别）
+    /// </summary>
+    public long? ParentId { get; init; }
+}
+
+/// <summary>
+/// 移动资源命令验证器
+/// </summary>
+public class MoveResourceCommandValidator : AbstractValidator<MoveResourceCommand>
+{
+    /// <summary>
+    /// 初始化移动资源命令验证器
+    /// </summary>
+    public MoveResourceCommandValidator()
+    {
+        RuleFor(x => x.Id)
+            .NotEmpty().WithMessage("资源标识不能为空");
+    }
+}

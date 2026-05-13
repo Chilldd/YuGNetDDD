@@ -58,7 +58,7 @@ public class Handler : IRequestHandler<SyncApiEndpointsCommand, SyncApiEndpoints
             {
                 // 新增 API 资源
                 var resource = new ResourceEntity(
-                    name: endpoint.DisplayName,
+                    name: endpoint.Description,
                     code: endpoint.GeneratedCode,
                     type: ResourceType.Api,
                     description: endpoint.Description,
@@ -76,9 +76,9 @@ public class Handler : IRequestHandler<SyncApiEndpointsCommand, SyncApiEndpoints
                 // 检查是否需要更新
                 var needUpdate = false;
 
-                if (existingResource.Name != endpoint.DisplayName)
+                if (existingResource.Name != endpoint.Description)
                 {
-                    existingResource.Rename(endpoint.DisplayName);
+                    existingResource.Rename(endpoint.Description);
                     needUpdate = true;
                 }
 

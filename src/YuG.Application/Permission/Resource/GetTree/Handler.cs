@@ -31,12 +31,13 @@ public class Handler : IRequestHandler<GetResourceTreeQuery, GetResourceTreeResu
         var resources = await _resourceRepository.GetAllAsync(cancellationToken);
 
         // 应用筛选
+        ResourceType? filterType = null;
         var filtered = resources.AsEnumerable();
 
         if (!string.IsNullOrEmpty(query.Type))
         {
-            var type = Enum.Parse<ResourceType>(query.Type, ignoreCase: true);
-            filtered = filtered.Where(r => r.Type == type);
+            filterType = Enum.Parse<ResourceType>(query.Type, ignoreCase: true);
+            filtered = filtered.Where(r => r.Type == filterType.Value);
         }
 
         if (query.ActiveOnly == true)
@@ -45,6 +46,30 @@ public class Handler : IRequestHandler<GetResourceTreeQuery, GetResourceTreeResu
         }
 
         var list = filtered.ToList();
+
+        // 按子类型（Page/Api）筛选时，包含祖先节点以保持树形结构
+        if (filterType.HasValue && filterType.Value != ResourceType.Menu)
+        {
+            var includedIds = list.Select(r => r.Id).ToHashSet();
+            var pendingIds = list
+                .Where(r => r.ParentId.HasValue)
+                .Select(r => r.ParentId!.Value)
+                .Distinct()
+                .Where(id => !includedIds.Contains(id))
+                .ToHashSet();
+
+            while (pendingIds.Count > 0)
+            {
+                var ancestors = resources.Where(r => pendingIds.Remove(r.Id)).ToList();
+                list.AddRange(ancestors);
+                foreach (var a in ancestors) includedIds.Add(a.Id);
+
+                pendingIds = ancestors
+                    .Where(r => r.ParentId.HasValue && !includedIds.Contains(r.ParentId.Value))
+                    .Select(r => r.ParentId!.Value)
+                    .ToHashSet();
+            }
+        }
 
         var treeItems = list.Select(r => new ResourceTreeItem
         {

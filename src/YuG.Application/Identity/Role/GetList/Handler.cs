@@ -43,7 +43,9 @@ public class Handler : IRequestHandler<GetRoleListQuery, GetRoleListResult>
         return new GetRoleListResult
         {
             Items = items,
-            TotalCount = totalCount
+            TotalCount = totalCount,
+            Page = 1,
+            PageSize = totalCount
         };
     }
 }

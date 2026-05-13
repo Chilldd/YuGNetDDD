@@ -52,6 +52,9 @@ public class Handler : IRequestHandler<CreateResourceCommand, ResourceResult>
         }
         ResourceEntity.ValidateParentChildType(type, parentType);
 
+        // 规范化空权限编码为空字符串转为 null（避免唯一约束冲突）
+        var permissionCode = string.IsNullOrEmpty(request.PermissionCode) ? null : request.PermissionCode;
+
         // 解析状态
         var status = string.IsNullOrEmpty(request.Status) ? ResourceStatus.Active : Enum.Parse<ResourceStatus>(request.Status, ignoreCase: true);
 
@@ -72,9 +75,9 @@ public class Handler : IRequestHandler<CreateResourceCommand, ResourceResult>
                 var httpMethod = Enum.Parse<ResourceHttpMethod>(request.HttpMethod!, ignoreCase: true);
                 resource.ChangeEndpoint(request.Path!, httpMethod);
 
-                if (!string.IsNullOrEmpty(request.PermissionCode))
+                if (permissionCode is not null)
                 {
-                    resource.ConfigureApiPermission(request.PermissionCode);
+                    resource.ConfigureApiPermission(permissionCode);
                 }
                 break;
 
@@ -91,7 +94,7 @@ public class Handler : IRequestHandler<CreateResourceCommand, ResourceResult>
                 resource.ConfigurePage(
                     request.Route,
                     request.Component,
-                    request.PermissionCode);
+                    permissionCode);
                 break;
         }
 

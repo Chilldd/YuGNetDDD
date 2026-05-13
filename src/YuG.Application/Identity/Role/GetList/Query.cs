@@ -1,4 +1,5 @@
 using MediatR;
+using YuG.Application.Common;
 
 namespace YuG.Application.Identity.Role.GetList;
 
@@ -12,18 +13,7 @@ public class GetRoleListQuery : IRequest<GetRoleListResult>
 /// <summary>
 /// 获取角色列表查询结果
 /// </summary>
-public record GetRoleListResult
-{
-    /// <summary>
-    /// 角色列表项
-    /// </summary>
-    public List<RoleListItem> Items { get; init; } = [];
-
-    /// <summary>
-    /// 总记录数
-    /// </summary>
-    public int TotalCount { get; init; }
-}
+public record GetRoleListResult : PageResult<RoleListItem>;
 
 /// <summary>
 /// 角色列表项

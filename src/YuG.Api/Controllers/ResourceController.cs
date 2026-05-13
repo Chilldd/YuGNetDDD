@@ -10,6 +10,7 @@ using CreateResourceCommands = YuG.Application.Permission.Resource.Create;
 using UpdateResourceCommands = YuG.Application.Permission.Resource.Update;
 using ActivateResourceCommands = YuG.Application.Permission.Resource.Activate;
 using DisableResourceCommands = YuG.Application.Permission.Resource.Disable;
+using MoveResourceCommands = YuG.Application.Permission.Resource.Move;
 
 namespace YuG.Api.Controllers;
 
@@ -172,6 +173,31 @@ public class ResourceController : ControllerBase
     {
         var command = new DisableResourceCommands.DisableResourceCommand { Id = id };
         var response = await _mediator.Send(command);
+        return Ok(response);
+    }
+
+    /// <summary>
+    /// 移动资源
+    /// </summary>
+    /// <param name="id">资源标识</param>
+    /// <param name="command">移动资源命令（仅读取 ParentId）</param>
+    /// <returns>移动后的资源</returns>
+    /// <response code="200">移动成功</response>
+    /// <response code="400">请求参数无效</response>
+    /// <response code="404">资源不存在</response>
+    [HttpPut("{id}/move")]
+    [ApiDescription("移动资源")]
+    [ProducesResponseType(typeof(MoveResourceCommands.ResourceResult), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<MoveResourceCommands.ResourceResult>> Move(long id, [FromBody] MoveResourceCommands.MoveResourceCommand command)
+    {
+        var cmd = new MoveResourceCommands.MoveResourceCommand
+        {
+            Id = id,
+            ParentId = command.ParentId
+        };
+        var response = await _mediator.Send(cmd);
         return Ok(response);
     }
 }

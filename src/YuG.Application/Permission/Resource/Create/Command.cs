@@ -241,7 +241,7 @@ public class CreateResourceCommandValidator : AbstractValidator<CreateResourceCo
         {
             RuleFor(x => x.HttpMethod)
                 .NotEmpty().WithMessage("API 类型的 HTTP 方法不能为空")
-                .Must(method => new[] { "GET", "POST", "PUT", "DELETE" }.Contains(method!.ToUpperInvariant()))
+                .Must(method => method is not null && new[] { "GET", "POST", "PUT", "DELETE" }.Contains(method.ToUpperInvariant()))
                 .WithMessage("HTTP 方法必须是 GET、POST、PUT 或 DELETE");
 
             RuleFor(x => x.Path)
