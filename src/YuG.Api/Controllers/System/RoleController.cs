@@ -13,14 +13,14 @@ using YuG.Application.Identity.Role.UnassignResource;
 using CreateRoleCommands = YuG.Application.Identity.Role.Create;
 using UpdateRoleCommands = YuG.Application.Identity.Role.Update;
 
-namespace YuG.Api.Controllers;
+namespace YuG.Api.Controllers.System;
 
 /// <summary>
 /// 角色管理控制器
 /// </summary>
 [ApiController]
 [Authorize]
-[Route("api/role")]
+[Route("api/system/role")]
 public class RoleController : ControllerBase
 {
     private readonly IMediator _mediator;

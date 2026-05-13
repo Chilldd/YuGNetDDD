@@ -3,15 +3,16 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using YuG.Api.Helpers;
 using YuG.Application.Identity.Role.SetUserRoles;
+using YuG.Application.Identity.User.Create;
 
-namespace YuG.Api.Controllers;
+namespace YuG.Api.Controllers.System;
 
 /// <summary>
 /// 用户管理控制器
 /// </summary>
 [ApiController]
 [Authorize]
-[Route("api/user")]
+[Route("api/system/user")]
 public class UserController : ControllerBase
 {
     private readonly IMediator _mediator;
@@ -23,6 +24,24 @@ public class UserController : ControllerBase
     public UserController(IMediator mediator)
     {
         _mediator = mediator;
+    }
+
+    /// <summary>
+    /// 创建用户
+    /// </summary>
+    /// <param name="command">创建用户命令</param>
+    /// <returns>创建的用户</returns>
+    /// <response code="201">创建成功</response>
+    /// <response code="400">请求参数无效或用户名已存在</response>
+    [HttpPost]
+    [ApiDescription("创建用户")]
+    [Authorize(Policy = "user:create")]
+    [ProducesResponseType(typeof(UserResult), StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult<UserResult>> Create([FromBody] CreateUserCommand command)
+    {
+        var response = await _mediator.Send(command);
+        return CreatedAtAction(null, new { id = response.Id }, response);
     }
 
     /// <summary>

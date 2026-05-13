@@ -12,14 +12,14 @@ using ActivateResourceCommands = YuG.Application.Permission.Resource.Activate;
 using DisableResourceCommands = YuG.Application.Permission.Resource.Disable;
 using MoveResourceCommands = YuG.Application.Permission.Resource.Move;
 
-namespace YuG.Api.Controllers;
+namespace YuG.Api.Controllers.System;
 
 /// <summary>
 /// 资源管理控制器
 /// </summary>
 [ApiController]
 [Authorize]
-[Route("api/management/resources")]
+[Route("api/system/resources")]
 public class ResourceController : ControllerBase
 {
     private readonly IMediator _mediator;
