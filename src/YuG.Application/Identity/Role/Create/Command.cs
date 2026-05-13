@@ -34,6 +34,11 @@ public record RoleResult
     public string Status { get; init; } = "Active";
 
     /// <summary>
+    /// 是否为系统内置角色
+    /// </summary>
+    public bool IsSystem { get; init; }
+
+    /// <summary>
     /// 创建时间（UTC）
     /// </summary>
     public DateTime CreatedAt { get; init; }

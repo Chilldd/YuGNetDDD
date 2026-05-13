@@ -15,6 +15,7 @@ public class PermissionAuthorizationHandler : AuthorizationHandler<PermissionReq
 
     private IReadOnlySet<string>? _cachedPermissions;
     private bool _permissionsLoaded;
+    private bool? _isSuperAdmin;
 
     /// <summary>
     /// 初始化权限编码授权处理器
@@ -38,12 +39,35 @@ public class PermissionAuthorizationHandler : AuthorizationHandler<PermissionReq
         AuthorizationHandlerContext context,
         PermissionRequirement requirement)
     {
+        // 检查是否为超级管理员（系统角色），拥有所有权限
+        if (await IsSuperAdminAsync())
+        {
+            context.Succeed(requirement);
+            return;
+        }
+
         var permissions = await GetUserPermissionsAsync();
 
         if (permissions.Contains(requirement.PermissionCode))
         {
             context.Succeed(requirement);
         }
+    }
+
+    /// <summary>
+    /// 判断当前用户是否拥有超级管理员角色
+    /// </summary>
+    private async Task<bool> IsSuperAdminAsync()
+    {
+        if (_isSuperAdmin.HasValue)
+        {
+            return _isSuperAdmin.Value;
+        }
+
+        var roles = await _roleRepository.GetByUserIdAsync(_userIdentity.UserId);
+        _isSuperAdmin = roles.Any(r => r.IsSystem && r.Status == Domain.Identity.Enums.RoleStatus.Active);
+
+        return _isSuperAdmin.Value;
     }
 
     /// <summary>

@@ -59,6 +59,11 @@ public class RoleConfiguration : IEntityTypeConfiguration<Role>
             .IsRequired()
             .HasDefaultValue(RoleStatus.Active);
 
+        // 系统内置角色标记
+        builder.Property(r => r.IsSystem)
+            .IsRequired()
+            .HasDefaultValue(false);
+
         // 配置 Role ↔ Resource 多对多关系
         builder.HasMany(r => r.Resources)
             .WithMany()

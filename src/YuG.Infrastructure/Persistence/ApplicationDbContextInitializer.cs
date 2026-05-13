@@ -80,11 +80,16 @@ public class ApplicationDbContextInitializer
             {
                 var adminRole = new Role("管理员", "admin", "系统管理员，拥有所有权限");
                 var userRole = new Role("普通用户", "user", "普通用户，拥有基础权限");
+                var superAdminRole = new Role("超级管理员", "superadmin", "超级管理员，拥有所有权限（系统内置）", isSystem: true);
 
-                await _context.Roles.AddRangeAsync([adminRole, userRole], cancellationToken);
+                await _context.Roles.AddRangeAsync([adminRole, userRole, superAdminRole], cancellationToken);
                 await _context.SaveChangesAsync(cancellationToken);
 
-                _logger.LogInformation("种子数据填充完成：已创建默认角色 (admin, user)");
+                // 将管理员角色和超级管理员角色分配给默认管理员用户
+                admin.SetRoles([superAdminRole]);
+                await _context.SaveChangesAsync(cancellationToken);
+
+                _logger.LogInformation("种子数据填充完成：已创建默认角色并分配给管理员账户");
             }
         }
         catch (Exception ex)

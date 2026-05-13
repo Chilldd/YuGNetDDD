@@ -40,6 +40,7 @@ public class Handler : IRequestHandler<GetRoleQuery, GetRoleResult?>
             Code = role.Code,
             Description = role.Description,
             Status = role.Status.ToString(),
+            IsSystem = role.IsSystem,
             ResourceIds = role.Resources.Select(r => r.Id).ToList(),
             CreatedAt = role.CreatedAt,
             UpdatedAt = role.UpdatedAt

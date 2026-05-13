@@ -58,6 +58,7 @@ public class Handler : IRequestHandler<CreateRoleCommand, RoleResult>
             Code = role.Code,
             Description = role.Description,
             Status = role.Status.ToString(),
+            IsSystem = role.IsSystem,
             CreatedAt = role.CreatedAt,
             UpdatedAt = role.UpdatedAt
         };

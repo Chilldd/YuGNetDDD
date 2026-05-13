@@ -33,6 +33,11 @@ public class Role : AggregateRoot
     public RoleStatus Status { get; private set; } = RoleStatus.Active;
 
     /// <summary>
+    /// 是否为系统内置角色（系统角色不允许通过接口修改）
+    /// </summary>
+    public bool IsSystem { get; private set; }
+
+    /// <summary>
     /// 关联的用户集合（多对多，仅用于 EF Core 映射）
     /// </summary>
     public IReadOnlyCollection<User> Users => _users.AsReadOnly();
@@ -55,7 +60,18 @@ public class Role : AggregateRoot
     /// <param name="name">角色名称</param>
     /// <param name="code">角色编码</param>
     /// <param name="description">角色描述（可选）</param>
-    public Role(string name, string code, string? description)
+    public Role(string name, string code, string? description) : this(name, code, description, isSystem: false)
+    {
+    }
+
+    /// <summary>
+    /// 创建角色
+    /// </summary>
+    /// <param name="name">角色名称</param>
+    /// <param name="code">角色编码</param>
+    /// <param name="description">角色描述（可选）</param>
+    /// <param name="isSystem">是否为系统内置角色</param>
+    public Role(string name, string code, string? description, bool isSystem)
     {
         ValidateName(name);
         ValidateCode(code);
@@ -64,6 +80,7 @@ public class Role : AggregateRoot
         Code = code.Trim();
         Description = description?.Trim();
         Status = RoleStatus.Active;
+        IsSystem = isSystem;
     }
 
     /// <summary>
@@ -72,6 +89,8 @@ public class Role : AggregateRoot
     /// <param name="newName">新名称</param>
     public void Rename(string newName)
     {
+        EnsureNotSystemRole();
+
         if (string.IsNullOrWhiteSpace(newName))
         {
             throw new DomainException("角色名称不能为空");
@@ -91,6 +110,7 @@ public class Role : AggregateRoot
     /// <param name="newCode">新编码</param>
     public void ChangeCode(string newCode)
     {
+        EnsureNotSystemRole();
         ValidateCode(newCode);
         Code = newCode.Trim();
     }
@@ -101,6 +121,8 @@ public class Role : AggregateRoot
     /// <param name="newDescription">新描述</param>
     public void ChangeDescription(string? newDescription)
     {
+        EnsureNotSystemRole();
+
         if (newDescription?.Length > 500)
         {
             throw new DomainException("角色描述长度不能超过 500 个字符");
@@ -114,6 +136,7 @@ public class Role : AggregateRoot
     /// </summary>
     public void Activate()
     {
+        EnsureNotSystemRole();
         Status = RoleStatus.Active;
     }
 
@@ -122,6 +145,7 @@ public class Role : AggregateRoot
     /// </summary>
     public void Disable()
     {
+        EnsureNotSystemRole();
         Status = RoleStatus.Disabled;
     }
 
@@ -131,6 +155,8 @@ public class Role : AggregateRoot
     /// <param name="resource">资源</param>
     public void AssignResource(Resource resource)
     {
+        EnsureNotSystemRole();
+
         if (resource is null)
         {
             throw new DomainException("资源不能为空");
@@ -148,6 +174,8 @@ public class Role : AggregateRoot
     /// <param name="resource">资源</param>
     public void UnassignResource(Resource resource)
     {
+        EnsureNotSystemRole();
+
         if (resource is null)
         {
             throw new DomainException("资源不能为空");
@@ -161,7 +189,20 @@ public class Role : AggregateRoot
     /// </summary>
     public void ClearResources()
     {
+        EnsureNotSystemRole();
         _resources.Clear();
+    }
+
+    /// <summary>
+    /// 确保当前角色不是系统内置角色，防止通过接口修改
+    /// </summary>
+    /// <exception cref="DomainException">当角色为系统内置角色时抛出</exception>
+    private void EnsureNotSystemRole()
+    {
+        if (IsSystem)
+        {
+            throw new DomainException("系统内置角色不允许修改");
+        }
     }
 
     /// <summary>

@@ -49,6 +49,14 @@ public class Handler : IRequestHandler<SetUserRolesCommand>
             throw new DomainException($"以下角色不存在：{string.Join(", ", notFoundIds)}");
         }
 
+        // 排除系统内置角色（系统角色只能通过种子数据分配）
+        var systemRoles = roles.Where(r => r.IsSystem).ToList();
+        if (systemRoles.Count != 0)
+        {
+            var systemRoleNames = string.Join(", ", systemRoles.Select(r => $"'{r.Name}'"));
+            throw new DomainException($"系统内置角色不允许通过接口分配：{systemRoleNames}");
+        }
+
         // 设置用户角色（覆盖模式）
         user.SetRoles(roles);
 

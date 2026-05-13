@@ -37,6 +37,7 @@ public class Handler : IRequestHandler<GetRoleListQuery, GetRoleListResult>
             Code = r.Code,
             Description = r.Description,
             Status = r.Status.ToString(),
+            IsSystem = r.IsSystem,
             CreatedAt = r.CreatedAt
         }).ToList();
 

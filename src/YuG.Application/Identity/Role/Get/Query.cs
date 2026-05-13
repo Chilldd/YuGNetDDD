@@ -45,6 +45,11 @@ public record GetRoleResult
     public string Status { get; init; } = "Active";
 
     /// <summary>
+    /// 是否为系统内置角色
+    /// </summary>
+    public bool IsSystem { get; init; }
+
+    /// <summary>
     /// 关联的资源标识列表
     /// </summary>
     public List<long> ResourceIds { get; init; } = [];
