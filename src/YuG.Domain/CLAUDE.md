@@ -24,6 +24,7 @@ Domain
 ├── Common （通用）
 │    ├── Interfaces  （外部服务接口）
 │    ├── Enums （通用枚举对象）
+│    ├── Constants （常量）
 │    ├── IRepositories.cs （仓储接口）
 
 ---

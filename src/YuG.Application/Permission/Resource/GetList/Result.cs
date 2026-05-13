@@ -53,11 +53,6 @@ public record ResourceListItem
     public string? Route { get; init; }
 
     /// <summary>
-    /// 组件路径（菜单/页面类型有效）
-    /// </summary>
-    public string? Component { get; init; }
-
-    /// <summary>
     /// 是否隐藏（仅菜单类型）
     /// </summary>
     public bool IsHidden { get; init; }

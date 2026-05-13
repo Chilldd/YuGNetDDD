@@ -69,7 +69,6 @@ public class Handler : IRequestHandler<GetResourceListQuery, GetResourceListResu
             Path = r.Path,
             Icon = r.Icon,
             Route = r.Route,
-            Component = r.Component,
             IsHidden = r.IsHidden,
             Badge = r.Badge,
             PermissionCode = r.PermissionCode,

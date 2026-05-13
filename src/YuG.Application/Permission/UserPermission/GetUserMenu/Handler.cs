@@ -1,7 +1,9 @@
 using MediatR;
 using YuG.Domain.Identity.Enums;
+using YuG.Domain.Common.Constants;
 using YuG.Domain.Identity.Repositories;
 using YuG.Domain.Permission.Enums;
+using YuG.Domain.Permission.Repositories;
 using ResourceEntity = YuG.Domain.Permission.Entities.Resource;
 
 namespace YuG.Application.Permission.UserPermission.GetUserMenu;
@@ -12,14 +14,17 @@ namespace YuG.Application.Permission.UserPermission.GetUserMenu;
 public class Handler : IRequestHandler<GetUserMenuQuery, GetUserMenuResult>
 {
     private readonly IRoleRepository _roleRepository;
+    private readonly IResourceRepository _resourceRepository;
 
     /// <summary>
     /// 初始化获取当前用户菜单查询处理器
     /// </summary>
     /// <param name="roleRepository">角色仓储</param>
-    public Handler(IRoleRepository roleRepository)
+    /// <param name="resourceRepository">资源仓储</param>
+    public Handler(IRoleRepository roleRepository, IResourceRepository resourceRepository)
     {
         _roleRepository = roleRepository;
+        _resourceRepository = resourceRepository;
     }
 
     /// <summary>
@@ -32,27 +37,40 @@ public class Handler : IRequestHandler<GetUserMenuQuery, GetUserMenuResult>
     {
         var roles = await _roleRepository.GetByUserIdWithResourcesAsync(query.UserId, cancellationToken);
 
-        // 收集用户所有角色下的激活资源
-        var resourceIds = new HashSet<long>();
-        var resourceMap = new Dictionary<long, ResourceEntity>();
+        // 超级管理员角色拥有所有资源权限
+        var isSuperAdmin = roles.Any(r => r.Code == RoleCodes.SuperAdmin);
 
-        foreach (var role in roles.Where(r => r.Status == RoleStatus.Active))
+        IReadOnlyCollection<ResourceEntity> resources;
+        if (isSuperAdmin)
         {
-            foreach (var resource in role.Resources.Where(r => r.Status == ResourceStatus.Active))
+            resources = await _resourceRepository.GetActiveAsync(cancellationToken);
+        }
+        else
+        {
+            // 收集用户所有角色下的激活资源
+            var resourceIds = new HashSet<long>();
+            var resourceList = new List<ResourceEntity>();
+
+            foreach (var role in roles.Where(r => r.Status == RoleStatus.Active))
             {
-                if (resourceIds.Add(resource.Id))
+                foreach (var resource in role.Resources.Where(r => r.Status == ResourceStatus.Active))
                 {
-                    resourceMap[resource.Id] = resource;
+                    if (resourceIds.Add(resource.Id))
+                    {
+                        resourceList.Add(resource);
+                    }
                 }
             }
+
+            resources = resourceList;
         }
 
         // 筛选 Menu 和 Page 类型的资源
-        var menuResources = resourceMap.Values
+        var menuResources = resources
             .Where(r => r.Type == ResourceType.Menu)
             .ToList();
 
-        var pageResources = resourceMap.Values
+        var pageResources = resources
             .Where(r => r.Type == ResourceType.Page)
             .ToList();
 
@@ -64,7 +82,6 @@ public class Handler : IRequestHandler<GetUserMenuQuery, GetUserMenuResult>
             Code = m.Code,
             Icon = m.Icon,
             Route = m.Route,
-            Component = m.Component,
             IsHidden = m.IsHidden,
             Badge = m.Badge,
             SortOrder = m.SortOrder,
@@ -93,7 +110,6 @@ public class Handler : IRequestHandler<GetUserMenuQuery, GetUserMenuResult>
                 Name = p.Name,
                 Code = p.Code,
                 Route = p.Route,
-                Component = p.Component,
                 PermissionCode = p.PermissionCode,
                 SortOrder = p.SortOrder
             })

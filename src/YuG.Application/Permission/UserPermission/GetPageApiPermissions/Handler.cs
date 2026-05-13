@@ -1,7 +1,10 @@
 using MediatR;
 using YuG.Domain.Identity.Enums;
+using YuG.Domain.Common.Constants;
 using YuG.Domain.Identity.Repositories;
 using YuG.Domain.Permission.Enums;
+using YuG.Domain.Permission.Repositories;
+using ResourceEntity = YuG.Domain.Permission.Entities.Resource;
 
 namespace YuG.Application.Permission.UserPermission.GetPageApiPermissions;
 
@@ -11,14 +14,17 @@ namespace YuG.Application.Permission.UserPermission.GetPageApiPermissions;
 public class Handler : IRequestHandler<GetPageApiPermissionsQuery, GetPageApiPermissionsResult>
 {
     private readonly IRoleRepository _roleRepository;
+    private readonly IResourceRepository _resourceRepository;
 
     /// <summary>
     /// 初始化获取页面 API 权限查询处理器
     /// </summary>
     /// <param name="roleRepository">角色仓储</param>
-    public Handler(IRoleRepository roleRepository)
+    /// <param name="resourceRepository">资源仓储</param>
+    public Handler(IRoleRepository roleRepository, IResourceRepository resourceRepository)
     {
         _roleRepository = roleRepository;
+        _resourceRepository = resourceRepository;
     }
 
     /// <summary>
@@ -31,24 +37,43 @@ public class Handler : IRequestHandler<GetPageApiPermissionsQuery, GetPageApiPer
     {
         var roles = await _roleRepository.GetByUserIdWithResourcesAsync(query.UserId, cancellationToken);
 
-        // 收集用户所有角色下的激活资源
-        var resourceIds = new HashSet<long>();
-        var permissionCodes = new List<string>();
+        // 超级管理员角色拥有所有资源权限
+        var isSuperAdmin = roles.Any(r => r.Code == RoleCodes.SuperAdmin);
 
-        foreach (var role in roles.Where(r => r.Status == RoleStatus.Active))
+        IEnumerable<ResourceEntity> resources;
+        if (isSuperAdmin)
         {
-            foreach (var resource in role.Resources.Where(r =>
-                r.Status == ResourceStatus.Active
-                && r.Type == ResourceType.Api
-                && r.ParentId == query.PageId
-                && !string.IsNullOrEmpty(r.PermissionCode)))
+            resources = await _resourceRepository.GetActiveAsync(cancellationToken);
+        }
+        else
+        {
+            // 收集用户所有角色下的激活资源
+            var resourceIds = new HashSet<long>();
+            var resourceList = new List<ResourceEntity>();
+
+            foreach (var role in roles.Where(r => r.Status == RoleStatus.Active))
             {
-                if (resourceIds.Add(resource.Id))
+                foreach (var resource in role.Resources.Where(r =>
+                    r.Status == ResourceStatus.Active))
                 {
-                    permissionCodes.Add(resource.PermissionCode!);
+                    if (resourceIds.Add(resource.Id))
+                    {
+                        resourceList.Add(resource);
+                    }
                 }
             }
+
+            resources = resourceList;
         }
+
+        // 筛选指定页面的 API 权限编码
+        var permissionCodes = resources
+            .Where(r => r.Type == ResourceType.Api
+                && r.ParentId == query.PageId
+                && !string.IsNullOrEmpty(r.PermissionCode))
+            .Select(r => r.PermissionCode!)
+            .Distinct()
+            .ToList();
 
         return new GetPageApiPermissionsResult
         {

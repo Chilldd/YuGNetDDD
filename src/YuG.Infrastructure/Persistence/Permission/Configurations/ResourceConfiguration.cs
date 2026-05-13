@@ -81,12 +81,7 @@ public class ResourceConfiguration : IEntityTypeConfiguration<Resource>
             .HasMaxLength(500)
             .IsRequired(false);
 
-        // 组件路径配置（仅菜单类型有效）
-        builder.Property(r => r.Component)
-            .HasMaxLength(500)
-            .IsRequired(false);
-
-        // 是否隐藏配置（仅菜单类型有效）
+// 是否隐藏配置（仅菜单类型有效）
         builder.Property(r => r.IsHidden)
             .HasDefaultValue(false);
 

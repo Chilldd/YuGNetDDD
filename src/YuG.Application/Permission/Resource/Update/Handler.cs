@@ -86,7 +86,6 @@ public class Handler : IRequestHandler<UpdateResourceCommand, ResourceResult>
                 resource.ConfigureMenu(
                     request.Icon,
                     request.Route,
-                    request.Component,
                     request.IsHidden,
                     request.Badge);
                 break;
@@ -94,7 +93,6 @@ public class Handler : IRequestHandler<UpdateResourceCommand, ResourceResult>
             case ResourceType.Page:
                 resource.ConfigurePage(
                     request.Route,
-                    request.Component,
                     permissionCode);
                 break;
         }
@@ -126,7 +124,6 @@ public class Handler : IRequestHandler<UpdateResourceCommand, ResourceResult>
             Path = resource.Path,
             Icon = resource.Icon,
             Route = resource.Route,
-            Component = resource.Component,
             IsHidden = resource.IsHidden,
             Badge = resource.Badge,
             PermissionCode = resource.PermissionCode,

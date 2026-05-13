@@ -30,12 +30,7 @@ public record UserMenuTreeItem
     /// </summary>
     public string? Route { get; init; }
 
-    /// <summary>
-    /// 组件路径
-    /// </summary>
-    public string? Component { get; init; }
-
-    /// <summary>
+/// <summary>
     /// 是否隐藏
     /// </summary>
     public bool IsHidden { get; init; }

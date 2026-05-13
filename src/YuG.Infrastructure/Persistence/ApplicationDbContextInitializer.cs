@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using YuG.Domain.Common.Constants;
 using YuG.Domain.Identity.Entities;
 using YuG.Domain.Common.Interfaces;
 
@@ -78,9 +79,9 @@ public class ApplicationDbContextInitializer
             // 创建默认角色
             if (!await _context.Roles.AnyAsync(cancellationToken))
             {
-                var adminRole = new Role("管理员", "admin", "系统管理员，拥有所有权限");
-                var userRole = new Role("普通用户", "user", "普通用户，拥有基础权限");
-                var superAdminRole = new Role("超级管理员", "superadmin", "超级管理员，拥有所有权限（系统内置）", isSystem: true);
+                var superAdminRole = new Role("超级管理员", RoleCodes.SuperAdmin, "超级管理员，拥有所有权限（系统内置）", isSystem: true);
+                var adminRole = new Role("管理员", RoleCodes.Admin, "系统管理员，拥有所有权限");
+                var userRole = new Role("普通用户", RoleCodes.User, "普通用户，拥有基础权限");
 
                 await _context.Roles.AddRangeAsync([adminRole, userRole, superAdminRole], cancellationToken);
                 await _context.SaveChangesAsync(cancellationToken);

@@ -56,7 +56,6 @@ public class RoleRepository : Repository<Role>, IRoleRepository
         }
 
         return await _context.Set<Role>()
-            .AsNoTracking()
             .Where(r => idList.Contains(r.Id))
             .ToListAsync(cancellationToken);
     }

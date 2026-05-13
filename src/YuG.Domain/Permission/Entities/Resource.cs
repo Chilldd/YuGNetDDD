@@ -48,12 +48,7 @@ public class Resource : AggregateRoot
     /// </summary>
     public string? Route { get; private set; }
 
-    /// <summary>
-    /// 组件路径（菜单/页面类型有效）
-    /// </summary>
-    public string? Component { get; private set; }
-
-    /// <summary>
+/// <summary>
     /// 是否隐藏（仅菜单类型资源有效，用于隐藏菜单但保留路由）
     /// </summary>
     public bool IsHidden { get; private set; }
@@ -147,10 +142,9 @@ public class Resource : AggregateRoot
     /// </summary>
     /// <param name="icon">菜单图标（可选）</param>
     /// <param name="route">前端路由（可选）</param>
-    /// <param name="component">组件路径（可选）</param>
     /// <param name="isHidden">是否隐藏（可选）</param>
     /// <param name="badge">菜单角标（可选）</param>
-    public void ConfigureMenu(string? icon, string? route, string? component, bool? isHidden, string? badge)
+    public void ConfigureMenu(string? icon, string? route, bool? isHidden, string? badge)
     {
         if (Type != ResourceType.Menu)
         {
@@ -167,19 +161,13 @@ public class Resource : AggregateRoot
             throw new DomainException("前端路由长度不能超过 500 个字符");
         }
 
-        if (component?.Length > 500)
-        {
-            throw new DomainException("组件路径长度不能超过 500 个字符");
-        }
-
-        if (badge?.Length > 50)
+if (badge?.Length > 50)
         {
             throw new DomainException("菜单角标长度不能超过 50 个字符");
         }
 
         Icon = icon;
         Route = route;
-        Component = component;
         if (isHidden.HasValue)
         {
             IsHidden = isHidden.Value;
@@ -191,9 +179,8 @@ public class Resource : AggregateRoot
     /// 配置页面资源信息（仅页面类型可调用）
     /// </summary>
     /// <param name="route">前端路由（可选）</param>
-    /// <param name="component">组件路径（可选）</param>
     /// <param name="permissionCode">页面权限编码（可选，如 user:manage）</param>
-    public void ConfigurePage(string? route, string? component, string? permissionCode)
+    public void ConfigurePage(string? route, string? permissionCode)
     {
         if (Type != ResourceType.Page)
         {
@@ -205,18 +192,12 @@ public class Resource : AggregateRoot
             throw new DomainException("前端路由长度不能超过 500 个字符");
         }
 
-        if (component?.Length > 500)
-        {
-            throw new DomainException("组件路径长度不能超过 500 个字符");
-        }
-
-        if (permissionCode?.Length > 100)
+if (permissionCode?.Length > 100)
         {
             throw new DomainException("权限编码长度不能超过 100 个字符");
         }
 
         Route = route;
-        Component = component;
         PermissionCode = permissionCode;
     }
 
@@ -333,16 +314,16 @@ public class Resource : AggregateRoot
         switch (parentType.Value)
         {
             case ResourceType.Menu:
-                if (childType != ResourceType.Page)
+                if (childType != ResourceType.Menu && childType != ResourceType.Page)
                 {
-                    throw new DomainException("Menu 类型的子资源只能是 Page 类型");
+                    throw new DomainException("Menu 类型的子资源只能是 Menu 或 Page 类型");
                 }
                 break;
 
             case ResourceType.Page:
-                if (childType != ResourceType.Page && childType != ResourceType.Api)
+                if (childType != ResourceType.Api)
                 {
-                    throw new DomainException("Page 类型的子资源只能是 Page 或 Api 类型");
+                    throw new DomainException("Page 类型的子资源只能是 Api 类型");
                 }
                 break;
 

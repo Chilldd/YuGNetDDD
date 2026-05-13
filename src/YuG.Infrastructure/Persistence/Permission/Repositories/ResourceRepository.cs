@@ -142,7 +142,6 @@ public class ResourceRepository : Repository<Resource>, IResourceRepository
         }
 
         return await _context.Resources
-            .AsNoTracking()
             .Where(r => idList.Contains(r.Id))
             .ToListAsync(cancellationToken);
     }

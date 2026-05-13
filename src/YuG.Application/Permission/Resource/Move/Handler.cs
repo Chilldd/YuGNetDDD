@@ -77,7 +77,6 @@ public class Handler : IRequestHandler<MoveResourceCommand, ResourceResult>
             Path = resource.Path,
             Icon = resource.Icon,
             Route = resource.Route,
-            Component = resource.Component,
             IsHidden = resource.IsHidden,
             Badge = resource.Badge,
             PermissionCode = resource.PermissionCode,

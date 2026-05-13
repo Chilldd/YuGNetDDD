@@ -54,11 +54,6 @@ public record ResourceResult
     public string? Route { get; init; }
 
     /// <summary>
-    /// 组件路径（菜单/页面类型有效）
-    /// </summary>
-    public string? Component { get; init; }
-
-    /// <summary>
     /// 是否隐藏（仅菜单类型）
     /// </summary>
     public bool IsHidden { get; init; }
@@ -145,11 +140,6 @@ public class CreateResourceCommand : CommandBase<ResourceResult>
     public string? Route { get; init; }
 
     /// <summary>
-    /// 组件路径（菜单/页面类型有效）
-    /// </summary>
-    public string? Component { get; init; }
-
-    /// <summary>
     /// 是否隐藏（仅菜单类型）
     /// </summary>
     public bool IsHidden { get; init; }
@@ -213,9 +203,6 @@ public class CreateResourceCommandValidator : AbstractValidator<CreateResourceCo
             RuleFor(x => x.Route)
                 .MaximumLength(500).WithMessage("前端路由长度不能超过 500 个字符");
 
-            RuleFor(x => x.Component)
-                .MaximumLength(500).WithMessage("组件路径长度不能超过 500 个字符");
-
             RuleFor(x => x.PermissionCode)
                 .MaximumLength(100).WithMessage("权限编码长度不能超过 100 个字符");
         });
@@ -228,9 +215,6 @@ public class CreateResourceCommandValidator : AbstractValidator<CreateResourceCo
 
             RuleFor(x => x.Route)
                 .MaximumLength(500).WithMessage("前端路由长度不能超过 500 个字符");
-
-            RuleFor(x => x.Component)
-                .MaximumLength(500).WithMessage("组件路径长度不能超过 500 个字符");
 
             RuleFor(x => x.Badge)
                 .MaximumLength(50).WithMessage("菜单角标长度不能超过 50 个字符");
