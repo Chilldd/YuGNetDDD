@@ -2,6 +2,7 @@ using MediatR;
 using YuG.Domain.Common;
 using YuG.Domain.Permission.Enums;
 using YuG.Domain.Permission.Repositories;
+using ResourceEntity = YuG.Domain.Permission.Entities.Resource;
 
 namespace YuG.Application.Permission.Resource.Update;
 
@@ -42,6 +43,19 @@ public class Handler : IRequestHandler<UpdateResourceCommand, ResourceResult>
         {
             throw new DomainException($"资源编码 '{request.Code}' 已被其他资源使用");
         }
+
+        // 验证父子类型层级关系
+        ResourceType? parentType = null;
+        if (request.ParentId.HasValue)
+        {
+            var parent = await _resourceRepository.GetByIdAsync(request.ParentId.Value, cancellationToken);
+            if (parent is null)
+            {
+                throw new DomainException($"父级资源 '{request.ParentId.Value}' 不存在");
+            }
+            parentType = parent.Type;
+        }
+        ResourceEntity.ValidateParentChildType(resource.Type, parentType);
 
         // 更新基础字段
         resource.Rename(request.Name);

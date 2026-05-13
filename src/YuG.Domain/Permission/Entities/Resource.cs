@@ -314,6 +314,44 @@ public class Resource : AggregateRoot
     }
 
     /// <summary>
+    /// 验证资源父子类型层级关系
+    /// </summary>
+    /// <param name="childType">子资源类型</param>
+    /// <param name="parentType">父级资源类型（null 表示根级别）</param>
+    /// <exception cref="DomainException">层级关系不合法时抛出</exception>
+    public static void ValidateParentChildType(ResourceType childType, ResourceType? parentType)
+    {
+        if (parentType is null)
+        {
+            if (childType != ResourceType.Menu)
+            {
+                throw new DomainException("根级别资源只能是 Menu 类型");
+            }
+            return;
+        }
+
+        switch (parentType.Value)
+        {
+            case ResourceType.Menu:
+                if (childType != ResourceType.Page)
+                {
+                    throw new DomainException("Menu 类型的子资源只能是 Page 类型");
+                }
+                break;
+
+            case ResourceType.Page:
+                if (childType != ResourceType.Page && childType != ResourceType.Api)
+                {
+                    throw new DomainException("Page 类型的子资源只能是 Page 或 Api 类型");
+                }
+                break;
+
+            case ResourceType.Api:
+                throw new DomainException("Api 类型资源不能作为父级");
+        }
+    }
+
+    /// <summary>
     /// 变更排序顺序
     /// </summary>
     /// <param name="sortOrder">新的排序顺序</param>

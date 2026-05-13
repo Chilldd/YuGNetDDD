@@ -1,4 +1,5 @@
 using System.Reflection;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Routing;
@@ -82,12 +83,22 @@ public class ApiEndpointScanner : IApiEndpointScanner
                     var actionName = action.ActionName;
                     var displayName = $"{controllerName} {actionName}";
                     var generatedCode = GenerateEndpointCode(fullPath, httpMethod);
+                    var permissionCode = GeneratePermissionCode(controllerName, actionName);
+                    var hasAuthorize =
+                        action.MethodInfo.IsDefined(typeof(AuthorizeAttribute), false) ||
+                        action.ControllerTypeInfo.IsDefined(typeof(AuthorizeAttribute), false);
+                    var hasAllowAnonymous =
+                        action.MethodInfo.IsDefined(typeof(AllowAnonymousAttribute), false) ||
+                        action.ControllerTypeInfo.IsDefined(typeof(AllowAnonymousAttribute), false);
+                    var requirePermission = hasAuthorize && !hasAllowAnonymous;
 
                     endpoints.Add(new DiscoveredEndpointInfo(
                         fullPath,
                         httpMethod,
                         displayName,
                         generatedCode,
+                        permissionCode,
+                        requirePermission,
                         endpointDescription ?? string.Empty));
                 }
             }
@@ -263,5 +274,18 @@ public class ApiEndpointScanner : IApiEndpointScanner
 
         // 添加 HTTP 方法后缀
         return $"{code}_{httpMethod}".ToLowerInvariant();
+    }
+
+    /// <summary>
+    /// 生成权限编码（格式：{模块}:{操作}）
+    /// </summary>
+    /// <param name="controllerName">控制器名称</param>
+    /// <param name="actionName">操作方法名称</param>
+    /// <returns>权限编码</returns>
+    private static string GeneratePermissionCode(string controllerName, string actionName)
+    {
+        var module = controllerName.ToLowerInvariant();
+        var verb = actionName.ToLowerInvariant();
+        return $"{module}:{verb}";
     }
 }

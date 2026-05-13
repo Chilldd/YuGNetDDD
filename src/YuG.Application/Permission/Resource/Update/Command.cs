@@ -257,7 +257,10 @@ public class UpdateResourceCommandValidator : AbstractValidator<UpdateResourceCo
                 .MaximumLength(500).WithMessage("API 路径长度不能超过 500 个字符");
 
             RuleFor(x => x.PermissionCode)
-                .MaximumLength(100).WithMessage("权限编码长度不能超过 100 个字符");
+                .NotEmpty().WithMessage("API 类型的权限编码不能为空")
+                .MaximumLength(100).WithMessage("权限编码长度不能超过 100 个字符")
+                .Matches(@"^[a-zA-Z0-9_-]+:[a-zA-Z0-9_-]+$")
+                .WithMessage("权限编码格式必须为 {模块}:{操作}，如 resource:list");
         });
 
         RuleFor(x => x.Status)

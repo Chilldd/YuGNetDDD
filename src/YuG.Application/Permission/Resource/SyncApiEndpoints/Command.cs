@@ -18,6 +18,8 @@ public record DiscoveredEndpointInfo(
     ResourceHttpMethod HttpMethod,
     string DisplayName,
     string GeneratedCode,
+    string PermissionCode,
+    bool RequirePermission,
     string Description);
 
 /// <summary>
@@ -48,6 +50,9 @@ public class SyncApiEndpointsCommandValidator : AbstractValidator<SyncApiEndpoin
             endpoint.RuleFor(x => x.DisplayName).NotEmpty().MaximumLength(200);
             endpoint.RuleFor(x => x.GeneratedCode).NotEmpty().MaximumLength(100)
                 .Matches(@"^[a-zA-Z0-9_-]+$").WithMessage("资源编码只能包含字母、数字、下划线和短横线");
+            endpoint.RuleFor(x => x.PermissionCode).NotEmpty().MaximumLength(100)
+                .Matches(@"^[a-zA-Z0-9_-]+:[a-zA-Z0-9_-]+$")
+                .WithMessage("权限编码格式必须为 {模块}:{操作}，如 resource:list");
             endpoint.RuleFor(x => x.Description).MaximumLength(500)
                 .WithMessage("资源描述长度不能超过 500 个字符");
         });

@@ -5,6 +5,7 @@ using YuG.Api.Helpers;
 using YuG.Application.Permission.Resource.Delete;
 using YuG.Application.Permission.Resource.Get;
 using YuG.Application.Permission.Resource.GetList;
+using YuG.Application.Permission.Resource.GetTree;
 using CreateResourceCommands = YuG.Application.Permission.Resource.Create;
 using UpdateResourceCommands = YuG.Application.Permission.Resource.Update;
 using ActivateResourceCommands = YuG.Application.Permission.Resource.Activate;
@@ -42,6 +43,22 @@ public class ResourceController : ControllerBase
     [ProducesResponseType(typeof(GetResourceListResult), StatusCodes.Status200OK)]
     public async Task<ActionResult<GetResourceListResult>> Get(
         [FromQuery] GetResourceListQuery query)
+    {
+        var response = await _mediator.Send(query);
+        return Ok(response);
+    }
+
+    /// <summary>
+    /// 获取资源树
+    /// </summary>
+    /// <param name="query">获取资源树查询</param>
+    /// <returns>资源树结构</returns>
+    /// <response code="200">查询成功</response>
+    [HttpGet("tree")]
+    [ApiDescription("获取资源树")]
+    [ProducesResponseType(typeof(GetResourceTreeResult), StatusCodes.Status200OK)]
+    public async Task<ActionResult<GetResourceTreeResult>> GetTree(
+        [FromQuery] GetResourceTreeQuery query)
     {
         var response = await _mediator.Send(query);
         return Ok(response);

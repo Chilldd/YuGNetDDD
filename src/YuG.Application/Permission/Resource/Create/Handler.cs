@@ -39,6 +39,19 @@ public class Handler : IRequestHandler<CreateResourceCommand, ResourceResult>
         // 解析资源类型
         var type = Enum.Parse<ResourceType>(request.Type, ignoreCase: true);
 
+        // 验证父子类型层级关系
+        ResourceType? parentType = null;
+        if (request.ParentId.HasValue)
+        {
+            var parent = await _resourceRepository.GetByIdAsync(request.ParentId.Value, cancellationToken);
+            if (parent is null)
+            {
+                throw new DomainException($"父级资源 '{request.ParentId.Value}' 不存在");
+            }
+            parentType = parent.Type;
+        }
+        ResourceEntity.ValidateParentChildType(type, parentType);
+
         // 解析状态
         var status = string.IsNullOrEmpty(request.Status) ? ResourceStatus.Active : Enum.Parse<ResourceStatus>(request.Status, ignoreCase: true);
 

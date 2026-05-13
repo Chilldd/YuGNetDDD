@@ -35,7 +35,7 @@ public class Handler : IRequestHandler<SyncApiEndpointsCommand, SyncApiEndpoints
         // 1. 获取现有 API 资源
         var existingResources = await _resourceRepository.GetAllAsync(cancellationToken);
         var existingDict = existingResources
-            .Where(r => r.Type == ResourceType.Api)
+            .Where(r => r.Type == ResourceType.Api && r.HttpMethod.HasValue && r.Path is not null)
             .ToDictionary(r => (r.Path!.ToLowerInvariant(), r.HttpMethod!.Value), r => r);
 
         int addedCount = 0;
@@ -45,6 +45,12 @@ public class Handler : IRequestHandler<SyncApiEndpointsCommand, SyncApiEndpoints
         // 2. 处理端点（平铺，不含父级分组）
         foreach (var endpoint in request.Endpoints)
         {
+            // 跳过无需权限验证的端点
+            if (!endpoint.RequirePermission)
+            {
+                continue;
+            }
+
             var normalizedPath = endpoint.Path.ToLowerInvariant();
             var key = (normalizedPath, endpoint.HttpMethod);
 
@@ -60,6 +66,7 @@ public class Handler : IRequestHandler<SyncApiEndpointsCommand, SyncApiEndpoints
                     sortOrder: sortOrder++,
                     status: ResourceStatus.Active);
                 resource.ChangeEndpoint(endpoint.Path, endpoint.HttpMethod);
+                resource.ConfigureApiPermission(endpoint.PermissionCode);
 
                 await _resourceRepository.AddAsync(resource, cancellationToken);
                 addedCount++;
@@ -91,6 +98,12 @@ public class Handler : IRequestHandler<SyncApiEndpointsCommand, SyncApiEndpoints
                 if (existingResource.Description != endpoint.Description)
                 {
                     existingResource.ChangeDescription(endpoint.Description);
+                    needUpdate = true;
+                }
+
+                if (existingResource.PermissionCode != endpoint.PermissionCode)
+                {
+                    existingResource.ConfigureApiPermission(endpoint.PermissionCode);
                     needUpdate = true;
                 }
 
