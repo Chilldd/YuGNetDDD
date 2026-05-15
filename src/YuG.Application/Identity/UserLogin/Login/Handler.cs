@@ -1,6 +1,7 @@
 using MediatR;
 using YuG.Domain.Common;
 using YuG.Domain.Common.Interfaces;
+using YuG.Domain.Identity.Enums;
 using YuG.Domain.Identity.Repositories;
 using DomainRefreshToken = YuG.Domain.Identity.ValueObjects.RefreshToken;
 
@@ -54,6 +55,12 @@ public class Handler : IRequestHandler<LoginCommand, LoginResult>
         if (!user.VerifyPassword(_passwordHasher, request.Password))
         {
             throw new DomainException("用户名或密码不正确");
+        }
+
+        // 检查用户状态
+        if (user.Status == UserStatus.Disabled)
+        {
+            throw new DomainException("该账号已被禁用");
         }
 
         // 查询用户角色

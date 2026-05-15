@@ -1,5 +1,6 @@
 using MediatR;
 using YuG.Application.Common.Exceptions;
+using YuG.Application.Common.Guards;
 using YuG.Domain.Common;
 using YuG.Domain.Identity.Repositories;
 using RoleResult = YuG.Application.Identity.Role.Create.RoleResult;
@@ -37,6 +38,8 @@ public class Handler : IRequestHandler<UpdateRoleCommand, RoleResult>
         {
             throw new NotFoundException(nameof(RoleEntity), request.Id);
         }
+
+        SystemRoleGuard.AgainstModification(role);
 
         // 检查编码唯一性（如果编码改变）
         if (role.Code != request.Code && await _roleRepository.CodeExistsAsync(request.Code, cancellationToken))

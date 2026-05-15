@@ -37,7 +37,7 @@ public abstract class Repository<TAggregate> : IRepository<TAggregate>
     }
 
     /// <inheritdoc />
-    public async Task<IReadOnlyList<TAggregate>> GetAllAsync(CancellationToken cancellationToken = default)
+    public virtual async Task<IReadOnlyList<TAggregate>> GetAllAsync(CancellationToken cancellationToken = default)
     {
         return await _dbSet.ToListAsync(cancellationToken);
     }

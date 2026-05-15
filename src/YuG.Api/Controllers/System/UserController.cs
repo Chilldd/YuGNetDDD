@@ -3,7 +3,12 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using YuG.Api.Helpers;
 using YuG.Application.Identity.Role.SetUserRoles;
+using YuG.Application.Identity.User.Activate;
 using YuG.Application.Identity.User.Create;
+using YuG.Application.Identity.User.Delete;
+using YuG.Application.Identity.User.Disable;
+using YuG.Application.Identity.User.Get;
+using YuG.Application.Identity.User.GetList;
 
 namespace YuG.Api.Controllers.System;
 
@@ -27,6 +32,45 @@ public class UserController : ControllerBase
     }
 
     /// <summary>
+    /// 获取用户列表
+    /// </summary>
+    /// <param name="query">获取用户列表查询</param>
+    /// <returns>用户列表</returns>
+    /// <response code="200">查询成功</response>
+    [HttpGet]
+    [ApiDescription("获取用户列表")]
+    [Authorize(Policy = "user:get")]
+    [ProducesResponseType(typeof(GetUserListResult), StatusCodes.Status200OK)]
+    public async Task<ActionResult<GetUserListResult>> GetList([FromQuery] GetUserListQuery query)
+    {
+        var response = await _mediator.Send(query);
+        return Ok(response);
+    }
+
+    /// <summary>
+    /// 获取单个用户
+    /// </summary>
+    /// <param name="id">用户标识</param>
+    /// <returns>用户详细信息</returns>
+    /// <response code="200">查询成功</response>
+    /// <response code="404">用户不存在</response>
+    [HttpGet("{id}")]
+    [ApiDescription("获取单个用户")]
+    [Authorize(Policy = "user:getbyid")]
+    [ProducesResponseType(typeof(GetUserResult), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<GetUserResult>> GetById(long id)
+    {
+        var query = new GetUserQuery { Id = id };
+        var response = await _mediator.Send(query);
+        if (response is null)
+        {
+            return NotFound();
+        }
+        return Ok(response);
+    }
+
+    /// <summary>
     /// 创建用户
     /// </summary>
     /// <param name="command">创建用户命令</param>
@@ -42,6 +86,63 @@ public class UserController : ControllerBase
     {
         var response = await _mediator.Send(command);
         return CreatedAtAction(null, new { id = response.Id }, response);
+    }
+
+    /// <summary>
+    /// 删除用户
+    /// </summary>
+    /// <param name="id">用户标识</param>
+    /// <returns>删除结果</returns>
+    /// <response code="204">删除成功</response>
+    /// <response code="404">用户不存在</response>
+    [HttpDelete("{id}")]
+    [ApiDescription("删除用户")]
+    [Authorize(Policy = "user:delete")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> Delete(long id)
+    {
+        var command = new DeleteUserCommand { Id = id };
+        await _mediator.Send(command);
+        return NoContent();
+    }
+
+    /// <summary>
+    /// 启用用户
+    /// </summary>
+    /// <param name="id">用户标识</param>
+    /// <returns>启用后的用户</returns>
+    /// <response code="200">启用成功</response>
+    /// <response code="404">用户不存在</response>
+    [HttpPost("{id}/activate")]
+    [ApiDescription("启用用户")]
+    [Authorize(Policy = "user:activate")]
+    [ProducesResponseType(typeof(UserResult), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<UserResult>> Activate(long id)
+    {
+        var command = new ActivateUserCommand { Id = id };
+        var response = await _mediator.Send(command);
+        return Ok(response);
+    }
+
+    /// <summary>
+    /// 禁用用户
+    /// </summary>
+    /// <param name="id">用户标识</param>
+    /// <returns>禁用后的用户</returns>
+    /// <response code="200">禁用成功</response>
+    /// <response code="404">用户不存在</response>
+    [HttpPost("{id}/disable")]
+    [ApiDescription("禁用用户")]
+    [Authorize(Policy = "user:disable")]
+    [ProducesResponseType(typeof(UserResult), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<UserResult>> Disable(long id)
+    {
+        var command = new DisableUserCommand { Id = id };
+        var response = await _mediator.Send(command);
+        return Ok(response);
     }
 
     /// <summary>

@@ -1,6 +1,6 @@
 # 权限系统
 
-基于 RBAC 的权限系统，资源采用 Menu → Page → Api 三层树结构，前后端共用同一套角色-资源关联数据。
+基于 RBAC 的权限系统，资源采用 Menu / Page → Api 的三层树结构（根节点可以是 Menu 或 Page），前后端共用同一套角色-资源关联数据。
 
 ---
 
@@ -8,7 +8,7 @@
 
 **User → Role → Resource：多对多关系**
 
-Resource 三种类型，层级约束：根节点必须是 Menu → Menu 的子节点是 Page → Page 的子节点是 Page 或 Api → Api 不能有子节点。
+Resource 三种类型，层级约束：根节点可以是 Menu 或 Page → Menu 的子节点是 Menu 或 Page → Page 的子节点是 Api → Api 不能有子节点。
 
 资源核心字段：
 - `PermissionCode` — Page/Api 类型的权限编码，格式如 `user:create`

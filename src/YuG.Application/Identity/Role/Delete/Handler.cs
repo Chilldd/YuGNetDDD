@@ -1,5 +1,6 @@
 using MediatR;
 using YuG.Application.Common.Exceptions;
+using YuG.Application.Common.Guards;
 using YuG.Domain.Common;
 using YuG.Domain.Identity.Repositories;
 using RoleEntity = YuG.Domain.Identity.Entities.Role;
@@ -35,10 +36,7 @@ public class Handler : IRequestHandler<DeleteRoleCommand>
             throw new NotFoundException(nameof(RoleEntity), request.Id);
         }
 
-        if (role.IsSystem)
-        {
-            throw new DomainException("系统内置角色不允许删除");
-        }
+        SystemRoleGuard.AgainstModification(role);
 
         _roleRepository.Delete(role);
         await _roleRepository.SaveChangesAsync(cancellationToken);

@@ -14,6 +14,7 @@ Application核心定位是用例编排层（Use Case Orchestration Layer）
 - Command / Query = 输入模型（DTO）
 - Result = 输出模型（DTO）
 - Query 必须有 Result，Command 可选（一般返回 ID 或 Void）
+- `Common/Guards/` 下的守卫方法统一处理禁止操作，修改命令 Handler 必须调用对应守卫
 
 ---
 
@@ -28,6 +29,7 @@ Application
 │    │    │    ├── Handler.cs  （处理程序）
 ├── Common （通用）
 │    ├── Behaviors  （MediatR管道）
+│    ├── Guards （守卫类，如 SystemRoleGuard）
 │    ├── Exceptions （异常）
 │    ├── Interfaces （数据库上下文接口）
 

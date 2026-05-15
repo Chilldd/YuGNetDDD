@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using YuG.Domain.Identity.Entities;
+using YuG.Domain.Identity.Enums;
 using YuG.Domain.Identity.ValueObjects;
 
 namespace YuG.Infrastructure.Persistence.Identity.Configurations;
@@ -43,6 +44,15 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         builder.Property(u => u.PasswordHash)
             .HasMaxLength(500)
             .IsRequired();
+
+        // 用户状态配置（枚举转字符串）
+        builder.Property(u => u.Status)
+            .HasConversion(
+                v => v.ToString(),
+                s => Enum.Parse<UserStatus>(s, ignoreCase: true))
+            .HasMaxLength(20)
+            .IsRequired()
+            .HasDefaultValue(UserStatus.Active);
 
         // 配置 Owned Type：RefreshToken（值对象）
         builder.OwnsMany(u => u.RefreshTokens, rt =>

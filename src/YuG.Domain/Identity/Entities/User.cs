@@ -1,5 +1,6 @@
 using YuG.Domain.Common;
 using YuG.Domain.Common.Interfaces;
+using YuG.Domain.Identity.Enums;
 using YuG.Domain.Identity.ValueObjects;
 
 namespace YuG.Domain.Identity.Entities;
@@ -21,6 +22,11 @@ public class User : AggregateRoot
     /// 密码哈希
     /// </summary>
     public string PasswordHash { get; private set; } = string.Empty;
+
+    /// <summary>
+    /// 用户状态
+    /// </summary>
+    public UserStatus Status { get; private set; } = UserStatus.Active;
 
     /// <summary>
     /// 刷新令牌集合（只读）
@@ -48,6 +54,22 @@ public class User : AggregateRoot
     {
         Username = username;
         PasswordHash = passwordHash;
+    }
+
+    /// <summary>
+    /// 启用用户
+    /// </summary>
+    public void Activate()
+    {
+        Status = UserStatus.Active;
+    }
+
+    /// <summary>
+    /// 禁用用户
+    /// </summary>
+    public void Disable()
+    {
+        Status = UserStatus.Disabled;
     }
 
     /// <summary>

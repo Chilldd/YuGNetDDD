@@ -16,6 +16,7 @@ Repository = 聚合根的持久化抽象（Persistence Boundary）
 - 按聚合根划分仓储: 一个聚合根 = 一个 Repository, Repository 只操作聚合根
 - 聚合内部对象必须通过聚合根访问
 - 事务由 Application 层控制, Repository 不负责事务开启与提交, 只参与事务
+- 基类 Repository 方法标记为 virtual，子仓储可按需重写查询行为
 
 ---
 

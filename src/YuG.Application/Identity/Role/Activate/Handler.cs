@@ -1,5 +1,7 @@
 using MediatR;
 using YuG.Application.Common.Exceptions;
+using YuG.Application.Common.Guards;
+using YuG.Domain.Common;
 using YuG.Domain.Identity.Repositories;
 using RoleResult = YuG.Application.Identity.Role.Create.RoleResult;
 using RoleEntity = YuG.Domain.Identity.Entities.Role;
@@ -35,6 +37,8 @@ public class Handler : IRequestHandler<ActivateRoleCommand, RoleResult>
         {
             throw new NotFoundException(nameof(RoleEntity), request.Id);
         }
+
+        SystemRoleGuard.AgainstModification(role);
 
         role.Activate();
 

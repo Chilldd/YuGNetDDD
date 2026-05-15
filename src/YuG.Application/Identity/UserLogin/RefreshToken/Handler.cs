@@ -1,6 +1,7 @@
 using MediatR;
 using YuG.Domain.Common;
 using YuG.Domain.Common.Interfaces;
+using YuG.Domain.Identity.Enums;
 using YuG.Domain.Identity.Repositories;
 using DomainRefreshToken = YuG.Domain.Identity.ValueObjects.RefreshToken;
 
@@ -57,6 +58,12 @@ public class Handler : IRequestHandler<RefreshTokenCommand, RefreshTokenResult>
 
         // 撤销旧的刷新令牌
         user.RevokeRefreshToken(request.RefreshToken);
+
+        // 检查用户状态
+        if (user.Status == UserStatus.Disabled)
+        {
+            throw new DomainException("该账号已被禁用");
+        }
 
         // 查询用户角色
         var roles = await _roleRepository.GetByUserIdAsync(user.Id, cancellationToken);

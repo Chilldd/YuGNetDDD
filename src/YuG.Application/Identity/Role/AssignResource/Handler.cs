@@ -1,5 +1,6 @@
 using MediatR;
 using YuG.Application.Common.Exceptions;
+using YuG.Application.Common.Guards;
 using YuG.Domain.Common;
 using YuG.Domain.Identity.Repositories;
 using YuG.Domain.Permission.Repositories;
@@ -41,6 +42,8 @@ public class Handler : IRequestHandler<AssignResourceCommand, RoleResult>
         {
             throw new NotFoundException(nameof(RoleEntity), request.RoleId);
         }
+
+        SystemRoleGuard.AgainstModification(role);
 
         // 获取要分配的资源
         var resources = await _resourceRepository.GetByIdsAsync(request.ResourceIds, cancellationToken);

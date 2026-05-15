@@ -1,5 +1,7 @@
 using MediatR;
 using YuG.Application.Common.Exceptions;
+using YuG.Application.Common.Guards;
+using YuG.Domain.Common;
 using YuG.Domain.Identity.Repositories;
 using RoleEntity = YuG.Domain.Identity.Entities.Role;
 
@@ -34,6 +36,8 @@ public class Handler : IRequestHandler<UnassignResourceCommand>
         {
             throw new NotFoundException(nameof(RoleEntity), request.RoleId);
         }
+
+        SystemRoleGuard.AgainstModification(role);
 
         // 查找并移除资源
         var resource = role.Resources.FirstOrDefault(r => r.Id == request.ResourceId);

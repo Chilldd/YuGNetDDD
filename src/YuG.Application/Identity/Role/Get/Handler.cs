@@ -28,7 +28,7 @@ public class Handler : IRequestHandler<GetRoleQuery, GetRoleResult?>
     public async Task<GetRoleResult?> Handle(GetRoleQuery query, CancellationToken cancellationToken)
     {
         var role = await _roleRepository.GetByIdWithResourcesAsync(query.Id, cancellationToken);
-        if (role is null)
+        if (role is null || role.IsSystem)
         {
             return null;
         }

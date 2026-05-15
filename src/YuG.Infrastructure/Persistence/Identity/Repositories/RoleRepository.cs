@@ -22,6 +22,15 @@ public class RoleRepository : Repository<Role>, IRoleRepository
     }
 
     /// <inheritdoc />
+    public override async Task<IReadOnlyList<Role>> GetAllAsync(CancellationToken cancellationToken = default)
+    {
+        return await _context.Set<Role>()
+            .AsNoTracking()
+            .Where(r => !r.IsSystem)
+            .ToListAsync(cancellationToken);
+    }
+
+    /// <inheritdoc />
     public async Task<Role?> GetByCodeAsync(string code, CancellationToken cancellationToken = default)
     {
         return await _context.Set<Role>()

@@ -304,9 +304,9 @@ if (permissionCode?.Length > 100)
     {
         if (parentType is null)
         {
-            if (childType != ResourceType.Menu)
+            if (childType != ResourceType.Menu && childType != ResourceType.Page)
             {
-                throw new DomainException("根级别资源只能是 Menu 类型");
+                throw new DomainException("根级别资源只能是 Menu 或 Page 类型");
             }
             return;
         }
