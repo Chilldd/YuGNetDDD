@@ -55,12 +55,8 @@ public class Handler : IRequestHandler<AssignResourceCommand, RoleResult>
             throw new DomainException($"以下资源不存在：{string.Join(", ", notFoundIds)}");
         }
 
-        // 清除旧资源，分配新资源
-        role.ClearResources();
-        foreach (var resource in resources)
-        {
-            role.AssignResource(resource);
-        }
+        // 替换角色的所有资源（清空旧资源 + 分配新资源，触发领域事件）
+        role.ReplaceResources(resources);
 
         // 保存
         _roleRepository.Update(role);

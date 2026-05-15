@@ -1,6 +1,7 @@
 using YuG.Domain.Common;
 using YuG.Domain.Common.Interfaces;
 using YuG.Domain.Identity.Enums;
+using YuG.Domain.Identity.Events;
 using YuG.Domain.Identity.ValueObjects;
 
 namespace YuG.Domain.Identity.Entities;
@@ -92,15 +93,21 @@ public class User : AggregateRoot
                 _roles.Add(role);
             }
         }
+
+        var roleIds = roles.Select(r => r.Id).ToList();
+        AddDomainEvent(new UserRolesChangedEvent(Id, roleIds));
     }
 
     /// <summary>
-    /// 重置密码
+    /// 重置密码（自动递增世代版本、撤销所有刷新令牌，使现有会话全部失效）
     /// </summary>
     /// <param name="passwordHash">新密码哈希</param>
     public void ResetPassword(string passwordHash)
     {
         PasswordHash = passwordHash;
+        Generation++;
+        RevokeAllRefreshTokens();
+        AddDomainEvent(new UserPasswordResetEvent(Id, Username, Generation));
     }
 
     /// <summary>
@@ -134,6 +141,16 @@ public class User : AggregateRoot
                 _refreshTokens[i] = _refreshTokens[i].Revoke();
             }
         }
+    }
+
+    /// <summary>
+    /// 记录登录成功（递增世代版本、撤销旧刷新令牌，使旧会话全部失效）
+    /// </summary>
+    public void RecordLogin()
+    {
+        Generation++;
+        RevokeAllRefreshTokens();
+        AddDomainEvent(new UserLoggedInEvent(Id, Username, Generation));
     }
 
     /// <summary>

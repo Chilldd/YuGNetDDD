@@ -1,5 +1,6 @@
 using YuG.Domain.Common;
 using YuG.Domain.Identity.Enums;
+using YuG.Domain.Identity.Events;
 using YuG.Domain.Permission.Entities;
 
 namespace YuG.Domain.Identity.Entities;
@@ -191,6 +192,33 @@ public class Role : AggregateRoot
     {
         EnsureNotSystemRole();
         _resources.Clear();
+    }
+
+    /// <summary>
+    /// 替换角色的所有资源（清空旧资源+分配新资源，触发领域事件）
+    /// </summary>
+    /// <param name="resources">新资源集合</param>
+    public void ReplaceResources(IEnumerable<Resource> resources)
+    {
+        EnsureNotSystemRole();
+
+        _resources.Clear();
+
+        foreach (var resource in resources)
+        {
+            if (resource is null)
+            {
+                throw new DomainException("资源不能为空");
+            }
+
+            if (!_resources.Any(r => r.Id == resource.Id))
+            {
+                _resources.Add(resource);
+            }
+        }
+
+        var resourceIds = _resources.Select(r => r.Id).ToList();
+        AddDomainEvent(new RoleResourcesUpdatedEvent(Id, Code, resourceIds));
     }
 
     /// <summary>
