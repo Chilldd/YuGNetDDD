@@ -52,6 +52,7 @@ Application
 - Handler 必须单一职责
 - 所有输入必须通过 Command / Query，Controller 不直接调用 Domain
 - 所有外部依赖必须抽象接口
+- 业务变更时，代码修复完成后必须检查对应领域事件是否需要修改，防止代码逻辑不一致或缺少业务处理
 
 ---
 

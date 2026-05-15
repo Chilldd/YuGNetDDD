@@ -63,6 +63,12 @@ public static class DependencyInjection
         // 注册角色仓储
         services.AddScoped<IRoleRepository, RoleRepository>();
 
+        // 注册服务器信息服务
+        services.AddSingleton<IServerInfoService, ServerInfoService>();
+
+        // 注册健康检查服务
+        services.AddScoped<IHealthCheckService, HealthCheckService>();
+
         return services;
     }
 }

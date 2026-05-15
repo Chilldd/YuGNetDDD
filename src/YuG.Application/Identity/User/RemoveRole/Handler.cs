@@ -1,5 +1,6 @@
 using MediatR;
 using YuG.Application.Common.Exceptions;
+using YuG.Application.Common.Guards;
 using YuG.Domain.Common;
 using YuG.Domain.Identity.Repositories;
 using UserEntity = YuG.Domain.Identity.Entities.User;
@@ -40,10 +41,7 @@ public class Handler : IRequestHandler<RemoveUserRoleCommand>
         }
 
         // 系统内置角色不允许移除
-        if (role.IsSystem)
-        {
-            throw new DomainException("系统内置角色不允许移除");
-        }
+        SystemRoleGuard.AgainstModification(role);
 
         // 遍历用户，逐个移除角色
         foreach (var userId in request.UserIds)
