@@ -9,6 +9,7 @@ using YuG.Application.Identity.User.Delete;
 using YuG.Application.Identity.User.Disable;
 using YuG.Application.Identity.User.Get;
 using YuG.Application.Identity.User.GetList;
+using YuG.Application.Identity.User.RemoveRole;
 using YuG.Application.Identity.User.ResetPassword;
 
 namespace YuG.Api.Controllers.System;
@@ -187,6 +188,28 @@ public class UserController : ControllerBase
             return BadRequest("用户标识不匹配");
         }
 
+        await _mediator.Send(command);
+        return NoContent();
+    }
+
+    /// <summary>
+    /// 移除用户角色
+    /// </summary>
+    /// <param name="userId">用户标识</param>
+    /// <param name="roleId">角色标识</param>
+    /// <returns>操作结果</returns>
+    /// <response code="204">移除成功</response>
+    /// <response code="400">请求参数无效</response>
+    /// <response code="404">用户不存在</response>
+    [HttpDelete("{userId}/roles/{roleId}")]
+    [ApiDescription("移除用户角色")]
+    [Authorize(Policy = "user:removerole")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> RemoveRole(long userId, long roleId)
+    {
+        var command = new RemoveUserRoleCommand { UserId = userId, RoleId = roleId };
         await _mediator.Send(command);
         return NoContent();
     }

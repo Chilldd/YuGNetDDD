@@ -99,6 +99,21 @@ public class User : AggregateRoot
     }
 
     /// <summary>
+    /// 移除用户角色
+    /// </summary>
+    /// <param name="role">要移除的角色</param>
+    public void RemoveRole(Role role)
+    {
+        if (_roles.RemoveAll(r => r.Id == role.Id) == 0)
+        {
+            return;
+        }
+
+        var roleIds = _roles.Select(r => r.Id).ToList();
+        AddDomainEvent(new UserRolesChangedEvent(Id, roleIds));
+    }
+
+    /// <summary>
     /// 重置密码（自动递增世代版本、撤销所有刷新令牌，使现有会话全部失效）
     /// </summary>
     /// <param name="passwordHash">新密码哈希</param>
