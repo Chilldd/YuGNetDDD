@@ -1,4 +1,5 @@
 using MediatR;
+using YuG.Application.Common;
 using YuG.Domain.Common;
 using YuG.Domain.Common.Interfaces;
 using YuG.Domain.Identity.Enums;
@@ -16,6 +17,7 @@ public class Handler : IRequestHandler<LoginCommand, LoginResult>
     private readonly IPasswordHasher _passwordHasher;
     private readonly IUserRepository _userRepository;
     private readonly IRoleRepository _roleRepository;
+    private readonly ICache _cache;
 
     /// <summary>
     /// 初始化登录命令处理器
@@ -24,16 +26,19 @@ public class Handler : IRequestHandler<LoginCommand, LoginResult>
     /// <param name="passwordHasher">密码哈希服务</param>
     /// <param name="jwtTokenService">JWT令牌服务</param>
     /// <param name="roleRepository">角色仓储</param>
+    /// <param name="cache">缓存服务</param>
     public Handler(
         IUserRepository userRepository,
         IPasswordHasher passwordHasher,
         IJwtTokenService jwtTokenService,
-        IRoleRepository roleRepository)
+        IRoleRepository roleRepository,
+        ICache cache)
     {
         _userRepository = userRepository;
         _passwordHasher = passwordHasher;
         _jwtTokenService = jwtTokenService;
         _roleRepository = roleRepository;
+        _cache = cache;
     }
 
     /// <summary>
@@ -67,10 +72,20 @@ public class Handler : IRequestHandler<LoginCommand, LoginResult>
         var roles = await _roleRepository.GetByUserIdAsync(user.Id, cancellationToken);
         var roleCodes = roles.Select(r => r.Code).ToList();
 
-        // 生成访问令牌（包含角色信息）
-        var accessToken = _jwtTokenService.GenerateAccessToken(user.Id, user.Username, roleCodes);
+        // 递增令牌世代版本，使旧 token 全部失效（单设备登录）
+        user.IncrementGeneration();
 
-        // 生成刷新令牌
+        // 撤销所有旧刷新令牌
+        user.RevokeAllRefreshTokens();
+
+        // 生成访问令牌（包含当前世代版本）
+        var accessToken = _jwtTokenService.GenerateAccessToken(user.Id, user.Username, roleCodes, user.Generation);
+
+        // 缓存当前令牌世代版本
+        await _cache.SetAsync(CacheKeys.TokenGeneration(user.Id), user.Generation.ToString(),
+            TimeSpan.FromDays(7), cancellationToken);
+
+        // 生成新的刷新令牌
         var refreshTokenValue = _jwtTokenService.GenerateRefreshToken();
         var refreshToken = new DomainRefreshToken
         {
@@ -79,7 +94,7 @@ public class Handler : IRequestHandler<LoginCommand, LoginResult>
             CreatedAt = DateTime.UtcNow
         };
 
-        // 保存刷新令牌
+        // 保存新的刷新令牌
         user.AddRefreshToken(refreshToken);
         await _userRepository.SaveChangesAsync(cancellationToken);
 

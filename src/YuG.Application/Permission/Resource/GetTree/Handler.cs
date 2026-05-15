@@ -93,32 +93,32 @@ public class Handler : IRequestHandler<GetResourceTreeQuery, GetResourceTreeResu
         // 构建完整树形结构
         var allRoots = BuildTree(treeItems, null);
 
-        // 分离 Menu 根节点和孤立资源（无父级的非 Menu 类型）
-        var menuRoots = allRoots.Where(x => x.Type == nameof(ResourceType.Menu))
+        // 分离顶层节点（Menu 和 Page）和孤立 Api（无父级的 Api 类型）
+        var topLevelItems = allRoots.Where(x => x.Type != nameof(ResourceType.Api))
             .OrderBy(x => x.SortOrder)
             .ToList();
 
-        var orphanItems = allRoots.Where(x => x.Type != nameof(ResourceType.Menu))
+        var orphanApis = allRoots.Where(x => x.Type == nameof(ResourceType.Api))
             .OrderBy(x => x.SortOrder)
             .ToList();
 
-        // 如果有孤立资源，创建虚拟的"其他"节点统一收纳
-        if (orphanItems.Count > 0)
+        // 如果有孤立 Api，创建虚拟的"其他"节点统一收纳
+        if (orphanApis.Count > 0)
         {
-            menuRoots.Add(new ResourceTreeItem
+            topLevelItems.Add(new ResourceTreeItem
             {
                 Id = -1,
                 Name = "其他",
                 Code = "_other_",
                 Type = nameof(ResourceType.Menu),
-                Description = "未分组的资源（无父级）",
-                Children = orphanItems
+                Description = "未分组的 Api",
+                Children = orphanApis
             });
         }
 
         return new GetResourceTreeResult
         {
-            Items = menuRoots
+            Items = topLevelItems
         };
     }
 

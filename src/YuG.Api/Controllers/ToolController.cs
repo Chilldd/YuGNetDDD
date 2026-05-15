@@ -11,6 +11,7 @@ namespace YuG.Api.Controllers;
 /// </summary>
 [ApiController]
 [Route("api/tool")]
+[Authorize]
 public class ToolController : ControllerBase
 {
     private readonly IMediator _mediator;
@@ -34,8 +35,8 @@ public class ToolController : ControllerBase
     /// </summary>
     /// <returns>同步结果统计</returns>
     /// <response code="200">同步成功</response>
-    [AllowAnonymous]
     [HttpPost("sync-api-resources")]
+    [Authorize(Policy = "tool:syncapiresources")]
     [ApiDescription("同步扫描到的 API 端点到资源表")]
     [ProducesResponseType(typeof(SyncApiEndpointsResult), StatusCodes.Status200OK)]
     public async Task<ActionResult<SyncApiEndpointsResult>> SyncApiResources()

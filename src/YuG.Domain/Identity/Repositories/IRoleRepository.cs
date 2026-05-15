@@ -49,6 +49,14 @@ public interface IRoleRepository : IRepository<Role>
     Task<Role?> GetByIdWithResourcesAsync(long id, CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// 根据标识获取角色（包含用户导航）
+    /// </summary>
+    /// <param name="id">角色标识</param>
+    /// <param name="cancellationToken">取消令牌</param>
+    /// <returns>角色实体，不存在则返回 null</returns>
+    Task<Role?> GetByIdWithUsersAsync(long id, CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// 获取指定用户的所有角色（包含资源导航）
     /// </summary>
     /// <param name="userId">用户标识</param>

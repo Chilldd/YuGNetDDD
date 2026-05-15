@@ -34,9 +34,14 @@ public class Handler : IRequestHandler<SyncApiEndpointsCommand, SyncApiEndpoints
     {
         // 1. 获取现有 API 资源
         var existingResources = await _resourceRepository.GetAllAsync(cancellationToken);
-        var existingDict = existingResources
+        var existingByPath = existingResources
             .Where(r => r.Type == ResourceType.Api && r.HttpMethod.HasValue && r.Path is not null)
             .ToDictionary(r => (r.Path!.ToLowerInvariant(), r.HttpMethod!.Value), r => r);
+
+        // 按 PermissionCode 索引（唯一约束，用于路由变更等冲突检测）
+        var existingByPermissionCode = existingResources
+            .Where(r => r.Type == ResourceType.Api && r.PermissionCode is not null)
+            .ToDictionary(r => r.PermissionCode!, r => r);
 
         int addedCount = 0;
         int updatedCount = 0;
@@ -54,64 +59,41 @@ public class Handler : IRequestHandler<SyncApiEndpointsCommand, SyncApiEndpoints
             var normalizedPath = endpoint.Path.ToLowerInvariant();
             var key = (normalizedPath, endpoint.HttpMethod);
 
-            if (!existingDict.TryGetValue(key, out var existingResource))
+            if (!existingByPath.TryGetValue(key, out var existingResource))
             {
-                // 新增 API 资源
-                var resource = new ResourceEntity(
-                    name: endpoint.Description,
-                    code: endpoint.GeneratedCode,
-                    type: ResourceType.Api,
-                    description: endpoint.Description,
-                    parentId: null,
-                    sortOrder: sortOrder++,
-                    status: ResourceStatus.Active);
-                resource.ChangeEndpoint(endpoint.Path, endpoint.HttpMethod);
-                resource.ConfigureApiPermission(endpoint.PermissionCode);
+                // 按路径未匹配到，按 PermissionCode 查找
+                // 处理路由变更或同权限多端点场景：PermissionCode 已在其他路径上存在
+                if (endpoint.PermissionCode is not null &&
+                    existingByPermissionCode.TryGetValue(endpoint.PermissionCode, out var resourceByCode))
+                {
+                    existingResource = resourceByCode;
+                    ApplyEndpointUpdates(existingResource, endpoint, ref updatedCount);
+                    _resourceRepository.Update(existingResource);
 
-                await _resourceRepository.AddAsync(resource, cancellationToken);
-                addedCount++;
+                    // 更新路径索引，避免同一端点重复处理
+                    existingByPath[key] = existingResource;
+                }
+                else
+                {
+                    // 真正的新资源
+                    var resource = new ResourceEntity(
+                        name: endpoint.Description,
+                        code: endpoint.GeneratedCode,
+                        type: ResourceType.Api,
+                        description: endpoint.Description,
+                        parentId: null,
+                        sortOrder: sortOrder++,
+                        status: ResourceStatus.Active);
+                    resource.ChangeEndpoint(endpoint.Path, endpoint.HttpMethod);
+                    resource.ConfigureApiPermission(endpoint.PermissionCode);
+
+                    await _resourceRepository.AddAsync(resource, cancellationToken);
+                    addedCount++;
+                }
             }
             else
             {
-                // 检查是否需要更新
-                var needUpdate = false;
-
-                if (existingResource.Name != endpoint.Description)
-                {
-                    existingResource.Rename(endpoint.Description);
-                    needUpdate = true;
-                }
-
-                if (existingResource.Code != endpoint.GeneratedCode)
-                {
-                    existingResource.ChangeCode(endpoint.GeneratedCode);
-                    needUpdate = true;
-                }
-
-                if (existingResource.Path != endpoint.Path ||
-                    existingResource.HttpMethod != endpoint.HttpMethod)
-                {
-                    existingResource.ChangeEndpoint(endpoint.Path, endpoint.HttpMethod);
-                    needUpdate = true;
-                }
-
-                if (existingResource.Description != endpoint.Description)
-                {
-                    existingResource.ChangeDescription(endpoint.Description);
-                    needUpdate = true;
-                }
-
-                if (existingResource.PermissionCode != endpoint.PermissionCode)
-                {
-                    existingResource.ConfigureApiPermission(endpoint.PermissionCode);
-                    needUpdate = true;
-                }
-
-                if (needUpdate)
-                {
-                    _resourceRepository.Update(existingResource);
-                    updatedCount++;
-                }
+                ApplyEndpointUpdates(existingResource, endpoint, ref updatedCount);
             }
         }
 
@@ -125,5 +107,56 @@ public class Handler : IRequestHandler<SyncApiEndpointsCommand, SyncApiEndpoints
             UpdatedCount = updatedCount,
             TotalEndpoints = request.Endpoints.Count
         };
+    }
+
+    /// <summary>
+    /// 对现有资源应用端点变更的差异更新
+    /// </summary>
+    /// <param name="resource">现有资源</param>
+    /// <param name="endpoint">扫描到的端点信息</param>
+    /// <param name="updatedCount">更新计数器引用</param>
+    private void ApplyEndpointUpdates(
+        ResourceEntity resource,
+        DiscoveredEndpointInfo endpoint,
+        ref int updatedCount)
+    {
+        var needUpdate = false;
+
+        if (resource.Name != endpoint.Description)
+        {
+            resource.Rename(endpoint.Description);
+            needUpdate = true;
+        }
+
+        if (resource.Code != endpoint.GeneratedCode)
+        {
+            resource.ChangeCode(endpoint.GeneratedCode);
+            needUpdate = true;
+        }
+
+        if (resource.Path != endpoint.Path ||
+            resource.HttpMethod != endpoint.HttpMethod)
+        {
+            resource.ChangeEndpoint(endpoint.Path, endpoint.HttpMethod);
+            needUpdate = true;
+        }
+
+        if (resource.Description != endpoint.Description)
+        {
+            resource.ChangeDescription(endpoint.Description);
+            needUpdate = true;
+        }
+
+        if (resource.PermissionCode != endpoint.PermissionCode)
+        {
+            resource.ConfigureApiPermission(endpoint.PermissionCode);
+            needUpdate = true;
+        }
+
+        if (needUpdate)
+        {
+            _resourceRepository.Update(resource);
+            updatedCount++;
+        }
     }
 }

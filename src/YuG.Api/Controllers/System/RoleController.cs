@@ -9,6 +9,8 @@ using YuG.Application.Identity.Role.Disable;
 using YuG.Application.Identity.Role.Get;
 using YuG.Application.Identity.Role.GetList;
 using YuG.Application.Identity.Role.AssignResource;
+using YuG.Application.Identity.Role.AssignUsers;
+using YuG.Application.Identity.Role.GetUsers;
 using YuG.Application.Identity.Role.UnassignResource;
 using CreateRoleCommands = YuG.Application.Identity.Role.Create;
 using UpdateRoleCommands = YuG.Application.Identity.Role.Update;
@@ -216,6 +218,51 @@ public class RoleController : ControllerBase
     public async Task<IActionResult> UnassignResource(long roleId, long resourceId)
     {
         var command = new UnassignResourceCommand { RoleId = roleId, ResourceId = resourceId };
+        await _mediator.Send(command);
+        return NoContent();
+    }
+
+    /// <summary>
+    /// 获取角色关联的用户列表
+    /// </summary>
+    /// <param name="id">角色标识</param>
+    /// <returns>用户列表</returns>
+    /// <response code="200">查询成功</response>
+    /// <response code="404">角色不存在</response>
+    [HttpGet("{id}/users")]
+    [ApiDescription("获取角色关联的用户列表")]
+    [Authorize(Policy = "role:getusers")]
+    [ProducesResponseType(typeof(GetRoleUsersResult), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<GetRoleUsersResult>> GetUsers(long id)
+    {
+        var query = new GetRoleUsersQuery { RoleId = id };
+        var response = await _mediator.Send(query);
+        return Ok(response);
+    }
+
+    /// <summary>
+    /// 给角色分配用户（追加模式，已有用户跳过）
+    /// </summary>
+    /// <param name="id">角色标识</param>
+    /// <param name="command">分配用户命令</param>
+    /// <returns>操作结果</returns>
+    /// <response code="204">分配成功</response>
+    /// <response code="400">请求参数无效或用户不存在</response>
+    /// <response code="404">角色不存在</response>
+    [HttpPost("{id}/users")]
+    [ApiDescription("给角色分配用户")]
+    [Authorize(Policy = "role:assignusers")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> AssignUsers(long id, [FromBody] AssignRoleUsersCommand command)
+    {
+        if (id != command.RoleId)
+        {
+            return BadRequest("角色标识不匹配");
+        }
+
         await _mediator.Send(command);
         return NoContent();
     }

@@ -29,6 +29,11 @@ public class User : AggregateRoot
     public UserStatus Status { get; private set; } = UserStatus.Active;
 
     /// <summary>
+    /// 令牌世代版本（重置密码时递增，所有旧令牌失效）
+    /// </summary>
+    public int Generation { get; private set; }
+
+    /// <summary>
     /// 刷新令牌集合（只读）
     /// </summary>
     public IReadOnlyCollection<RefreshToken> RefreshTokens => _refreshTokens.AsReadOnly();
@@ -90,6 +95,23 @@ public class User : AggregateRoot
     }
 
     /// <summary>
+    /// 重置密码
+    /// </summary>
+    /// <param name="passwordHash">新密码哈希</param>
+    public void ResetPassword(string passwordHash)
+    {
+        PasswordHash = passwordHash;
+    }
+
+    /// <summary>
+    /// 递增令牌世代版本（重置密码时调用，使所有旧令牌立即失效）
+    /// </summary>
+    public void IncrementGeneration()
+    {
+        Generation++;
+    }
+
+    /// <summary>
     /// 验证密码
     /// </summary>
     /// <param name="passwordHasher">密码哈希服务</param>
@@ -98,6 +120,20 @@ public class User : AggregateRoot
     public bool VerifyPassword(IPasswordHasher passwordHasher, string password)
     {
         return passwordHasher.Verify(password, PasswordHash);
+    }
+
+    /// <summary>
+    /// 撤销所有有效的刷新令牌（用于重置密码等场景）
+    /// </summary>
+    public void RevokeAllRefreshTokens()
+    {
+        for (var i = 0; i < _refreshTokens.Count; i++)
+        {
+            if (!_refreshTokens[i].IsRevoked)
+            {
+                _refreshTokens[i] = _refreshTokens[i].Revoke();
+            }
+        }
     }
 
     /// <summary>

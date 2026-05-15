@@ -39,6 +39,12 @@ public class PermissionAuthorizationHandler : AuthorizationHandler<PermissionReq
         AuthorizationHandlerContext context,
         PermissionRequirement requirement)
     {
+        // 用户未认证时不处理授权（让框架返回 401）
+        if (context.User.Identity?.IsAuthenticated != true)
+        {
+            return;
+        }
+
         // 检查是否为超级管理员（系统角色），拥有所有权限
         if (await IsSuperAdminAsync())
         {

@@ -78,6 +78,14 @@ public class RoleRepository : Repository<Role>, IRoleRepository
     }
 
     /// <inheritdoc />
+    public async Task<Role?> GetByIdWithUsersAsync(long id, CancellationToken cancellationToken = default)
+    {
+        return await _context.Set<Role>()
+            .Include(r => r.Users)
+            .FirstOrDefaultAsync(r => r.Id == id, cancellationToken);
+    }
+
+    /// <inheritdoc />
     public async Task<IReadOnlyList<Role>> GetByUserIdWithResourcesAsync(long userId, CancellationToken cancellationToken = default)
     {
         return await _context.Set<Role>()

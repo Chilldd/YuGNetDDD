@@ -1,4 +1,5 @@
 using MediatR;
+using YuG.Application.Common;
 using YuG.Domain.Common;
 using YuG.Domain.Common.Interfaces;
 using YuG.Domain.Identity.Enums;
@@ -15,6 +16,7 @@ public class Handler : IRequestHandler<RefreshTokenCommand, RefreshTokenResult>
     private readonly IJwtTokenService _jwtTokenService;
     private readonly IUserRepository _userRepository;
     private readonly IRoleRepository _roleRepository;
+    private readonly ICache _cache;
 
     /// <summary>
     /// 初始化刷新令牌命令处理器
@@ -22,14 +24,17 @@ public class Handler : IRequestHandler<RefreshTokenCommand, RefreshTokenResult>
     /// <param name="userRepository">用户仓储</param>
     /// <param name="jwtTokenService">JWT令牌服务</param>
     /// <param name="roleRepository">角色仓储</param>
+    /// <param name="cache">缓存服务</param>
     public Handler(
         IUserRepository userRepository,
         IJwtTokenService jwtTokenService,
-        IRoleRepository roleRepository)
+        IRoleRepository roleRepository,
+        ICache cache)
     {
         _userRepository = userRepository;
         _jwtTokenService = jwtTokenService;
         _roleRepository = roleRepository;
+        _cache = cache;
     }
 
     /// <summary>
@@ -69,8 +74,12 @@ public class Handler : IRequestHandler<RefreshTokenCommand, RefreshTokenResult>
         var roles = await _roleRepository.GetByUserIdAsync(user.Id, cancellationToken);
         var roleCodes = roles.Select(r => r.Code).ToList();
 
-        // 生成新的访问令牌（包含角色信息）
-        var accessToken = _jwtTokenService.GenerateAccessToken(user.Id, user.Username, roleCodes);
+        // 生成新的访问令牌（包含当前世代版本）
+        var accessToken = _jwtTokenService.GenerateAccessToken(user.Id, user.Username, roleCodes, user.Generation);
+
+        // 更新缓存中的世代版本
+        await _cache.SetAsync(CacheKeys.TokenGeneration(user.Id), user.Generation.ToString(),
+            TimeSpan.FromDays(7), cancellationToken);
 
         // 生成新的刷新令牌
         var newRefreshTokenValue = _jwtTokenService.GenerateRefreshToken();

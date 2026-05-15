@@ -194,6 +194,28 @@ public class Role : AggregateRoot
     }
 
     /// <summary>
+    /// 分配用户到角色（追加模式，已有用户跳过）
+    /// </summary>
+    /// <param name="users">用户集合</param>
+    public void AssignUsers(IEnumerable<User> users)
+    {
+        EnsureNotSystemRole();
+
+        foreach (var user in users)
+        {
+            if (user is null)
+            {
+                throw new DomainException("用户不能为空");
+            }
+
+            if (!_users.Any(u => u.Id == user.Id))
+            {
+                _users.Add(user);
+            }
+        }
+    }
+
+    /// <summary>
     /// 确保当前角色不是系统内置角色，防止通过接口修改
     /// </summary>
     /// <exception cref="DomainException">当角色为系统内置角色时抛出</exception>

@@ -9,6 +9,7 @@ using YuG.Application.Identity.User.Delete;
 using YuG.Application.Identity.User.Disable;
 using YuG.Application.Identity.User.Get;
 using YuG.Application.Identity.User.GetList;
+using YuG.Application.Identity.User.ResetPassword;
 
 namespace YuG.Api.Controllers.System;
 
@@ -141,6 +142,25 @@ public class UserController : ControllerBase
     public async Task<ActionResult<UserResult>> Disable(long id)
     {
         var command = new DisableUserCommand { Id = id };
+        var response = await _mediator.Send(command);
+        return Ok(response);
+    }
+
+    /// <summary>
+    /// 重置用户密码
+    /// </summary>
+    /// <param name="id">用户标识</param>
+    /// <returns>重置密码后的用户</returns>
+    /// <response code="200">重置成功</response>
+    /// <response code="404">用户不存在</response>
+    [HttpPost("{id}/reset-password")]
+    [ApiDescription("重置用户密码")]
+    [Authorize(Policy = "user:resetpassword")]
+    [ProducesResponseType(typeof(UserResult), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<UserResult>> ResetPassword(long id)
+    {
+        var command = new ResetPasswordCommand { Id = id };
         var response = await _mediator.Send(command);
         return Ok(response);
     }

@@ -55,8 +55,9 @@ public class JwtTokenService : IJwtTokenService
     /// <param name="userId">用户ID</param>
     /// <param name="username">用户名</param>
     /// <param name="roles">用户角色编码列表</param>
+    /// <param name="generation">令牌世代版本</param>
     /// <returns>JWT 访问令牌</returns>
-    public string GenerateAccessToken(long userId, string username, IReadOnlyList<string> roles)
+    public string GenerateAccessToken(long userId, string username, IReadOnlyList<string> roles, int generation = 0)
     {
         var tokenHandler = new JwtSecurityTokenHandler();
         var key = Encoding.UTF8.GetBytes(_options.SecretKey);
@@ -66,7 +67,8 @@ public class JwtTokenService : IJwtTokenService
             new(JwtRegisteredClaimNames.Sub, userId.ToString()),
             new(JwtRegisteredClaimNames.UniqueName, username),
             new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-            new(JwtRegisteredClaimNames.Iat, DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString())
+            new(JwtRegisteredClaimNames.Iat, DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString()),
+            new("gen", generation.ToString())
         };
 
         // 将角色编码写入 claims（每个角色一个独立的 ClaimTypes.Role claim）

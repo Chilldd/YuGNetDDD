@@ -11,8 +11,9 @@ public interface IJwtTokenService
     /// <param name="userId">用户ID</param>
     /// <param name="username">用户名</param>
     /// <param name="roles">用户角色编码列表</param>
+    /// <param name="generation">令牌世代版本</param>
     /// <returns>JWT 访问令牌</returns>
-    string GenerateAccessToken(long userId, string username, IReadOnlyList<string> roles);
+    string GenerateAccessToken(long userId, string username, IReadOnlyList<string> roles, int generation = 0);
 
     /// <summary>
     /// 生成刷新令牌

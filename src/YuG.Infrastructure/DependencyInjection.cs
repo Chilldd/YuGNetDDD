@@ -50,6 +50,10 @@ public static class DependencyInjection
         // 注册密码哈希服务
         services.AddSingleton<IPasswordHasher, PasswordHasher>();
 
+        // 注册缓存服务
+        services.Configure<SqliteCacheOptions>(configuration.GetSection("Cache"));
+        services.AddSingleton<ICache, SqliteCache>();
+
         // 注册用户仓储
         services.AddScoped<IUserRepository, UserRepository>();
 

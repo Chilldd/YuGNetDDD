@@ -45,6 +45,10 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
             .HasMaxLength(500)
             .IsRequired();
 
+        // 令牌世代版本配置
+        builder.Property(u => u.Generation)
+            .HasDefaultValue(0);
+
         // 用户状态配置（枚举转字符串）
         builder.Property(u => u.Status)
             .HasConversion(

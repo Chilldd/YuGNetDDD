@@ -30,7 +30,6 @@ public class UserRepository : Repository<User>, IUserRepository
     public async Task<User?> GetByUsernameAsync(string username, CancellationToken cancellationToken = default)
     {
         return await _context.Users
-            .AsNoTracking()
             .Include(u => u.RefreshTokens)
             .FirstOrDefaultAsync(u => u.Username == username, cancellationToken);
     }
@@ -53,6 +52,14 @@ public class UserRepository : Repository<User>, IUserRepository
     {
         return await _context.Users
             .Include(u => u.Roles)
+            .FirstOrDefaultAsync(u => u.Id == id, cancellationToken);
+    }
+
+    /// <inheritdoc />
+    public async Task<User?> GetByIdWithRefreshTokensAsync(long id, CancellationToken cancellationToken = default)
+    {
+        return await _context.Users
+            .Include(u => u.RefreshTokens)
             .FirstOrDefaultAsync(u => u.Id == id, cancellationToken);
     }
 }

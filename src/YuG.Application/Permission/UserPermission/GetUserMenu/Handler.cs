@@ -90,9 +90,37 @@ public class Handler : IRequestHandler<GetUserMenuQuery, GetUserMenuResult>
         .OrderBy(x => x.SortOrder)
         .ToList();
 
+        // 收集已被 Menu 引用的 Page ID
+        var attachedPageIds = menuResources
+            .SelectMany(m => pageResources.Where(p => p.ParentId == m.Id))
+            .Select(p => p.Id)
+            .ToHashSet();
+
+        // 无父级 Page 作为顶层节点（首页等顶级页面）
+        var orphanPages = pageResources
+            .Where(p => p.ParentId is null && !attachedPageIds.Contains(p.Id))
+            .OrderBy(p => p.SortOrder)
+            .Select(p => new UserMenuTreeItem
+            {
+                Id = p.Id,
+                Name = p.Name,
+                Code = p.Code,
+                Icon = p.Icon,
+                Route = p.Route,
+                IsHidden = p.IsHidden,
+                Badge = p.Badge,
+                SortOrder = p.SortOrder,
+                PermissionCode = p.PermissionCode
+            })
+            .ToList();
+
+        var allItems = menuItems.Concat(orphanPages)
+            .OrderBy(x => x.SortOrder)
+            .ToList();
+
         return new GetUserMenuResult
         {
-            Items = menuItems
+            Items = allItems
         };
     }
 
