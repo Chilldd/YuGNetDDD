@@ -9,14 +9,14 @@ namespace YuG.Application.Identity.User.RemoveRole;
 public class RemoveUserRoleCommand : IRequest
 {
     /// <summary>
-    /// 用户标识
-    /// </summary>
-    public long UserId { get; init; }
-
-    /// <summary>
     /// 角色标识
     /// </summary>
     public long RoleId { get; init; }
+
+    /// <summary>
+    /// 用户标识列表
+    /// </summary>
+    public List<long> UserIds { get; init; } = [];
 }
 
 /// <summary>
@@ -29,10 +29,11 @@ public class RemoveUserRoleCommandValidator : AbstractValidator<RemoveUserRoleCo
     /// </summary>
     public RemoveUserRoleCommandValidator()
     {
-        RuleFor(x => x.UserId)
-            .GreaterThan(0).WithMessage("用户标识必须大于 0");
-
         RuleFor(x => x.RoleId)
             .GreaterThan(0).WithMessage("角色标识必须大于 0");
+
+        RuleFor(x => x.UserIds)
+            .NotNull().WithMessage("用户标识列表不能为空")
+            .NotEmpty().WithMessage("用户标识列表不能为空");
     }
 }

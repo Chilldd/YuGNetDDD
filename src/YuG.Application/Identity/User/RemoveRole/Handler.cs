@@ -32,13 +32,6 @@ public class Handler : IRequestHandler<RemoveUserRoleCommand>
     /// <param name="cancellationToken">取消令牌</param>
     public async Task Handle(RemoveUserRoleCommand request, CancellationToken cancellationToken)
     {
-        // 获取用户（包含角色导航）
-        var user = await _userRepository.GetByIdWithRolesAsync(request.UserId, cancellationToken);
-        if (user is null)
-        {
-            throw new NotFoundException(nameof(UserEntity), request.UserId);
-        }
-
         // 获取角色
         var role = await _roleRepository.GetByIdAsync(request.RoleId, cancellationToken);
         if (role is null)
@@ -52,11 +45,19 @@ public class Handler : IRequestHandler<RemoveUserRoleCommand>
             throw new DomainException("系统内置角色不允许移除");
         }
 
-        // 移除用户角色
-        user.RemoveRole(role);
+        // 遍历用户，逐个移除角色
+        foreach (var userId in request.UserIds)
+        {
+            var user = await _userRepository.GetByIdWithRolesAsync(userId, cancellationToken);
+            if (user is null)
+            {
+                throw new NotFoundException(nameof(UserEntity), userId);
+            }
 
-        // 保存
-        _userRepository.Update(user);
+            user.RemoveRole(role);
+            _userRepository.Update(user);
+        }
+
         await _userRepository.SaveChangesAsync(cancellationToken);
     }
 }

@@ -193,24 +193,24 @@ public class UserController : ControllerBase
     }
 
     /// <summary>
-    /// 移除用户角色
+    /// 移除用户角色（批量：从多个用户移除同一个角色）
     /// </summary>
-    /// <param name="userId">用户标识</param>
     /// <param name="roleId">角色标识</param>
+    /// <param name="command">移除用户角色命令</param>
     /// <returns>操作结果</returns>
     /// <response code="204">移除成功</response>
     /// <response code="400">请求参数无效</response>
     /// <response code="404">用户不存在</response>
-    [HttpDelete("{userId}/roles/{roleId}")]
+    [HttpDelete("roles/{roleId}")]
     [ApiDescription("移除用户角色")]
     [Authorize(Policy = "user:removerole")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> RemoveRole(long userId, long roleId)
+    public async Task<IActionResult> RemoveRole(long roleId, [FromBody] RemoveUserRoleCommand command)
     {
-        var command = new RemoveUserRoleCommand { UserId = userId, RoleId = roleId };
-        await _mediator.Send(command);
+        var cmd = new RemoveUserRoleCommand { RoleId = roleId, UserIds = command.UserIds };
+        await _mediator.Send(cmd);
         return NoContent();
     }
 }
