@@ -33,7 +33,7 @@ public class StatusController : ControllerBase
     /// <response code="200">查询成功</response>
     [HttpGet]
     [ApiDescription("获取系统状态")]
-    [Authorize(Policy = "status:get")]
+    [Authorize(Policy = "status:getstatus")]
     [ProducesResponseType(typeof(GetStatusResult), StatusCodes.Status200OK)]
     public async Task<ActionResult<GetStatusResult>> GetStatus()
     {

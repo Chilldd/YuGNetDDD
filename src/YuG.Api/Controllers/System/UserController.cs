@@ -41,7 +41,7 @@ public class UserController : ControllerBase
     /// <response code="200">查询成功</response>
     [HttpGet]
     [ApiDescription("获取用户列表")]
-    [Authorize(Policy = "user:get")]
+    [Authorize(Policy = "user:getlist")]
     [ProducesResponseType(typeof(GetUserListResult), StatusCodes.Status200OK)]
     public async Task<ActionResult<GetUserListResult>> GetList([FromQuery] GetUserListQuery query)
     {
