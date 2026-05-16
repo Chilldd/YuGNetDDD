@@ -14,8 +14,6 @@ public abstract class Repository<TAggregate> : IRepository<TAggregate>
     protected readonly ApplicationDbContext _context;
     private readonly IDomainEventPublisher _domainEventPublisher;
     protected readonly DbSet<TAggregate> _dbSet;
-    private readonly HashSet<TAggregate> _trackedAggregates = [];
-
     /// <summary>
     /// 初始化仓储
     /// </summary>
@@ -52,7 +50,6 @@ public abstract class Repository<TAggregate> : IRepository<TAggregate>
     public async Task<TAggregate> AddAsync(TAggregate aggregate, CancellationToken cancellationToken = default)
     {
         await _dbSet.AddAsync(aggregate, cancellationToken);
-        _trackedAggregates.Add(aggregate);
         return aggregate;
     }
 
@@ -60,14 +57,12 @@ public abstract class Repository<TAggregate> : IRepository<TAggregate>
     public void Update(TAggregate aggregate)
     {
         _dbSet.Update(aggregate);
-        _trackedAggregates.Add(aggregate);
     }
 
     /// <inheritdoc />
     public void Delete(TAggregate aggregate)
     {
         _dbSet.Remove(aggregate);
-        _trackedAggregates.Add(aggregate);
     }
 
     /// <inheritdoc />
@@ -79,26 +74,30 @@ public abstract class Repository<TAggregate> : IRepository<TAggregate>
     /// <inheritdoc />
     public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
+        // 获取当前被 EF Core 追踪且有领域事件的聚合根
+        var aggregatesWithEvents = _context.ChangeTracker.Entries<TAggregate>()
+            .Where(e => e.Entity.DomainEvents.Count > 0)
+            .Select(e => e.Entity)
+            .ToList();
+
         // 保存变更到数据库
         var result = await _context.SaveChangesAsync(cancellationToken);
 
-        // 收集所有已操作聚合根中的领域事件
-        var domainEvents = _trackedAggregates
+        // 收集并发布领域事件
+        var domainEvents = aggregatesWithEvents
             .SelectMany(a => a.DomainEvents)
             .ToList();
 
-        // 发布领域事件
-        if (domainEvents.Any())
+        if (domainEvents.Count > 0)
         {
             await _domainEventPublisher.PublishAsync(domainEvents, cancellationToken);
         }
 
-        // 清空所有领域事件和跟踪集合
-        foreach (var aggregate in _trackedAggregates)
+        // 清空所有领域事件
+        foreach (var aggregate in aggregatesWithEvents)
         {
             aggregate.ClearDomainEvents();
         }
-        _trackedAggregates.Clear();
 
         return result;
     }
