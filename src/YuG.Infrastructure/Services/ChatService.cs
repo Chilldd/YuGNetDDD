@@ -27,18 +27,16 @@ public class ChatService : IChatService
     }
 
     /// <inheritdoc />
-    public async Task<ChatReplyResult> ChatAsync(string message, List<ChatMessageDto> history, long userId, CancellationToken ct)
+    public async Task<ChatReplyResult> ChatAsync(List<ChatMessageDto> messages, long userId, CancellationToken ct)
     {
-        var messages = history
+        var infraMessages = messages
             .Select(m => new InfrastructureChatMessageDto { Role = m.Role, Content = m.Content })
             .ToList();
-
-        messages.Add(new InfrastructureChatMessageDto { Role = "user", Content = message });
 
         var request = new InfrastructureChatRequest
         {
             UserId = userId,
-            Messages = messages,
+            Messages = infraMessages,
         };
 
         var response = await _chatClient.ChatAsync(request, ct);
@@ -53,21 +51,18 @@ public class ChatService : IChatService
 
     /// <inheritdoc />
     public async IAsyncEnumerable<ChatStreamDeltaResult> StreamAsync(
-        string message,
-        List<ChatMessageDto> history,
+        List<ChatMessageDto> messages,
         long userId,
         [EnumeratorCancellation] CancellationToken ct)
     {
-        var messages = history
+        var infraMessages = messages
             .Select(m => new InfrastructureChatMessageDto { Role = m.Role, Content = m.Content })
             .ToList();
-
-        messages.Add(new InfrastructureChatMessageDto { Role = "user", Content = message });
 
         var request = new InfrastructureChatRequest
         {
             UserId = userId,
-            Messages = messages,
+            Messages = infraMessages,
         };
 
         var httpResponse = await _chatClient.StreamAsync(request, ct);

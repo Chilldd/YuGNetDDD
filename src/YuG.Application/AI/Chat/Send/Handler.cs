@@ -40,14 +40,16 @@ public class ChatCommandHandler : IRequestHandler<ChatCommand, ChatReplyResult>
         // 1. 加载或创建会话
         var session = await LoadOrCreateSessionAsync(request.SessionId, userId, cancellationToken);
 
-        // 2. 构造消息历史
-        var history = session.Messages
+        // 2. 构造完整消息列表（历史 + 当前用户输入）
+        var messages = session.Messages
             .OrderBy(m => m.SequenceNumber)
             .Select(m => new ChatMessageDto(m.Role, m.Content))
             .ToList();
 
+        messages.Add(new ChatMessageDto("user", request.Message));
+
         // 3. 调 AI Gateway
-        var result = await _chatService.ChatAsync(request.Message, history, userId, cancellationToken);
+        var result = await _chatService.ChatAsync(messages, userId, cancellationToken);
 
         // 4. 持久化消息
         session.AddMessage("user", request.Message);
