@@ -123,6 +123,7 @@ public class ChatService : IChatService
         return null;
     }
 
+    /// <summary>从用量对象中反射提取各 Token 计数字段。</summary>
     private static UsageData ParseUsageObject(object obj)
     {
         static int GetInt(object target, string name1, string name2)
