@@ -1,5 +1,3 @@
-using YuG.Common.Models;
-
 namespace YuG.Application.Permission.Resource.GetList;
 
 /// <summary>
@@ -83,7 +81,3 @@ public record ResourceListItem
     public string Status { get; init; } = string.Empty;
 }
 
-/// <summary>
-/// 获取资源列表响应
-/// </summary>
-public record GetResourceListResult : PageResult<ResourceListItem>;

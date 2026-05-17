@@ -6,7 +6,7 @@ namespace YuG.Application.Identity.Role.GetList;
 /// <summary>
 /// 获取角色列表查询
 /// </summary>
-public class GetRoleListQuery : IRequest<GetRoleListResult>
+public class GetRoleListQuery : IRequest<PageResult<RoleListItem>>
 {
     /// <summary>
     /// 当前页码（从 1 开始）
@@ -18,11 +18,6 @@ public class GetRoleListQuery : IRequest<GetRoleListResult>
     /// </summary>
     public int PageSize { get; init; } = 10;
 }
-
-/// <summary>
-/// 获取角色列表查询结果
-/// </summary>
-public record GetRoleListResult : PageResult<RoleListItem>;
 
 /// <summary>
 /// 角色列表项

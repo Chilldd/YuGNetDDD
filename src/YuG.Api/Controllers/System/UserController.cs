@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using YuG.Api.Helpers;
 using YuG.Application.Identity.Role.SetUserRoles;
+using YuG.Common.Models;
 using YuG.Application.Identity.User.Activate;
 using YuG.Application.Identity.User.Create;
 using YuG.Application.Identity.User.Delete;
@@ -42,8 +43,8 @@ public class UserController : ControllerBase
     [HttpGet]
     [ApiDescription("获取用户列表")]
     [Authorize(Policy = "user:getlist")]
-    [ProducesResponseType(typeof(GetUserListResult), StatusCodes.Status200OK)]
-    public async Task<ActionResult<GetUserListResult>> GetList([FromQuery] GetUserListQuery query)
+    [ProducesResponseType(typeof(PageResult<UserListItem>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<PageResult<UserListItem>>> GetList([FromQuery] GetUserListQuery query)
     {
         var response = await _mediator.Send(query);
         return Ok(response);

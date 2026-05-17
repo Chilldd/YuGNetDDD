@@ -1,5 +1,6 @@
 using FluentValidation;
 using MediatR;
+using YuG.Common.Models;
 using YuG.Domain.Permission.Enums;
 
 namespace YuG.Application.Permission.Resource.GetList;
@@ -7,7 +8,7 @@ namespace YuG.Application.Permission.Resource.GetList;
 /// <summary>
 /// 获取资源列表查询
 /// </summary>
-public class GetResourceListQuery : IRequest<GetResourceListResult>
+public class GetResourceListQuery : IRequest<PageResult<ResourceListItem>>
 {
     /// <summary>
     /// 当前页码（从 1 开始）

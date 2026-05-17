@@ -6,7 +6,7 @@ namespace YuG.Application.Identity.User.GetList;
 /// <summary>
 /// 获取用户列表查询
 /// </summary>
-public class GetUserListQuery : IRequest<GetUserListResult>
+public class GetUserListQuery : IRequest<PageResult<UserListItem>>
 {
     /// <summary>
     /// 当前页码（从 1 开始）
@@ -18,11 +18,6 @@ public class GetUserListQuery : IRequest<GetUserListResult>
     /// </summary>
     public int PageSize { get; init; } = 10;
 }
-
-/// <summary>
-/// 获取用户列表查询结果
-/// </summary>
-public record GetUserListResult : PageResult<UserListItem>;
 
 /// <summary>
 /// 用户列表项

@@ -1,4 +1,5 @@
 using MediatR;
+using YuG.Common.Models;
 using YuG.Domain.Identity.Repositories;
 
 namespace YuG.Application.Identity.User.GetList;
@@ -6,7 +7,7 @@ namespace YuG.Application.Identity.User.GetList;
 /// <summary>
 /// 获取用户列表查询处理器
 /// </summary>
-public class Handler : IRequestHandler<GetUserListQuery, GetUserListResult>
+public class Handler : IRequestHandler<GetUserListQuery, PageResult<UserListItem>>
 {
     private readonly IUserRepository _userRepository;
 
@@ -25,7 +26,7 @@ public class Handler : IRequestHandler<GetUserListQuery, GetUserListResult>
     /// <param name="query">获取用户列表查询</param>
     /// <param name="cancellationToken">取消令牌</param>
     /// <returns>用户列表结果</returns>
-    public async Task<GetUserListResult> Handle(GetUserListQuery query, CancellationToken cancellationToken)
+    public async Task<PageResult<UserListItem>> Handle(GetUserListQuery query, CancellationToken cancellationToken)
     {
         var pageResult = await _userRepository.GetUsersPagedAsync(query.Page, query.PageSize, cancellationToken);
 
@@ -37,7 +38,7 @@ public class Handler : IRequestHandler<GetUserListQuery, GetUserListResult>
             CreatedAt = u.CreatedAt,
         }).ToList();
 
-        return new GetUserListResult
+        return new PageResult<UserListItem>
         {
             Items = items,
             TotalCount = pageResult.TotalCount,

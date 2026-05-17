@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using YuG.Api.Helpers;
 using YuG.Application.Identity.Role.Activate;
+using YuG.Common.Models;
 using YuG.Application.Identity.Role.Create;
 using YuG.Application.Identity.Role.Delete;
 using YuG.Application.Identity.Role.Disable;
@@ -45,8 +46,8 @@ public class RoleController : ControllerBase
     [HttpGet]
     [ApiDescription("获取角色列表")]
     [Authorize(Policy = "role:get")]
-    [ProducesResponseType(typeof(GetRoleListResult), StatusCodes.Status200OK)]
-    public async Task<ActionResult<GetRoleListResult>> Get([FromQuery] GetRoleListQuery query)
+    [ProducesResponseType(typeof(PageResult<RoleListItem>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<PageResult<RoleListItem>>> Get([FromQuery] GetRoleListQuery query)
     {
         var response = await _mediator.Send(query);
         return Ok(response);

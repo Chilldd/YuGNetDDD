@@ -1,4 +1,5 @@
 using MediatR;
+using YuG.Common.Models;
 using YuG.Domain.Identity.Repositories;
 
 namespace YuG.Application.Identity.Role.GetList;
@@ -6,7 +7,7 @@ namespace YuG.Application.Identity.Role.GetList;
 /// <summary>
 /// 获取角色列表查询处理器
 /// </summary>
-public class Handler : IRequestHandler<GetRoleListQuery, GetRoleListResult>
+public class Handler : IRequestHandler<GetRoleListQuery, PageResult<RoleListItem>>
 {
     private readonly IRoleRepository _roleRepository;
 
@@ -25,7 +26,7 @@ public class Handler : IRequestHandler<GetRoleListQuery, GetRoleListResult>
     /// <param name="query">获取角色列表查询</param>
     /// <param name="cancellationToken">取消令牌</param>
     /// <returns>角色列表结果</returns>
-    public async Task<GetRoleListResult> Handle(GetRoleListQuery query, CancellationToken cancellationToken)
+    public async Task<PageResult<RoleListItem>> Handle(GetRoleListQuery query, CancellationToken cancellationToken)
     {
         var pageResult = await _roleRepository.GetRolesPagedAsync(query.Page, query.PageSize, cancellationToken);
 
@@ -40,7 +41,7 @@ public class Handler : IRequestHandler<GetRoleListQuery, GetRoleListResult>
             CreatedAt = r.CreatedAt,
         }).ToList();
 
-        return new GetRoleListResult
+        return new PageResult<RoleListItem>
         {
             Items = items,
             TotalCount = pageResult.TotalCount,

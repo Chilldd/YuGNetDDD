@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using YuG.Api.Helpers;
 using YuG.Application.Permission.Resource.Delete;
+using YuG.Common.Models;
 using YuG.Application.Permission.Resource.Get;
 using YuG.Application.Permission.Resource.GetList;
 using YuG.Application.Permission.Resource.GetTree;
@@ -42,8 +43,8 @@ public class ResourceController : ControllerBase
     [HttpGet]
     [ApiDescription("获取资源列表")]
     [Authorize(Policy = "resource:get")]
-    [ProducesResponseType(typeof(GetResourceListResult), StatusCodes.Status200OK)]
-    public async Task<ActionResult<GetResourceListResult>> Get(
+    [ProducesResponseType(typeof(PageResult<ResourceListItem>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<PageResult<ResourceListItem>>> Get(
         [FromQuery] GetResourceListQuery query)
     {
         var response = await _mediator.Send(query);

@@ -1,11 +1,12 @@
 using MediatR;
+using YuG.Common.Models;
 using YuG.Domain.Permission.Enums;
 using YuG.Domain.Permission.Repositories;
 
 namespace YuG.Application.Permission.Resource.GetList;
 
 /// <summary>获取资源列表查询处理器。</summary>
-public class Handler : IRequestHandler<GetResourceListQuery, GetResourceListResult>
+public class Handler : IRequestHandler<GetResourceListQuery, PageResult<ResourceListItem>>
 {
     private readonly IResourceRepository _resourceRepository;
 
@@ -17,7 +18,7 @@ public class Handler : IRequestHandler<GetResourceListQuery, GetResourceListResu
     }
 
     /// <inheritdoc />
-    public async Task<GetResourceListResult> Handle(GetResourceListQuery query, CancellationToken cancellationToken)
+    public async Task<PageResult<ResourceListItem>> Handle(GetResourceListQuery query, CancellationToken cancellationToken)
     {
         ResourceType? type = !string.IsNullOrEmpty(query.Type)
             ? Enum.Parse<ResourceType>(query.Type, ignoreCase: true)
@@ -51,7 +52,7 @@ public class Handler : IRequestHandler<GetResourceListQuery, GetResourceListResu
             Status = r.Status.ToString(),
         }).ToList();
 
-        return new GetResourceListResult
+        return new PageResult<ResourceListItem>
         {
             Items = items,
             TotalCount = pageResult.TotalCount,
