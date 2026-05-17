@@ -5,6 +5,9 @@ using YuG.Api.Helpers;
 using YuG.Application.AI.Chat.Common;
 using YuG.Application.AI.Chat.Send;
 using YuG.Application.AI.Chat.Stream;
+using YuG.Application.AI.Session.Delete;
+using YuG.Application.AI.Session.List;
+using YuG.Application.AI.Session.Rename;
 
 namespace YuG.Api.Controllers;
 
@@ -69,5 +72,49 @@ public class AIController : ControllerBase
         {
             // 客户端断开连接，正常结束
         }
+    }
+
+    /// <summary>获取当前用户的会话列表。</summary>
+    /// <returns>会话列表</returns>
+    /// <response code="200">获取成功</response>
+    [HttpGet("sessions")]
+    [ApiDescription("获取会话列表")]
+    [ProducesResponseType(typeof(IReadOnlyList<SessionListItemResult>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<IReadOnlyList<SessionListItemResult>>> GetSessions()
+    {
+        var result = await _mediator.Send(new SessionListQuery(), HttpContext.RequestAborted);
+        return Ok(result);
+    }
+
+    /// <summary>删除指定会话。</summary>
+    /// <param name="sessionId">会话 ID</param>
+    /// <response code="204">删除成功</response>
+    /// <response code="404">会话不存在</response>
+    [HttpDelete("sessions/{sessionId}")]
+    [ApiDescription("删除会话")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult> DeleteSession(string sessionId)
+    {
+        await _mediator.Send(new DeleteSessionCommand { SessionId = sessionId }, HttpContext.RequestAborted);
+        return NoContent();
+    }
+
+    /// <summary>重命名会话。</summary>
+    /// <param name="sessionId">会话 ID</param>
+    /// <param name="command">重命名命令</param>
+    /// <response code="204">重命名成功</response>
+    /// <response code="404">会话不存在</response>
+    /// <response code="400">参数校验失败</response>
+    [HttpPut("sessions/{sessionId}/rename")]
+    [ApiDescription("重命名会话")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult> RenameSession(string sessionId, [FromBody] RenameSessionCommand command)
+    {
+        var cmd = new RenameSessionCommand { SessionId = sessionId, Title = command.Title };
+        await _mediator.Send(cmd, HttpContext.RequestAborted);
+        return NoContent();
     }
 }

@@ -18,4 +18,8 @@ public interface IChatService
     /// <param name="ct">取消令牌</param>
     /// <returns>SSE 增量事件流</returns>
     IAsyncEnumerable<ChatStreamDeltaResult> StreamAsync(List<ChatMessageDto> messages, long userId, CancellationToken ct = default);
+
+    /// <summary>清除远程 AI Gateway 会话缓存。</summary>
+    /// <param name="sessionId">会话 ID</param>
+    Task ClearSessionAsync(string sessionId);
 }

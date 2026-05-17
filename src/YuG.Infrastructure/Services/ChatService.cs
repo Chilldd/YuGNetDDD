@@ -99,6 +99,12 @@ public class ChatService : IChatService
         }
     }
 
+    /// <inheritdoc />
+    public Task ClearSessionAsync(string sessionId)
+    {
+        return _chatClient.ClearSessionAsync(sessionId);
+    }
+
     private static UsageDataResult MapToUsageResult(UsageData source)
     {
         return new UsageDataResult
