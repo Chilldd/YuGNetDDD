@@ -6,7 +6,7 @@ using YuG.Application.AI.Chat.Common;
 using YuG.Application.AI.Chat.Send;
 using YuG.Application.AI.Chat.Stream;
 using YuG.Application.AI.Session.Delete;
-using YuG.Application.AI.Session.List;
+using YuG.Application.AI.Session.GetList;
 using YuG.Application.AI.Session.Rename;
 
 namespace YuG.Api.Controllers;
@@ -79,10 +79,10 @@ public class AIController : ControllerBase
     /// <response code="200">获取成功</response>
     [HttpGet("sessions")]
     [ApiDescription("获取会话列表")]
-    [ProducesResponseType(typeof(IReadOnlyList<SessionListItemResult>), StatusCodes.Status200OK)]
-    public async Task<ActionResult<IReadOnlyList<SessionListItemResult>>> GetSessions()
+    [ProducesResponseType(typeof(GetSessionListResult), StatusCodes.Status200OK)]
+    public async Task<ActionResult<GetSessionListResult>> GetSessions()
     {
-        var result = await _mediator.Send(new SessionListQuery(), HttpContext.RequestAborted);
+        var result = await _mediator.Send(new GetSessionListQuery(), HttpContext.RequestAborted);
         return Ok(result);
     }
 
