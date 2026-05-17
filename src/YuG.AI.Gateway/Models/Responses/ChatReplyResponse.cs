@@ -4,10 +4,10 @@ namespace YuG.AI.Gateway.Models.Responses;
 public class UsageData
 {
     /// <summary>输入 Token 数。</summary>
-    public int PromptTokens { get; set; }
+    public int InTokens { get; set; }
 
     /// <summary>输出 Token 数。</summary>
-    public int CompletionTokens { get; set; }
+    public int OutTokens { get; set; }
 
     /// <summary>总 Token 数。</summary>
     public int TotalTokens { get; set; }

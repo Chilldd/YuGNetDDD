@@ -104,8 +104,8 @@ public class ChatService : IChatService
 
         return new UsageData
         {
-            PromptTokens = GetInt(obj, "InputTokenCount", "InputTokens"),
-            CompletionTokens = GetInt(obj, "OutputTokenCount", "OutputTokens"),
+            InTokens = GetInt(obj, "InputTokenCount", "InputTokens"),
+            OutTokens = GetInt(obj, "OutputTokenCount", "OutputTokens"),
             TotalTokens = GetInt(obj, "TotalTokenCount", "TotalTokens"),
             PromptCacheHitTokens = hit > 0 ? hit : null,
             PromptCacheMissTokens = miss > 0 ? miss : null,
