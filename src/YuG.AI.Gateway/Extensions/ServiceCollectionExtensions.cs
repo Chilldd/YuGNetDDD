@@ -36,22 +36,6 @@ public static class ServiceCollectionExtensions
                         new Uri(options.DeepSeek.BaseUrl),
                         options.DeepSeek.ApiKey);
                     break;
-
-                case "azureopenai":
-                    builder.AddAzureOpenAIChatCompletion(
-                        options.AzureOpenAI.DeploymentName ?? options.AzureOpenAI.ModelId,
-                        options.AzureOpenAI.Endpoint,
-                        options.AzureOpenAI.ApiKey,
-                        modelId: options.AzureOpenAI.ModelId);
-                    break;
-
-                case "ollama":
-                    builder.AddOpenAIChatCompletion(
-                        options.Ollama.ModelId,
-                        new Uri(options.Ollama.Endpoint),
-                        "ollama");
-                    break;
-
                 default:
                     throw new InvalidOperationException($"Unsupported AI provider: {options.Provider}");
             }
