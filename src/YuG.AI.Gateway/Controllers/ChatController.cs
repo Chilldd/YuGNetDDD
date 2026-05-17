@@ -22,35 +22,35 @@ public class ChatController : ControllerBase
         _sessionService = sessionService;
     }
 
-    /// <summary>基于会话的聊天补全。服务端自动管理对话上下文，客户端只需传递问题。</summary>
-    /// <param name="request">提问请求</param>
+    /// <summary>基于会话的聊天补全。服务端自动管理对话上下文，客户端只需传递消息。</summary>
+    /// <param name="request">聊天请求</param>
     /// <param name="ct">取消令牌</param>
     /// <returns>回复与 sessionId</returns>
     [HttpPost]
     public async Task<ActionResult<ChatReplyResponse>> Chat(
-        [FromBody] ChatQuestionRequest request, CancellationToken ct)
+        [FromBody] ChatRequest request, CancellationToken ct)
     {
-        if (string.IsNullOrWhiteSpace(request.Question))
-            return BadRequest(new { error = "Question cannot be empty" });
+        if (string.IsNullOrWhiteSpace(request.Message))
+            return BadRequest(new { error = "Message cannot be empty" });
 
         var (history, sessionId) = _sessionService.GetOrCreateSession(request.SessionId);
-        var result = await _chatService.ChatWithHistoryAsync(history, request.Question, ct);
+        var result = await _chatService.ChatWithHistoryAsync(history, request.Message, ct);
         result.SessionId = sessionId;
 
         return Ok(result);
     }
 
     /// <summary>基于会话的流式聊天补全，使用 SSE 协议推送响应。服务端自动管理对话上下文。</summary>
-    /// <param name="request">提问请求</param>
+    /// <param name="request">聊天请求</param>
     /// <param name="ct">取消令牌</param>
     [HttpPost("stream")]
     public async Task Stream(
-        [FromBody] ChatQuestionRequest request, CancellationToken ct)
+        [FromBody] ChatRequest request, CancellationToken ct)
     {
-        if (string.IsNullOrWhiteSpace(request.Question))
+        if (string.IsNullOrWhiteSpace(request.Message))
         {
             Response.StatusCode = StatusCodes.Status400BadRequest;
-            await Response.WriteAsJsonAsync(new { error = "Question cannot be empty" }, ct);
+            await Response.WriteAsJsonAsync(new { error = "Message cannot be empty" }, ct);
             return;
         }
 
@@ -62,7 +62,7 @@ public class ChatController : ControllerBase
 
         var chatId = $"chatcmpl-{Guid.NewGuid():N}";
 
-        await foreach (var delta in _chatService.ChatStreamWithHistoryAsync(history, request.Question, ct))
+        await foreach (var delta in _chatService.ChatStreamWithHistoryAsync(history, request.Message, ct))
         {
             var json = System.Text.Json.JsonSerializer.Serialize(new
             {

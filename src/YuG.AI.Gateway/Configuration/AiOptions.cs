@@ -9,6 +9,9 @@ public class AiOptions
     /// <summary>AI Provider 名称（deepseek / azureopenai / ollama）。</summary>
     public string Provider { get; set; } = "DeepSeek";
 
+    /// <summary>系统提示词，创建新会话时自动注入。</summary>
+    public string? SystemPrompt { get; set; }
+
     /// <summary>DeepSeek 配置。</summary>
     public DeepSeekConfig DeepSeek { get; set; } = new();
 
