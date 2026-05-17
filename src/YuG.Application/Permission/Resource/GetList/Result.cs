@@ -1,4 +1,4 @@
-using YuG.Application.Common;
+using YuG.Common.Models;
 
 namespace YuG.Application.Permission.Resource.GetList;
 

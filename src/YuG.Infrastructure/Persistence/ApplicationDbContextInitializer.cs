@@ -2,7 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using YuG.Domain.Common.Constants;
 using YuG.Domain.Identity.Entities;
-using YuG.Domain.Common.Interfaces;
+using YuG.Common.Interfaces;
 
 namespace YuG.Infrastructure.Persistence;
 

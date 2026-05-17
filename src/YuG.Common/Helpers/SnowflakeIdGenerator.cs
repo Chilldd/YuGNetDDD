@@ -1,4 +1,4 @@
-namespace YuG.Domain.Common;
+namespace YuG.Common.Helpers;
 
 /// <summary>
 /// 雪花ID生成器（线程安全），用于生成分布式唯一 ID

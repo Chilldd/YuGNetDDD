@@ -1,6 +1,4 @@
-using YuG.Domain.Common;
-
-namespace YuG.Domain.Common.Interfaces;
+namespace YuG.Common.Interfaces;
 
 /// <summary>
 /// 服务器信息

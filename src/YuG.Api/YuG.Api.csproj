@@ -9,6 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\YuG.Common\YuG.Common.csproj" />
     <ProjectReference Include="..\YuG.Application\YuG.Application.csproj" />
     <ProjectReference Include="..\YuG.Infrastructure\YuG.Infrastructure.csproj" />
   </ItemGroup>

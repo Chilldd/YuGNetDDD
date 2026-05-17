@@ -1,5 +1,5 @@
 using YuG.Domain.Common;
-using YuG.Domain.Common.Interfaces;
+using YuG.Common.Interfaces;
 using YuG.Domain.Identity.Enums;
 using YuG.Domain.Identity.Events;
 using YuG.Domain.Identity.ValueObjects;

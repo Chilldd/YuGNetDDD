@@ -1,6 +1,6 @@
 using MediatR;
 using YuG.Application.Common.Exceptions;
-using YuG.Domain.Common.Interfaces;
+using YuG.Common.Interfaces;
 using YuG.Domain.Identity.Repositories;
 using UserResult = YuG.Application.Identity.User.Create.UserResult;
 using UserEntity = YuG.Domain.Identity.Entities.User;

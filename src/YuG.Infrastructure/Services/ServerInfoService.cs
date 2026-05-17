@@ -1,6 +1,6 @@
 using System.Diagnostics;
 using System.Runtime.InteropServices;
-using YuG.Domain.Common.Interfaces;
+using YuG.Common.Interfaces;
 
 namespace YuG.Infrastructure.Services;
 

@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.IdentityModel.Tokens;
 using YuG.Api.Authorization;
-using YuG.Domain.Common.Interfaces;
+using YuG.Common.Interfaces;
 
 namespace YuG.Api.Extensions;
 

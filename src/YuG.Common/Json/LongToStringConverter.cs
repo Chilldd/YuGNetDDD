@@ -1,7 +1,7 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace YuG.Api.Helpers;
+namespace YuG.Common.Json;
 
 /// <summary>
 /// JSON 转换器工厂，将 long/long? 序列化为字符串（解决 JavaScript 精度丢失问题）

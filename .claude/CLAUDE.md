@@ -9,6 +9,7 @@
 ### 项目结构
 ```
 src/
+├── YuG.Common/           ← 共享内核（Result 模式、值对象基类、Guard、扩展方法、通用异常、分页模型）
 ├── YuG.Domain/           ← 领域层（实体、值对象、领域事件、仓储接口）
 ├── YuG.Application/      ← 应用层（CQRS 命令/查询、管道行为、DTO）
 ├── YuG.Infrastructure/   ← 基础设施层（EF Core、仓储实现、外部服务）
@@ -16,7 +17,7 @@ src/
 ```
 
 ### 依赖方向
-Api → Infrastructure → Application → Domain（Domain 无外部依赖）
+Api → Infrastructure → Application → Domain → Common（Common 无外部依赖）
 
 ### 参考文档
 - [权限系统设计](docs/permission-system.md) — RBAC 权限模型、JWT 设计、后端鉴权、前端权限接口

@@ -1,7 +1,7 @@
 using System.Text.Json;
 using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.Options;
-using YuG.Domain.Common.Interfaces;
+using YuG.Common.Interfaces;
 
 namespace YuG.Infrastructure.Services;
 

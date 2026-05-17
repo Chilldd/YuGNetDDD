@@ -3,7 +3,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using YuG.Application.Common.Interfaces;
 using YuG.Domain.Common;
-using YuG.Domain.Common.Interfaces;
+using YuG.Common.Interfaces;
 using YuG.Domain.Identity.Repositories;
 using YuG.Domain.Permission.Repositories;
 using YuG.Infrastructure.DomainEvents;

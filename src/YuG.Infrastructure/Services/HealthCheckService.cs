@@ -1,6 +1,6 @@
 using System.Diagnostics;
 using Microsoft.EntityFrameworkCore;
-using YuG.Domain.Common.Interfaces;
+using YuG.Common.Interfaces;
 using YuG.Infrastructure.Persistence;
 
 namespace YuG.Infrastructure.Services;

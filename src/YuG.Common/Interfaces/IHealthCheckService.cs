@@ -1,4 +1,4 @@
-namespace YuG.Domain.Common.Interfaces;
+namespace YuG.Common.Interfaces;
 
 /// <summary>
 /// 健康状态枚举

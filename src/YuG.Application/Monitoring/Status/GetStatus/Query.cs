@@ -1,5 +1,5 @@
 using MediatR;
-using YuG.Domain.Common.Interfaces;
+using YuG.Common.Interfaces;
 
 namespace YuG.Application.Monitoring.Status.GetStatus;
 

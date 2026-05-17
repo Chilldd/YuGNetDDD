@@ -1,6 +1,6 @@
 using MediatR;
 using YuG.Application.Common;
-using YuG.Domain.Common.Interfaces;
+using YuG.Common.Interfaces;
 using YuG.Domain.Identity.Events;
 
 namespace YuG.Application.Identity.EventHandlers;

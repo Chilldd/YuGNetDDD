@@ -1,6 +1,6 @@
 using MediatR;
 using YuG.Domain.Common;
-using YuG.Domain.Common.Interfaces;
+using YuG.Common.Interfaces;
 using YuG.Domain.Identity.Repositories;
 using UserEntity = YuG.Domain.Identity.Entities.User;
 

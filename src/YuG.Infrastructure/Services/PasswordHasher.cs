@@ -1,4 +1,4 @@
-using YuG.Domain.Common.Interfaces;
+using YuG.Common.Interfaces;
 
 namespace YuG.Infrastructure.Services;
 

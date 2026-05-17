@@ -1,3 +1,5 @@
+using YuG.Common.Helpers;
+
 namespace YuG.Domain.Common;
 
 /// <summary>

@@ -1,4 +1,4 @@
-namespace YuG.Application.Common;
+namespace YuG.Common.Models;
 
 /// <summary>
 /// 通用分页结果

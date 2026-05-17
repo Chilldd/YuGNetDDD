@@ -1,7 +1,7 @@
 using MediatR;
 using YuG.Application.Common;
 using YuG.Domain.Common;
-using YuG.Domain.Common.Interfaces;
+using YuG.Common.Interfaces;
 using YuG.Domain.Identity.Enums;
 using YuG.Domain.Identity.Repositories;
 using DomainRefreshToken = YuG.Domain.Identity.ValueObjects.RefreshToken;

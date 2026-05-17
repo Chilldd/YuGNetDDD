@@ -1,5 +1,5 @@
 using MediatR;
-using YuG.Application.Common;
+using YuG.Common.Models;
 
 namespace YuG.Application.Identity.User.GetList;
 

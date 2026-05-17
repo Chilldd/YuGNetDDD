@@ -37,7 +37,7 @@ builder.Services.AddApiTools();
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
-        options.JsonSerializerOptions.Converters.Add(new YuG.Api.Helpers.LongToStringConverterFactory());
+        options.JsonSerializerOptions.Converters.Add(new YuG.Common.Json.LongToStringConverterFactory());
         options.JsonSerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
     });
 
