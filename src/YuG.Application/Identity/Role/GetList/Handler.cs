@@ -28,25 +28,16 @@ public class Handler : IRequestHandler<GetRoleListQuery, PageResult<RoleListItem
     /// <returns>角色列表结果</returns>
     public async Task<PageResult<RoleListItem>> Handle(GetRoleListQuery query, CancellationToken cancellationToken)
     {
-        var pageResult = await _roleRepository.GetRolesPagedAsync(query.Page, query.PageSize, cancellationToken);
-
-        var items = pageResult.Items.Select(r => new RoleListItem
-        {
-            Id = r.Id,
-            Name = r.Name,
-            Code = r.Code,
-            Description = r.Description,
-            Status = r.Status.ToString(),
-            IsSystem = r.IsSystem,
-            CreatedAt = r.CreatedAt,
-        }).ToList();
-
-        return new PageResult<RoleListItem>
-        {
-            Items = items,
-            TotalCount = pageResult.TotalCount,
-            Page = pageResult.Page,
-            PageSize = pageResult.PageSize,
-        };
+        return await _roleRepository.GetRolesPagedAsync(query.Page, query.PageSize,
+            r => new RoleListItem
+            {
+                Id = r.Id,
+                Name = r.Name,
+                Code = r.Code,
+                Description = r.Description,
+                Status = r.Status.ToString(),
+                IsSystem = r.IsSystem,
+                CreatedAt = r.CreatedAt,
+            }, cancellationToken);
     }
 }

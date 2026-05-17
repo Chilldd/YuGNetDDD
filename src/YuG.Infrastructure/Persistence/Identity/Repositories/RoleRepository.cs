@@ -1,3 +1,4 @@
+using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
 using YuG.Common.Extensions;
 using YuG.Common.Models;
@@ -98,12 +99,13 @@ public class RoleRepository : Repository<Role>, IRoleRepository
     }
 
     /// <inheritdoc />
-    public async Task<PageResult<Role>> GetRolesPagedAsync(int page, int pageSize, CancellationToken cancellationToken = default)
+    public async Task<PageResult<TDto>> GetRolesPagedAsync<TDto>(int page, int pageSize, Expression<Func<Role, TDto>> selector, CancellationToken cancellationToken = default)
     {
         return await _context.Set<Role>()
             .AsNoTracking()
             .Where(r => !r.IsSystem)
             .OrderBy(r => r.Id)
+            .Select(selector)
             .ToPageResultAsync(page, pageSize, cancellationToken);
     }
 }

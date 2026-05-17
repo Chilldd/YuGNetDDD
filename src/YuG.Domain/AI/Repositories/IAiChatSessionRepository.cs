@@ -1,3 +1,4 @@
+using System.Linq.Expressions;
 using YuG.Common.Models;
 using YuG.Domain.AI.Entities;
 using YuG.Domain.AI.ValueObjects;
@@ -18,7 +19,8 @@ public interface IAiChatSessionRepository : IRepository<AiChatSession>
     /// <param name="sessionId">会话 ID</param>
     /// <param name="page">页码，从 1 开始</param>
     /// <param name="pageSize">每页条数</param>
+    /// <param name="selector">投影表达式</param>
     /// <param name="cancellationToken">取消令牌</param>
     /// <returns>消息分页结果</returns>
-    Task<PageResult<AiChatMessage>> GetMessagesPagedAsync(string sessionId, int page, int pageSize, CancellationToken cancellationToken = default);
+    Task<PageResult<TDto>> GetMessagesPagedAsync<TDto>(string sessionId, int page, int pageSize, Expression<Func<AiChatMessage, TDto>> selector, CancellationToken cancellationToken = default);
 }

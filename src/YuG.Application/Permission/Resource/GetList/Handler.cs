@@ -28,36 +28,26 @@ public class Handler : IRequestHandler<GetResourceListQuery, PageResult<Resource
             ? Enum.Parse<ResourceHttpMethod>(query.HttpMethod, ignoreCase: true)
             : null;
 
-        var pageResult = await _resourceRepository.GetResourcesPagedAsync(
+        return await _resourceRepository.GetResourcesPagedAsync(
             query.Page, query.PageSize,
             type, httpMethod, query.ParentId, query.Status,
-            cancellationToken);
-
-        var items = pageResult.Items.Select(r => new ResourceListItem
-        {
-            Id = r.Id,
-            Name = r.Name,
-            Code = r.Code,
-            Description = r.Description,
-            Type = r.Type.ToString(),
-            HttpMethod = r.HttpMethod!.ToString(),
-            Path = r.Path,
-            Icon = r.Icon,
-            Route = r.Route,
-            IsHidden = r.IsHidden,
-            Badge = r.Badge,
-            PermissionCode = r.PermissionCode,
-            ParentId = r.ParentId,
-            SortOrder = r.SortOrder,
-            Status = r.Status.ToString(),
-        }).ToList();
-
-        return new PageResult<ResourceListItem>
-        {
-            Items = items,
-            TotalCount = pageResult.TotalCount,
-            Page = pageResult.Page,
-            PageSize = pageResult.PageSize,
-        };
+            r => new ResourceListItem
+            {
+                Id = r.Id,
+                Name = r.Name,
+                Code = r.Code,
+                Description = r.Description,
+                Type = r.Type.ToString(),
+                HttpMethod = r.HttpMethod!.ToString(),
+                Path = r.Path,
+                Icon = r.Icon,
+                Route = r.Route,
+                IsHidden = r.IsHidden,
+                Badge = r.Badge,
+                PermissionCode = r.PermissionCode,
+                ParentId = r.ParentId,
+                SortOrder = r.SortOrder,
+                Status = r.Status.ToString(),
+            }, cancellationToken);
     }
 }

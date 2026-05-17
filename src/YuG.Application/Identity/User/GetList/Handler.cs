@@ -28,22 +28,13 @@ public class Handler : IRequestHandler<GetUserListQuery, PageResult<UserListItem
     /// <returns>用户列表结果</returns>
     public async Task<PageResult<UserListItem>> Handle(GetUserListQuery query, CancellationToken cancellationToken)
     {
-        var pageResult = await _userRepository.GetUsersPagedAsync(query.Page, query.PageSize, cancellationToken);
-
-        var items = pageResult.Items.Select(u => new UserListItem
-        {
-            Id = u.Id,
-            Username = u.Username,
-            Status = u.Status.ToString(),
-            CreatedAt = u.CreatedAt,
-        }).ToList();
-
-        return new PageResult<UserListItem>
-        {
-            Items = items,
-            TotalCount = pageResult.TotalCount,
-            Page = pageResult.Page,
-            PageSize = pageResult.PageSize,
-        };
+        return await _userRepository.GetUsersPagedAsync(query.Page, query.PageSize,
+            u => new UserListItem
+            {
+                Id = u.Id,
+                Username = u.Username,
+                Status = u.Status.ToString(),
+                CreatedAt = u.CreatedAt,
+            }, cancellationToken);
     }
 }
