@@ -1,6 +1,8 @@
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using YuG.Application.Common.Exceptions;
 using YuG.Application.Common.Interfaces;
+using YuG.Domain.AI.Entities;
 using YuG.Domain.AI.Repositories;
 
 namespace YuG.Application.AI.Session.GetMessages;
@@ -27,20 +29,25 @@ public class Handler : IRequestHandler<GetSessionMessagesQuery, GetSessionMessag
     {
         var userId = _userIdentity.UserId;
 
-        var session = await _sessionRepository.GetBySessionIdAsync(request.SessionId, cancellationToken);
-        if (session is null || session.UserId != userId)
-            throw new NotFoundException(nameof(Domain.AI.Entities.AiChatSession), request.SessionId);
+        var sessionExists = await _sessionRepository.GetQueryable()
+            .AnyAsync(s => s.SessionId == request.SessionId && s.UserId == userId, cancellationToken);
 
-        var orderedMessages = session.Messages.OrderBy(m => m.SequenceNumber).ToList();
-        var totalCount = orderedMessages.Count;
+        if (!sessionExists)
+            throw new NotFoundException(nameof(AiChatSession), request.SessionId);
 
-        // 从最新消息往回分页：Page 1 = 最后 PageSize 条
-        var skip = Math.Max(0, totalCount - request.Page * request.PageSize);
-        var take = Math.Min(request.PageSize, totalCount - skip);
+        var messagesQuery = _sessionRepository.GetQueryable()
+            .Where(s => s.SessionId == request.SessionId && s.UserId == userId)
+            .SelectMany(s => s.Messages);
 
-        var items = orderedMessages
-            .Skip(skip)
-            .Take(take)
+        var totalCount = await messagesQuery.CountAsync(cancellationToken);
+
+        var pageMessages = await messagesQuery
+            .OrderByDescending(m => m.SequenceNumber)
+            .Skip((request.Page - 1) * request.PageSize)
+            .Take(request.PageSize)
+            .ToListAsync(cancellationToken);
+
+        var items = pageMessages
             .OrderBy(m => m.SequenceNumber)
             .Select(m => new MessageItem
             {
