@@ -1,5 +1,6 @@
 using YuG.Api.Extensions;
 using YuG.Api.Middleware;
+using YuG.Common.Extensions;
 using YuG.Common.Jwt;
 using YuG.Infrastructure;
 using YuG.Infrastructure.Services;

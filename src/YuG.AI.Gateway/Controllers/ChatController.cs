@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using YuG.AI.Gateway.Models.Requests;
@@ -10,6 +11,7 @@ namespace YuG.AI.Gateway.Controllers;
 [ApiController]
 [EnableRateLimiting("Chat")]
 [Route("api/v1/chat")]
+[Authorize]
 public class ChatController : ControllerBase
 {
     private readonly IChatService _chatService;
