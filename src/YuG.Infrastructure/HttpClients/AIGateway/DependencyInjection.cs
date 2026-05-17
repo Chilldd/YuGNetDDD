@@ -12,9 +12,12 @@ public static class DependencyInjection
     /// <returns>服务集合（支持链式调用）</returns>
     public static IServiceCollection AddAiGatewayClient(this IServiceCollection services, string baseUrl)
     {
+        services.AddTransient<AuthHeaderDelegatingHandler>();
+
         services
             .AddRefitClient<IChatClient>()
-            .ConfigureHttpClient(c => c.BaseAddress = new Uri(baseUrl));
+            .ConfigureHttpClient(c => c.BaseAddress = new Uri(baseUrl))
+            .AddHttpMessageHandler<AuthHeaderDelegatingHandler>();
 
         return services;
     }
