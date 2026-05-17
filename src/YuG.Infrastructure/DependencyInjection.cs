@@ -66,6 +66,9 @@ public static class DependencyInjection
         // 注册健康检查服务
         services.AddScoped<IHealthCheckService, HealthCheckService>();
 
+        // 注册 AI 聊天服务
+        services.AddScoped<IChatService, ChatService>();
+
         return services;
     }
 }
