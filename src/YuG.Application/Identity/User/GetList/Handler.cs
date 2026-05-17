@@ -20,21 +20,25 @@ public class Handler : IRequestHandler<GetUserListQuery, PageResult<UserListItem
         _userRepository = userRepository;
     }
 
-    /// <summary>
-    /// 处理获取用户列表查询
-    /// </summary>
-    /// <param name="query">获取用户列表查询</param>
-    /// <param name="cancellationToken">取消令牌</param>
-    /// <returns>用户列表结果</returns>
+    /// <inheritdoc />
     public async Task<PageResult<UserListItem>> Handle(GetUserListQuery query, CancellationToken cancellationToken)
     {
-        return await _userRepository.GetUsersPagedAsync(query.Page, query.PageSize,
-            u => new UserListItem
-            {
-                Id = u.Id,
-                Username = u.Username,
-                Status = u.Status.ToString(),
-                CreatedAt = u.CreatedAt,
-            }, cancellationToken);
+        var pageResult = await _userRepository.GetUsersPagedAsync(query.Page, query.PageSize, cancellationToken);
+
+        var items = pageResult.Items.Select(u => new UserListItem
+        {
+            Id = u.Id,
+            Username = u.Username,
+            Status = u.Status.ToString(),
+            CreatedAt = u.CreatedAt,
+        }).ToList();
+
+        return new PageResult<UserListItem>
+        {
+            Items = items,
+            TotalCount = pageResult.TotalCount,
+            Page = pageResult.Page,
+            PageSize = pageResult.PageSize,
+        };
     }
 }

@@ -1,4 +1,3 @@
-using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
 using YuG.Common.Extensions;
 using YuG.Common.Models;
@@ -67,12 +66,11 @@ public class UserRepository : Repository<User>, IUserRepository
     }
 
     /// <inheritdoc />
-    public async Task<PageResult<TDto>> GetUsersPagedAsync<TDto>(int page, int pageSize, Expression<Func<User, TDto>> selector, CancellationToken cancellationToken = default)
+    public async Task<PageResult<User>> GetUsersPagedAsync(int page, int pageSize, CancellationToken cancellationToken = default)
     {
         return await _context.Users
             .AsNoTracking()
             .OrderBy(u => u.Id)
-            .Select(selector)
             .ToPageResultAsync(page, pageSize, cancellationToken);
     }
 }

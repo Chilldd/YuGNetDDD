@@ -1,4 +1,3 @@
-using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
 using YuG.Common.Extensions;
 using YuG.Common.Models;
@@ -29,7 +28,7 @@ public class AiChatSessionRepository : Repository<AiChatSession>, IAiChatSession
     }
 
     /// <inheritdoc />
-    public async Task<PageResult<TDto>> GetMessagesPagedAsync<TDto>(string sessionId, int page, int pageSize, Expression<Func<AiChatMessage, TDto>> selector, CancellationToken cancellationToken = default)
+    public async Task<PageResult<AiChatMessage>> GetMessagesPagedAsync(string sessionId, int page, int pageSize, CancellationToken cancellationToken = default)
     {
         var query = _dbSet
             .Where(s => s.SessionId == sessionId)
@@ -37,7 +36,6 @@ public class AiChatSessionRepository : Repository<AiChatSession>, IAiChatSession
 
         return await query
             .OrderByDescending(m => m.SequenceNumber)
-            .Select(selector)
             .ToPageResultAsync(page, pageSize, cancellationToken);
     }
 }

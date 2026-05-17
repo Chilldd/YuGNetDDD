@@ -1,4 +1,3 @@
-using System.Linq.Expressions;
 using YuG.Common.Models;
 using YuG.Domain.Common;
 using YuG.Domain.Identity.Entities;
@@ -47,8 +46,7 @@ public interface IUserRepository : IRepository<User>
     /// </summary>
     /// <param name="page">页码，从 1 开始</param>
     /// <param name="pageSize">每页条数</param>
-    /// <param name="selector">投影表达式</param>
     /// <param name="cancellationToken">取消令牌</param>
     /// <returns>用户分页结果</returns>
-    Task<PageResult<TDto>> GetUsersPagedAsync<TDto>(int page, int pageSize, Expression<Func<User, TDto>> selector, CancellationToken cancellationToken = default);
+    Task<PageResult<User>> GetUsersPagedAsync(int page, int pageSize, CancellationToken cancellationToken = default);
 }

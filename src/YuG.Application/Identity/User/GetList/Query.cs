@@ -1,4 +1,4 @@
-using MediatR;
+using YuG.Application.Common;
 using YuG.Common.Models;
 
 namespace YuG.Application.Identity.User.GetList;
@@ -6,17 +6,8 @@ namespace YuG.Application.Identity.User.GetList;
 /// <summary>
 /// 获取用户列表查询
 /// </summary>
-public class GetUserListQuery : IRequest<PageResult<UserListItem>>
+public class GetUserListQuery : PagedQuery<PageResult<UserListItem>>
 {
-    /// <summary>
-    /// 当前页码（从 1 开始）
-    /// </summary>
-    public int Page { get; init; } = 1;
-
-    /// <summary>
-    /// 每页条数
-    /// </summary>
-    public int PageSize { get; init; } = 10;
 }
 
 /// <summary>

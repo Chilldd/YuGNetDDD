@@ -1,4 +1,3 @@
-using System.Linq.Expressions;
 using YuG.Common.Models;
 using YuG.Domain.Common;
 using YuG.Domain.Permission.Entities;
@@ -91,12 +90,10 @@ public interface IResourceRepository : IRepository<Resource>
     /// <param name="httpMethod">HTTP 方法筛选（可选）</param>
     /// <param name="parentId">父级资源标识筛选（可选）</param>
     /// <param name="status">资源状态筛选（可选）</param>
-    /// <param name="selector">投影表达式</param>
     /// <param name="cancellationToken">取消令牌</param>
     /// <returns>资源分页结果</returns>
-    Task<PageResult<TDto>> GetResourcesPagedAsync<TDto>(
+    Task<PageResult<Resource>> GetResourcesPagedAsync(
         int page, int pageSize,
         ResourceType? type, ResourceHttpMethod? httpMethod, long? parentId, ResourceStatus? status,
-        Expression<Func<Resource, TDto>> selector,
         CancellationToken cancellationToken = default);
 }

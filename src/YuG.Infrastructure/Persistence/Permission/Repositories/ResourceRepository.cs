@@ -1,4 +1,3 @@
-using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
 using YuG.Common.Extensions;
 using YuG.Common.Models;
@@ -150,10 +149,9 @@ public class ResourceRepository : Repository<Resource>, IResourceRepository
     }
 
     /// <inheritdoc />
-    public async Task<PageResult<TDto>> GetResourcesPagedAsync<TDto>(
+    public async Task<PageResult<Resource>> GetResourcesPagedAsync(
         int page, int pageSize,
         ResourceType? type, ResourceHttpMethod? httpMethod, long? parentId, ResourceStatus? status,
-        Expression<Func<Resource, TDto>> selector,
         CancellationToken cancellationToken = default)
     {
         var query = _context.Resources
@@ -166,7 +164,6 @@ public class ResourceRepository : Repository<Resource>, IResourceRepository
         return await query
             .OrderBy(r => r.SortOrder)
             .ThenBy(r => r.Id)
-            .Select(selector)
             .ToPageResultAsync(page, pageSize, cancellationToken);
     }
 }

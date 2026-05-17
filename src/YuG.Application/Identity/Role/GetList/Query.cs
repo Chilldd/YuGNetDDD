@@ -1,4 +1,4 @@
-using MediatR;
+using YuG.Application.Common;
 using YuG.Common.Models;
 
 namespace YuG.Application.Identity.Role.GetList;
@@ -6,17 +6,8 @@ namespace YuG.Application.Identity.Role.GetList;
 /// <summary>
 /// 获取角色列表查询
 /// </summary>
-public class GetRoleListQuery : IRequest<PageResult<RoleListItem>>
+public class GetRoleListQuery : PagedQuery<PageResult<RoleListItem>>
 {
-    /// <summary>
-    /// 当前页码（从 1 开始）
-    /// </summary>
-    public int Page { get; init; } = 1;
-
-    /// <summary>
-    /// 每页条数
-    /// </summary>
-    public int PageSize { get; init; } = 10;
 }
 
 /// <summary>

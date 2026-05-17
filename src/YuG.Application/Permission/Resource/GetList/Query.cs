@@ -1,5 +1,5 @@
 using FluentValidation;
-using MediatR;
+using YuG.Application.Common;
 using YuG.Common.Models;
 using YuG.Domain.Permission.Enums;
 
@@ -8,18 +8,8 @@ namespace YuG.Application.Permission.Resource.GetList;
 /// <summary>
 /// 获取资源列表查询
 /// </summary>
-public class GetResourceListQuery : IRequest<PageResult<ResourceListItem>>
+public class GetResourceListQuery : PagedQuery<PageResult<ResourceListItem>>
 {
-    /// <summary>
-    /// 当前页码（从 1 开始）
-    /// </summary>
-    public int Page { get; init; } = 1;
-
-    /// <summary>
-    /// 每页条数
-    /// </summary>
-    public int PageSize { get; init; } = 10;
-
     /// <summary>
     /// 资源类型筛选（可选，Menu/Page/Api）
     /// </summary>

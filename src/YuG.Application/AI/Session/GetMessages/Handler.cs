@@ -36,17 +36,27 @@ public class Handler : IRequestHandler<GetSessionMessagesQuery, PageResult<Messa
         if (!sessionExists)
             throw new NotFoundException(nameof(AiChatSession), request.SessionId);
 
-        var result = await _sessionRepository.GetMessagesPagedAsync(
-            request.SessionId, request.Page, request.PageSize,
-            m => new MessageItem
+        var pageResult = await _sessionRepository.GetMessagesPagedAsync(
+            request.SessionId, request.Page, request.PageSize, cancellationToken);
+
+        var items = pageResult.Items
+            .OrderBy(m => m.SequenceNumber)
+            .Select(m => new MessageItem
             {
                 Role = m.Role,
                 Content = m.Content,
                 SequenceNumber = m.SequenceNumber,
                 TokenCount = m.TokenCount,
                 CreatedAt = m.CreatedAt,
-            }, cancellationToken);
+            })
+            .ToList();
 
-        return result with { Items = result.Items.OrderBy(i => i.SequenceNumber).ToList() };
+        return new PageResult<MessageItem>
+        {
+            Items = items,
+            TotalCount = pageResult.TotalCount,
+            Page = pageResult.Page,
+            PageSize = pageResult.PageSize,
+        };
     }
 }

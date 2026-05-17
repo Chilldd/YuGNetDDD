@@ -20,24 +20,28 @@ public class Handler : IRequestHandler<GetRoleListQuery, PageResult<RoleListItem
         _roleRepository = roleRepository;
     }
 
-    /// <summary>
-    /// 处理获取角色列表查询
-    /// </summary>
-    /// <param name="query">获取角色列表查询</param>
-    /// <param name="cancellationToken">取消令牌</param>
-    /// <returns>角色列表结果</returns>
+    /// <inheritdoc />
     public async Task<PageResult<RoleListItem>> Handle(GetRoleListQuery query, CancellationToken cancellationToken)
     {
-        return await _roleRepository.GetRolesPagedAsync(query.Page, query.PageSize,
-            r => new RoleListItem
-            {
-                Id = r.Id,
-                Name = r.Name,
-                Code = r.Code,
-                Description = r.Description,
-                Status = r.Status.ToString(),
-                IsSystem = r.IsSystem,
-                CreatedAt = r.CreatedAt,
-            }, cancellationToken);
+        var pageResult = await _roleRepository.GetRolesPagedAsync(query.Page, query.PageSize, cancellationToken);
+
+        var items = pageResult.Items.Select(r => new RoleListItem
+        {
+            Id = r.Id,
+            Name = r.Name,
+            Code = r.Code,
+            Description = r.Description,
+            Status = r.Status.ToString(),
+            IsSystem = r.IsSystem,
+            CreatedAt = r.CreatedAt,
+        }).ToList();
+
+        return new PageResult<RoleListItem>
+        {
+            Items = items,
+            TotalCount = pageResult.TotalCount,
+            Page = pageResult.Page,
+            PageSize = pageResult.PageSize,
+        };
     }
 }
