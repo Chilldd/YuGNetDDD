@@ -21,10 +21,10 @@ public class SessionService : ISessionService
     /// <inheritdoc />
     public (ChatHistory History, string SessionId) GetOrCreateSession(string? sessionId)
     {
-        if (sessionId is not null && _sessions.TryGetValue(sessionId, out var existing))
+        if (!string.IsNullOrWhiteSpace(sessionId) && _sessions.TryGetValue(sessionId, out var existing))
             return (existing, sessionId);
 
-        var id = sessionId ?? Guid.NewGuid().ToString("N");
+        var id = Guid.NewGuid().ToString("N");
         var history = _sessions.GetOrAdd(id, _ =>
         {
             var h = new ChatHistory();
