@@ -3,6 +3,7 @@ using YuG.Api.Middleware;
 using YuG.Common.Extensions;
 using YuG.Common.Jwt;
 using YuG.Infrastructure;
+using YuG.Infrastructure.HttpClients.AIGateway;
 using YuG.Infrastructure.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -54,6 +55,11 @@ builder.Services.AddSwaggerServices();
 
 // 注册基础设施层服务（数据库、仓储等）
 builder.Services.AddInfrastructure(builder.Configuration);
+
+// Refit 客户端：调用 AI.Gateway API
+builder.Services.AddAiGatewayClient(
+    builder.Configuration.GetValue<string>("RefitConfig:AIGateway:BaseUrl")
+    ?? "http://localhost:5100");
 
 // 注册 CORS 策略
 builder.Services.AddCorsConfiguration(builder.Configuration);
