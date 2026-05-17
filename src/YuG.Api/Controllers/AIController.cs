@@ -7,6 +7,7 @@ using YuG.Application.AI.Chat.Send;
 using YuG.Application.AI.Chat.Stream;
 using YuG.Application.AI.Session.Delete;
 using YuG.Application.AI.Session.GetList;
+using YuG.Application.AI.Session.GetMessages;
 using YuG.Application.AI.Session.Rename;
 
 namespace YuG.Api.Controllers;
@@ -72,6 +73,32 @@ public class AIController : ControllerBase
         {
             // 客户端断开连接，正常结束
         }
+    }
+
+    /// <summary>获取会话消息历史（倒序分页，Page 1 为最新消息）。</summary>
+    /// <param name="sessionId">会话 ID</param>
+    /// <param name="page">页码，从 1 开始</param>
+    /// <param name="pageSize">每页条数</param>
+    /// <returns>消息分页结果</returns>
+    /// <response code="200">获取成功</response>
+    /// <response code="404">会话不存在</response>
+    [HttpGet("sessions/{sessionId}/messages")]
+    [ApiDescription("获取会话消息历史")]
+    [ProducesResponseType(typeof(GetSessionMessagesResult), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<GetSessionMessagesResult>> GetSessionMessages(
+        string sessionId,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 10)
+    {
+        var query = new GetSessionMessagesQuery
+        {
+            SessionId = sessionId,
+            Page = page,
+            PageSize = pageSize,
+        };
+        var result = await _mediator.Send(query, HttpContext.RequestAborted);
+        return Ok(result);
     }
 
     /// <summary>获取当前用户的会话列表。</summary>
