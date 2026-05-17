@@ -1,5 +1,6 @@
-using YuG.Domain.Common;
+using YuG.Domain.AI.Events;
 using YuG.Domain.AI.ValueObjects;
+using YuG.Domain.Common;
 
 namespace YuG.Domain.AI.Entities;
 
@@ -52,6 +53,13 @@ public class AiChatSession : AggregateRoot
         var message = new AiChatMessage(role, content, sequence, tokenCount);
         Messages.Add(message);
         LastActiveAt = DateTime.UtcNow;
+
+        // 首次 assistant 回复后请求 AI 生成会话标题
+        if (Title == "新对话" && role == "assistant")
+        {
+            AddDomainEvent(new SessionTitleGenerationRequested(SessionId, UserId));
+        }
+
         return message;
     }
 
