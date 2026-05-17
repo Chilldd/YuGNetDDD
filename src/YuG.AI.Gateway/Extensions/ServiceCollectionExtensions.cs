@@ -1,8 +1,5 @@
-using System.ClientModel;
-using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Options;
-using OpenAI;
-using Azure.AI.OpenAI;
+using Microsoft.SemanticKernel;
 using YuG.AI.Gateway.Configuration;
 using YuG.AI.Gateway.Services;
 
@@ -21,36 +18,45 @@ public static class ServiceCollectionExtensions
         return services;
     }
 
-    /// <summary>注册 AI 核心服务（IChatClient、IChatService）。</summary>
+    /// <summary>注册 AI 核心服务（Kernel、ISessionService、IChatService）。</summary>
     /// <param name="services">服务集合</param>
     /// <returns>服务集合</returns>
     public static IServiceCollection AddAiCoreServices(this IServiceCollection services)
     {
-        services.AddSingleton<IChatClient>(sp =>
+        services.AddSingleton<Kernel>(sp =>
         {
             var options = sp.GetRequiredService<IOptions<AiOptions>>().Value;
-            return options.Provider.ToLowerInvariant() switch
+            var builder = Kernel.CreateBuilder();
+
+            switch (options.Provider.ToLowerInvariant())
             {
-                "deepseek" => new OpenAIClient(
-                    new ApiKeyCredential(options.DeepSeek.ApiKey),
-                    new OpenAIClientOptions { Endpoint = new Uri(options.DeepSeek.BaseUrl) })
-                    .GetChatClient(options.DeepSeek.ModelId)
-                    .AsIChatClient(),
+                case "deepseek":
+                    builder.AddOpenAIChatCompletion(
+                        options.DeepSeek.ModelId,
+                        new Uri(options.DeepSeek.BaseUrl),
+                        options.DeepSeek.ApiKey);
+                    break;
 
-                "azureopenai" => new AzureOpenAIClient(
-                    new Uri(options.AzureOpenAI.Endpoint),
-                    new ApiKeyCredential(options.AzureOpenAI.ApiKey))
-                    .GetChatClient(options.AzureOpenAI.ModelId)
-                    .AsIChatClient(),
+                case "azureopenai":
+                    builder.AddAzureOpenAIChatCompletion(
+                        options.AzureOpenAI.DeploymentName ?? options.AzureOpenAI.ModelId,
+                        options.AzureOpenAI.Endpoint,
+                        options.AzureOpenAI.ApiKey,
+                        modelId: options.AzureOpenAI.ModelId);
+                    break;
 
-                "ollama" => new OpenAIClient(
-                    new ApiKeyCredential("ollama"),
-                    new OpenAIClientOptions { Endpoint = new Uri(options.Ollama.Endpoint) })
-                    .GetChatClient(options.Ollama.ModelId)
-                    .AsIChatClient(),
+                case "ollama":
+                    builder.AddOpenAIChatCompletion(
+                        options.Ollama.ModelId,
+                        new Uri(options.Ollama.Endpoint),
+                        "ollama");
+                    break;
 
-                _ => throw new InvalidOperationException($"Unsupported AI provider: {options.Provider}")
-            };
+                default:
+                    throw new InvalidOperationException($"Unsupported AI provider: {options.Provider}");
+            }
+
+            return builder.Build();
         });
 
         services.AddSingleton<ISessionService, SessionService>();

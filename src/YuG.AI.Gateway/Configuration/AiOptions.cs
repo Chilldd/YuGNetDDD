@@ -21,8 +21,6 @@ public class AiOptions
     /// <summary>Ollama 配置。</summary>
     public OllamaConfig Ollama { get; set; } = new();
 
-    /// <summary>聊天默认参数。</summary>
-    public ChatDefaults Defaults { get; set; } = new();
 }
 
 /// <summary>DeepSeek 配置。</summary>
@@ -64,12 +62,3 @@ public class OllamaConfig
     public string ModelId { get; set; } = "llama3";
 }
 
-/// <summary>聊天默认参数。</summary>
-public class ChatDefaults
-{
-    /// <summary>默认采样温度。</summary>
-    public double Temperature { get; set; } = 0.7;
-
-    /// <summary>默认最大输出 Token 数。</summary>
-    public int MaxTokens { get; set; } = 4096;
-}

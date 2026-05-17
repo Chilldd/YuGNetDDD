@@ -1,24 +1,25 @@
 using System.Runtime.CompilerServices;
-using Microsoft.Extensions.AI;
+using System.Text;
 using Microsoft.Extensions.Options;
+using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.ChatCompletion;
 using YuG.AI.Gateway.Configuration;
 using YuG.AI.Gateway.Models.Responses;
 
 namespace YuG.AI.Gateway.Services;
 
-/// <summary>聊天服务实现，封装 <see cref="IChatClient"/> 的调用，使用 <see cref="ChatHistory"/> 管理对话上下文。</summary>
+/// <summary>聊天服务实现，使用 Semantic Kernel 的 <see cref="IChatCompletionService"/> 和 <see cref="ChatHistory"/> 管理对话。</summary>
 public class ChatService : IChatService
 {
-    private readonly IChatClient _chatClient;
+    private readonly Kernel _kernel;
     private readonly AiOptions _options;
 
     /// <summary>初始化 <see cref="ChatService"/> 实例。</summary>
-    /// <param name="chatClient">AI 聊天客户端</param>
+    /// <param name="kernel">Semantic Kernel 实例</param>
     /// <param name="options">AI 配置选项</param>
-    public ChatService(IChatClient chatClient, IOptions<AiOptions> options)
+    public ChatService(Kernel kernel, IOptions<AiOptions> options)
     {
-        _chatClient = chatClient;
+        _kernel = kernel;
         _options = options.Value;
     }
 
@@ -28,16 +29,10 @@ public class ChatService : IChatService
     {
         history.AddUserMessage(question);
 
-        var messages = history.Select(m => new Microsoft.Extensions.AI.ChatMessage(
-            new ChatRole(m.Role.Label),
-            m.Content ?? string.Empty))
-            .ToList();
+        var chatCompletion = _kernel.GetRequiredService<IChatCompletionService>();
+        var results = await chatCompletion.GetChatMessageContentsAsync(history, null, null, ct);
 
-        var response = await _chatClient.GetResponseAsync(messages, null, ct);
-
-        var reply = response.Messages
-            .LastOrDefault(m => m.Role.Value == "assistant")
-            ?.Text ?? string.Empty;
+        var reply = results is [.., var last] ? last.Content ?? string.Empty : string.Empty;
 
         if (reply.Length > 0)
             history.AddAssistantMessage(reply);
@@ -45,7 +40,7 @@ public class ChatService : IChatService
         return new ChatReplyResponse
         {
             Reply = reply,
-            Model = response.ModelId ?? _options.DeepSeek.ModelId,
+            Model = results.LastOrDefault()?.ModelId ?? _options.DeepSeek.ModelId,
         };
     }
 
@@ -55,25 +50,15 @@ public class ChatService : IChatService
     {
         history.AddUserMessage(question);
 
-        var messages = history.Select(m => new Microsoft.Extensions.AI.ChatMessage(
-            new ChatRole(m.Role.Label),
-            m.Content ?? string.Empty))
-            .ToList();
+        var chatCompletion = _kernel.GetRequiredService<IChatCompletionService>();
+        var fullReply = new StringBuilder();
 
-        var fullReply = new System.Text.StringBuilder();
-
-        await foreach (var delta in _chatClient.GetStreamingResponseAsync(messages, null, ct))
+        await foreach (var content in chatCompletion.GetStreamingChatMessageContentsAsync(history, null, null, ct))
         {
-            if (delta.Contents is { Count: > 0 } contents)
+            if (content.Content is { Length: > 0 } text)
             {
-                foreach (var content in contents)
-                {
-                    if (content is TextContent text)
-                    {
-                        fullReply.Append(text.Text);
-                        yield return new ChatStreamDelta(text.Text);
-                    }
-                }
+                fullReply.Append(text);
+                yield return new ChatStreamDelta(text);
             }
         }
 
