@@ -40,7 +40,7 @@ public class Handler : IRequestHandler<GetRoleListQuery, GetRoleListResult>
                 IsSystem = r.IsSystem,
                 CreatedAt = r.CreatedAt
             })
-            .ToPageResultAsync(query.PageIndex, query.PageSize, cancellationToken);
+            .ToPageResultAsync(query.Page, query.PageSize, cancellationToken);
 
         return new GetRoleListResult
         {

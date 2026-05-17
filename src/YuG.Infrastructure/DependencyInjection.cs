@@ -41,10 +41,7 @@ public static class DependencyInjection
         // 注册领域事件发布器
         services.AddScoped<IDomainEventPublisher, DomainEventPublisher>();
 
-        // 注册认证服务
-        services.Configure<JwtOptions>(configuration.GetSection("Jwt"));
-
-        // 注册 JWT 令牌服务
+        // 注册 JWT 令牌服务（JwtOptions 由 Common 层 AddJwtAuthentication 绑定）
         services.AddSingleton<IJwtTokenService, JwtTokenService>();
 
         // 注册密码哈希服务

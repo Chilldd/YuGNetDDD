@@ -73,7 +73,7 @@ public class Handler : IRequestHandler<GetResourceListQuery, GetResourceListResu
                 SortOrder = r.SortOrder,
                 Status = r.Status.ToString()
             })
-            .ToPageResultAsync(query.PageIndex, query.PageSize, cancellationToken);
+            .ToPageResultAsync(query.Page, query.PageSize, cancellationToken);
 
         return new GetResourceListResult
         {

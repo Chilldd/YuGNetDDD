@@ -1,5 +1,6 @@
 using YuG.Api.Extensions;
 using YuG.Api.Middleware;
+using YuG.Common.Jwt;
 using YuG.Infrastructure;
 using YuG.Infrastructure.Services;
 
@@ -41,8 +42,11 @@ builder.Services.AddControllers()
         options.JsonSerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
     });
 
-// 添加 JWT 认证
+// 添加 JWT 认证（共用 Common 层逻辑）
 builder.Services.AddJwtAuthentication(builder.Configuration);
+
+// 注册 API 层权限鉴权
+builder.Services.AddPermissionAuthorization();
 
 // 添加 Swagger 服务
 builder.Services.AddSwaggerServices();

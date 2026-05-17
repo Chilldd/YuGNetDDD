@@ -4,34 +4,9 @@ using System.Text;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using YuG.Common.Interfaces;
+using YuG.Common.Jwt;
 
 namespace YuG.Infrastructure.Services;
-
-/// <summary>
-/// JWT 令牌配置选项
-/// </summary>
-public class JwtOptions
-{
-    /// <summary>
-    /// 密钥
-    /// </summary>
-    public string SecretKey { get; set; } = string.Empty;
-
-    /// <summary>
-    /// 签发者
-    /// </summary>
-    public string Issuer { get; set; } = string.Empty;
-
-    /// <summary>
-    /// 受众
-    /// </summary>
-    public string Audience { get; set; } = string.Empty;
-
-    /// <summary>
-    /// 过期时间（分钟）
-    /// </summary>
-    public int ExpirationMinutes { get; set; } = 300;
-}
 
 /// <summary>
 /// JWT 令牌服务实现
@@ -71,7 +46,6 @@ public class JwtTokenService : IJwtTokenService
             new("gen", generation.ToString())
         };
 
-        // 将角色编码写入 claims（每个角色一个独立的 ClaimTypes.Role claim）
         claims.AddRange(roles.Select(r => new Claim(ClaimTypes.Role, r)));
 
         var tokenDescriptor = new SecurityTokenDescriptor
@@ -106,23 +80,8 @@ public class JwtTokenService : IJwtTokenService
     /// <returns>用户ID</returns>
     public long? GetUserIdFromToken(string token)
     {
-        try
-        {
-            var tokenHandler = new JwtSecurityTokenHandler();
-            var jsonToken = tokenHandler.ReadJwtToken(token);
-            var subClaim = jsonToken.Claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Sub);
-
-            if (subClaim != null && long.TryParse(subClaim.Value, out var userId))
-            {
-                return userId;
-            }
-
-            return null;
-        }
-        catch
-        {
-            return null;
-        }
+        var validator = new JwtTokenValidator(_options);
+        return validator.GetUserIdFromToken(token);
     }
 
     /// <summary>
@@ -134,23 +93,8 @@ public class JwtTokenService : IJwtTokenService
     {
         try
         {
-            var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.UTF8.GetBytes(_options.SecretKey);
-
-            var validationParameters = new TokenValidationParameters
-            {
-                ValidateIssuerSigningKey = true,
-                IssuerSigningKey = new SymmetricSecurityKey(key),
-                ValidateIssuer = true,
-                ValidIssuer = _options.Issuer,
-                ValidateAudience = true,
-                ValidAudience = _options.Audience,
-                ValidateLifetime = true,
-                ClockSkew = TimeSpan.Zero
-            };
-
-            tokenHandler.ValidateToken(token, validationParameters, out _);
-            return true;
+            var validator = new JwtTokenValidator(_options);
+            return validator.ValidateToken(token) is not null;
         }
         catch
         {

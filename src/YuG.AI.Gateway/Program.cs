@@ -3,12 +3,16 @@ using Microsoft.Extensions.Options;
 using YuG.AI.Gateway.Configuration;
 using YuG.AI.Gateway.Extensions;
 using YuG.AI.Gateway.Middleware;
+using YuG.Common.Jwt;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+// JWT 认证（与主 API 共享同一 SecretKey/Issuer，只认证不鉴权）
+builder.Services.AddJwtAuthentication(builder.Configuration);
 
 builder.Services.AddAiOptions(builder.Configuration);
 builder.Services.AddAiCoreServices();
@@ -31,6 +35,9 @@ aiOptions.Validate();
 app.UseMiddleware<RequestBodyParsingMiddleware>();
 app.UseRateLimiter();
 app.UseMiddleware<AiExceptionHandlingMiddleware>();
+
+app.UseAuthentication();
+app.UseAuthorization();
 
 if (app.Environment.IsDevelopment())
 {

@@ -37,7 +37,7 @@ public class Handler : IRequestHandler<GetUserListQuery, GetUserListResult>
                 Status = u.Status.ToString(),
                 CreatedAt = u.CreatedAt
             })
-            .ToPageResultAsync(query.PageIndex, query.PageSize, cancellationToken);
+            .ToPageResultAsync(query.Page, query.PageSize, cancellationToken);
 
         return new GetUserListResult
         {

@@ -12,7 +12,7 @@ public class GetResourceListQuery : IRequest<GetResourceListResult>
     /// <summary>
     /// 当前页码（从 1 开始）
     /// </summary>
-    public int PageIndex { get; init; } = 1;
+    public int Page { get; init; } = 1;
 
     /// <summary>
     /// 每页条数
