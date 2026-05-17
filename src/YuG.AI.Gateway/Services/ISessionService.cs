@@ -1,3 +1,5 @@
+using YuG.AI.Gateway.Models;
+
 namespace YuG.AI.Gateway.Services;
 
 /// <summary>会话管理接口，负责创建和清理对话会话。</summary>

@@ -2,6 +2,7 @@ using System.Collections.Concurrent;
 using Microsoft.Extensions.Options;
 using Microsoft.SemanticKernel.ChatCompletion;
 using YuG.AI.Gateway.Configuration;
+using YuG.AI.Gateway.Models;
 
 namespace YuG.AI.Gateway.Services;
 

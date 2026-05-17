@@ -1,6 +1,6 @@
 using Microsoft.SemanticKernel.ChatCompletion;
 
-namespace YuG.AI.Gateway.Services;
+namespace YuG.AI.Gateway.Models;
 
 /// <summary>会话数据，包含对话历史和统计信息。</summary>
 public class SessionData
