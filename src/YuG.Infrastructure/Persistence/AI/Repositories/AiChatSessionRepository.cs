@@ -1,6 +1,9 @@
 using Microsoft.EntityFrameworkCore;
+using YuG.Common.Extensions;
+using YuG.Common.Models;
 using YuG.Domain.AI.Entities;
 using YuG.Domain.AI.Repositories;
+using YuG.Domain.AI.ValueObjects;
 using YuG.Domain.Common;
 
 namespace YuG.Infrastructure.Persistence.AI.Repositories;
@@ -22,5 +25,17 @@ public class AiChatSessionRepository : Repository<AiChatSession>, IAiChatSession
         return await _dbSet
             .Include(s => s.Messages)
             .FirstOrDefaultAsync(s => s.SessionId == sessionId, cancellationToken);
+    }
+
+    /// <inheritdoc />
+    public async Task<PageResult<AiChatMessage>> GetMessagesPagedAsync(string sessionId, int page, int pageSize, CancellationToken cancellationToken = default)
+    {
+        var query = _dbSet
+            .Where(s => s.SessionId == sessionId)
+            .SelectMany(s => s.Messages);
+
+        return await query
+            .OrderByDescending(m => m.SequenceNumber)
+            .ToPageResultAsync(page, pageSize, cancellationToken);
     }
 }

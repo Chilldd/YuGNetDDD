@@ -35,19 +35,10 @@ public class Handler : IRequestHandler<GetSessionMessagesQuery, GetSessionMessag
         if (!sessionExists)
             throw new NotFoundException(nameof(AiChatSession), request.SessionId);
 
-        var messagesQuery = _sessionRepository.GetQueryable()
-            .Where(s => s.SessionId == request.SessionId && s.UserId == userId)
-            .SelectMany(s => s.Messages);
+        var pageResult = await _sessionRepository.GetMessagesPagedAsync(
+            request.SessionId, request.Page, request.PageSize, cancellationToken);
 
-        var totalCount = await messagesQuery.CountAsync(cancellationToken);
-
-        var pageMessages = await messagesQuery
-            .OrderByDescending(m => m.SequenceNumber)
-            .Skip((request.Page - 1) * request.PageSize)
-            .Take(request.PageSize)
-            .ToListAsync(cancellationToken);
-
-        var items = pageMessages
+        var items = pageResult.Items
             .OrderBy(m => m.SequenceNumber)
             .Select(m => new MessageItem
             {
@@ -62,9 +53,9 @@ public class Handler : IRequestHandler<GetSessionMessagesQuery, GetSessionMessag
         return new GetSessionMessagesResult
         {
             Items = items,
-            TotalCount = totalCount,
-            Page = request.Page,
-            PageSize = request.PageSize,
+            TotalCount = pageResult.TotalCount,
+            Page = pageResult.Page,
+            PageSize = pageResult.PageSize,
         };
     }
 }
