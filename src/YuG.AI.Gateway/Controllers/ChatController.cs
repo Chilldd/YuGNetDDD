@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using YuG.AI.Gateway.Models.Requests;
 using YuG.AI.Gateway.Models.Responses;
 using YuG.AI.Gateway.Services;
@@ -7,6 +8,7 @@ namespace YuG.AI.Gateway.Controllers;
 
 /// <summary>聊天补全接口控制器。</summary>
 [ApiController]
+[EnableRateLimiting("Chat")]
 [Route("api/v1/chat")]
 public class ChatController : ControllerBase
 {

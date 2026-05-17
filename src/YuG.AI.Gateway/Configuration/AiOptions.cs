@@ -21,6 +21,35 @@ public class AiOptions
     /// <summary>Ollama 配置。</summary>
     public OllamaConfig Ollama { get; set; } = new();
 
+    /// <summary>启动时校验配置是否有效。</summary>
+    /// <exception cref="InvalidOperationException">配置不完整时抛出</exception>
+    public void Validate()
+    {
+        switch (Provider.ToLowerInvariant())
+        {
+            case "deepseek":
+                if (string.IsNullOrWhiteSpace(DeepSeek.ApiKey))
+                    throw new InvalidOperationException("DeepSeek ApiKey 未配置");
+                if (string.IsNullOrWhiteSpace(DeepSeek.BaseUrl))
+                    throw new InvalidOperationException("DeepSeek BaseUrl 未配置");
+                break;
+
+            case "azureopenai":
+                if (string.IsNullOrWhiteSpace(AzureOpenAI.ApiKey))
+                    throw new InvalidOperationException("AzureOpenAI ApiKey 未配置");
+                if (string.IsNullOrWhiteSpace(AzureOpenAI.Endpoint))
+                    throw new InvalidOperationException("AzureOpenAI Endpoint 未配置");
+                break;
+
+            case "ollama":
+                if (string.IsNullOrWhiteSpace(Ollama.Endpoint))
+                    throw new InvalidOperationException("Ollama Endpoint 未配置");
+                break;
+
+            default:
+                throw new InvalidOperationException($"不支持的 AI Provider: {Provider}");
+        }
+    }
 }
 
 /// <summary>DeepSeek 配置。</summary>
