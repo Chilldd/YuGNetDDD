@@ -13,6 +13,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddAiOptions(builder.Configuration);
 builder.Services.AddAiCoreServices();
 builder.Services.AddSingleton<AiExceptionHandlingMiddleware>();
+builder.Services.AddSingleton<RequestBodyParsingMiddleware>();
 
 // 速率限制：按 sessionId 限流，60 次/分钟，未传 sessionId 时按 IP
 builder.Services.AddRateLimiter(options =>
@@ -27,8 +28,9 @@ var app = builder.Build();
 var aiOptions = app.Services.GetRequiredService<IOptions<AiOptions>>().Value;
 aiOptions.Validate();
 
-app.UseMiddleware<AiExceptionHandlingMiddleware>();
+app.UseMiddleware<RequestBodyParsingMiddleware>();
 app.UseRateLimiter();
+app.UseMiddleware<AiExceptionHandlingMiddleware>();
 
 if (app.Environment.IsDevelopment())
 {

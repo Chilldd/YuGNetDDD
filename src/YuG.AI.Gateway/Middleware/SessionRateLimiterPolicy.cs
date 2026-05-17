@@ -9,7 +9,7 @@ public class SessionRateLimiterPolicy : IRateLimiterPolicy<string>
 {
     private static readonly FixedWindowRateLimiterOptions _options = new()
     {
-        PermitLimit = 60,
+        PermitLimit = 3,
         Window = TimeSpan.FromMinutes(1),
         QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
         QueueLimit = 5,
@@ -33,33 +33,9 @@ public class SessionRateLimiterPolicy : IRateLimiterPolicy<string>
 
     private static string GetPartitionKey(HttpContext context)
     {
-        // 先尝试从请求体读取 sessionId
-        if (context.Request.Method == HttpMethod.Post.Method
-            && context.Request.ContentType?.StartsWith("application/json", StringComparison.OrdinalIgnoreCase) == true)
-        {
-            try
-            {
-                context.Request.EnableBuffering();
-                using var reader = new StreamReader(context.Request.Body, leaveOpen: true);
-                var body = reader.ReadToEnd();
-                context.Request.Body.Position = 0;
+        if (context.Items.TryGetValue("SessionId", out var sid) && sid is string sessionId)
+            return $"session:{sessionId}";
 
-                using var doc = JsonDocument.Parse(body);
-                if (doc.RootElement.TryGetProperty("sessionId", out var el)
-                    && el.ValueKind == JsonValueKind.String)
-                {
-                    var sid = el.GetString();
-                    if (!string.IsNullOrWhiteSpace(sid))
-                        return $"session:{sid}";
-                }
-            }
-            catch
-            {
-                // body 解析失败，回退到 IP
-            }
-        }
-
-        // 回退：按客户端 IP
         var ip = context.Connection.RemoteIpAddress?.ToString() ?? "unknown";
         return $"ip:{ip}";
     }
