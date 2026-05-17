@@ -33,7 +33,8 @@ public class AiChatSessionRepository : Repository<AiChatSession>, IAiChatSession
         var query = _dbSet
             .AsNoTracking()
             .Where(s => s.SessionId == sessionId)
-            .SelectMany(s => s.Messages);
+            .SelectMany(s => s.Messages)
+            .Where(m => m.Role != "system");
 
         return await query
             .OrderByDescending(m => m.SequenceNumber)
