@@ -8,7 +8,7 @@ namespace YuG.AI.Gateway.Services;
 /// <summary>基于内存的会话管理实现。</summary>
 public class SessionService : ISessionService
 {
-    private readonly ConcurrentDictionary<string, ChatHistory> _sessions = new();
+    private readonly ConcurrentDictionary<string, SessionData> _sessions = new();
     private readonly string? _systemPrompt;
 
     /// <summary>初始化 <see cref="SessionService"/> 实例。</summary>
@@ -19,20 +19,23 @@ public class SessionService : ISessionService
     }
 
     /// <inheritdoc />
-    public (ChatHistory History, string SessionId) GetOrCreateSession(string? sessionId)
+    public (SessionData Session, string SessionId) GetOrCreateSession(string? sessionId)
     {
         if (!string.IsNullOrWhiteSpace(sessionId) && _sessions.TryGetValue(sessionId, out var existing))
+        {
+            existing.LastActivityAt = DateTime.UtcNow;
             return (existing, sessionId);
+        }
 
         var id = Guid.NewGuid().ToString("N");
-        var history = _sessions.GetOrAdd(id, _ =>
+        var data = _sessions.GetOrAdd(id, _ =>
         {
-            var h = new ChatHistory();
+            var sd = new SessionData();
             if (!string.IsNullOrWhiteSpace(_systemPrompt))
-                h.AddSystemMessage(_systemPrompt);
-            return h;
+                sd.History.AddSystemMessage(_systemPrompt);
+            return sd;
         });
-        return (history, id);
+        return (data, id);
     }
 
     /// <inheritdoc />

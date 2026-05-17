@@ -31,6 +31,12 @@ public class ChatReplyResponse
     /// <summary>使用的模型标识。</summary>
     public string Model { get; set; } = string.Empty;
 
-    /// <summary>Token 用量信息。</summary>
+    /// <summary>Token 用量信息（本轮请求）。</summary>
     public UsageData? Usage { get; set; }
+
+    /// <summary>会话累计输入 Token 数。</summary>
+    public long TotalInTokens { get; set; }
+
+    /// <summary>会话累计输出 Token 数。</summary>
+    public long TotalOutTokens { get; set; }
 }

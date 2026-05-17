@@ -33,9 +33,18 @@ public class ChatController : ControllerBase
         if (string.IsNullOrWhiteSpace(request.Message))
             return BadRequest(new { error = "Message cannot be empty" });
 
-        var (history, sessionId) = _sessionService.GetOrCreateSession(request.SessionId);
-        var result = await _chatService.ChatWithHistoryAsync(history, request.Message, ct);
+        var (session, sessionId) = _sessionService.GetOrCreateSession(request.SessionId);
+        var result = await _chatService.ChatWithHistoryAsync(session.History, request.Message, ct);
         result.SessionId = sessionId;
+
+        if (result.Usage is not null)
+        {
+            session.TotalInTokens += result.Usage.InTokens;
+            session.TotalOutTokens += result.Usage.OutTokens;
+        }
+        result.TotalInTokens = session.TotalInTokens;
+        result.TotalOutTokens = session.TotalOutTokens;
+        session.LastActivityAt = DateTime.UtcNow;
 
         return Ok(result);
     }
@@ -54,7 +63,8 @@ public class ChatController : ControllerBase
             return;
         }
 
-        var (history, sessionId) = _sessionService.GetOrCreateSession(request.SessionId);
+        var (session, sessionId) = _sessionService.GetOrCreateSession(request.SessionId);
+        session.LastActivityAt = DateTime.UtcNow;
 
         Response.ContentType = "text/event-stream";
         Response.Headers.CacheControl = "no-cache";
@@ -62,14 +72,22 @@ public class ChatController : ControllerBase
 
         var chatId = $"chatcmpl-{Guid.NewGuid():N}";
 
-        await foreach (var delta in _chatService.ChatStreamWithHistoryAsync(history, request.Message, ct))
+        await foreach (var delta in _chatService.ChatStreamWithHistoryAsync(session.History, request.Message, ct))
         {
+            if (delta.Type == "usage" && delta.Usage is not null)
+            {
+                session.TotalInTokens += delta.Usage.InTokens;
+                session.TotalOutTokens += delta.Usage.OutTokens;
+            }
+
             var json = delta.Type switch
             {
                 "usage" => System.Text.Json.JsonSerializer.Serialize(new
                 {
                     type = "usage",
                     usage = delta.Usage,
+                    totalInTokens = session.TotalInTokens,
+                    totalOutTokens = session.TotalOutTokens,
                     sessionId
                 }),
                 _ => System.Text.Json.JsonSerializer.Serialize(new
