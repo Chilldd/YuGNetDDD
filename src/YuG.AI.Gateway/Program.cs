@@ -1,4 +1,3 @@
-using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.Extensions.Options;
 using YuG.AI.Gateway.Configuration;
@@ -15,16 +14,10 @@ builder.Services.AddAiOptions(builder.Configuration);
 builder.Services.AddAiCoreServices();
 builder.Services.AddSingleton<AiExceptionHandlingMiddleware>();
 
-// 速率限制：60 次/分钟/客户端
+// 速率限制：按 sessionId 限流，60 次/分钟，未传 sessionId 时按 IP
 builder.Services.AddRateLimiter(options =>
 {
-    options.AddFixedWindowLimiter("Chat", opt =>
-    {
-        opt.PermitLimit = 60;
-        opt.Window = TimeSpan.FromMinutes(1);
-        opt.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
-        opt.QueueLimit = 5;
-    });
+    options.AddPolicy<string, YuG.AI.Gateway.Middleware.SessionRateLimiterPolicy>("Chat");
     options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
 });
 

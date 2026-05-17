@@ -33,19 +33,6 @@ public class AiOptions
                 if (string.IsNullOrWhiteSpace(DeepSeek.BaseUrl))
                     throw new InvalidOperationException("DeepSeek BaseUrl 未配置");
                 break;
-
-            case "azureopenai":
-                if (string.IsNullOrWhiteSpace(AzureOpenAI.ApiKey))
-                    throw new InvalidOperationException("AzureOpenAI ApiKey 未配置");
-                if (string.IsNullOrWhiteSpace(AzureOpenAI.Endpoint))
-                    throw new InvalidOperationException("AzureOpenAI Endpoint 未配置");
-                break;
-
-            case "ollama":
-                if (string.IsNullOrWhiteSpace(Ollama.Endpoint))
-                    throw new InvalidOperationException("Ollama Endpoint 未配置");
-                break;
-
             default:
                 throw new InvalidOperationException($"不支持的 AI Provider: {Provider}");
         }
@@ -59,10 +46,10 @@ public class DeepSeekConfig
     public string ApiKey { get; set; } = string.Empty;
 
     /// <summary>API 基础地址。</summary>
-    public string BaseUrl { get; set; } = "https://api.deepseek.com/v1";
+    public string BaseUrl { get; set; } = "https://api.deepseek.com";
 
     /// <summary>模型标识。</summary>
-    public string ModelId { get; set; } = "deepseek-chat";
+    public string ModelId { get; set; } = "deepseek-v4-flash";
 }
 
 /// <summary>Azure OpenAI 配置。</summary>
