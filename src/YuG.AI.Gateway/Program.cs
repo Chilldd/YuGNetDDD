@@ -20,12 +20,11 @@ builder.Services.AddJwtAuthentication(builder.Configuration);
 builder.Services.AddAiOptions(builder.Configuration);
 builder.Services.AddAiCoreServices();
 builder.Services.AddSingleton<AiExceptionHandlingMiddleware>();
-builder.Services.AddSingleton<RequestBodyParsingMiddleware>();
 
-// 速率限制：按 sessionId 限流，60 次/分钟，未传 sessionId 时按 IP
+// 速率限制：按用户 ID 限流，60 次/分钟，未登录时按 IP
 builder.Services.AddRateLimiter(options =>
 {
-    options.AddPolicy<string, YuG.AI.Gateway.Middleware.SessionRateLimiterPolicy>("Chat");
+    options.AddPolicy<string, UserRateLimiterPolicy>("Chat");
     options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
 });
 
@@ -35,7 +34,6 @@ var app = builder.Build();
 var aiOptions = app.Services.GetRequiredService<IOptions<AiOptions>>().Value;
 aiOptions.Validate();
 
-app.UseMiddleware<RequestBodyParsingMiddleware>();
 app.UseRateLimiter();
 app.UseMiddleware<AiExceptionHandlingMiddleware>();
 

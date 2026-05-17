@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using YuG.Application.Common.Interfaces;
+using YuG.Domain.AI.Entities;
 using YuG.Domain.Identity.Entities;
 using YuG.Domain.Permission.Entities;
 using YuG.Infrastructure.Services;
@@ -54,6 +55,11 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
     /// 角色数据集
     /// </summary>
     public DbSet<Role> Roles => Set<Role>();
+
+    /// <summary>
+    /// 聊天会话数据集
+    /// </summary>
+    public DbSet<ChatSession> ChatSessions => Set<ChatSession>();
 
     /// <summary>
     /// 保存所有变更到数据库

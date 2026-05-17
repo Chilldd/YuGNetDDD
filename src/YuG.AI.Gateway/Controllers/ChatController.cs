@@ -15,60 +15,42 @@ namespace YuG.AI.Gateway.Controllers;
 public class ChatController : ControllerBase
 {
     private readonly IChatService _chatService;
-    private readonly ISessionService _sessionService;
 
     /// <summary>初始化 <see cref="ChatController"/> 实例。</summary>
     /// <param name="chatService">聊天服务</param>
-    /// <param name="sessionService">会话管理服务</param>
-    public ChatController(IChatService chatService, ISessionService sessionService)
+    public ChatController(IChatService chatService)
     {
         _chatService = chatService;
-        _sessionService = sessionService;
     }
 
-    /// <summary>基于会话的聊天补全。服务端自动管理对话上下文，客户端只需传递消息。</summary>
+    /// <summary>基于完整消息历史的聊天补全。消息列表包含 system/user/assistant 所有历史。</summary>
     /// <param name="request">聊天请求</param>
     /// <param name="ct">取消令牌</param>
-    /// <returns>回复与 sessionId</returns>
+    /// <returns>AI 回复</returns>
     [HttpPost]
     public async Task<ActionResult<ChatReplyResponse>> Chat(
         [FromBody] ChatRequest request, CancellationToken ct)
     {
-        if (string.IsNullOrWhiteSpace(request.Message))
-            return BadRequest(new { error = "Message cannot be empty" });
+        if (request.Messages is null || request.Messages.Count == 0)
+            return BadRequest(new { error = "Messages cannot be empty" });
 
-        var (session, sessionId) = _sessionService.GetOrCreateSession(request.SessionId);
-        var result = await _chatService.ChatWithHistoryAsync(session.History, request.Message, ct);
-        result.SessionId = sessionId;
-
-        if (result.Usage is not null)
-        {
-            session.TotalInTokens += result.Usage.InTokens;
-            session.TotalOutTokens += result.Usage.OutTokens;
-        }
-        result.TotalInTokens = session.TotalInTokens;
-        result.TotalOutTokens = session.TotalOutTokens;
-        session.LastActivityAt = DateTime.UtcNow;
-
+        var result = await _chatService.ChatAsync(request.Messages, ct);
         return Ok(result);
     }
 
-    /// <summary>基于会话的流式聊天补全，使用 SSE 协议推送响应。服务端自动管理对话上下文。</summary>
+    /// <summary>基于完整消息历史的流式聊天补全，使用 SSE 协议推送响应。</summary>
     /// <param name="request">聊天请求</param>
     /// <param name="ct">取消令牌</param>
     [HttpPost("stream")]
     public async Task Stream(
         [FromBody] ChatRequest request, CancellationToken ct)
     {
-        if (string.IsNullOrWhiteSpace(request.Message))
+        if (request.Messages is null || request.Messages.Count == 0)
         {
             Response.StatusCode = StatusCodes.Status400BadRequest;
-            await Response.WriteAsJsonAsync(new { error = "Message cannot be empty" }, ct);
+            await Response.WriteAsJsonAsync(new { error = "Messages cannot be empty" }, ct);
             return;
         }
-
-        var (session, sessionId) = _sessionService.GetOrCreateSession(request.SessionId);
-        session.LastActivityAt = DateTime.UtcNow;
 
         Response.ContentType = "text/event-stream";
         Response.Headers.CacheControl = "no-cache";
@@ -76,29 +58,19 @@ public class ChatController : ControllerBase
 
         var chatId = $"chatcmpl-{Guid.NewGuid():N}";
 
-        await foreach (var delta in _chatService.ChatStreamWithHistoryAsync(session.History, request.Message, ct))
+        await foreach (var delta in _chatService.ChatStreamAsync(request.Messages, ct))
         {
-            if (delta.Type == "usage" && delta.Usage is not null)
-            {
-                session.TotalInTokens += delta.Usage.InTokens;
-                session.TotalOutTokens += delta.Usage.OutTokens;
-            }
-
             var json = delta.Type switch
             {
                 "usage" => System.Text.Json.JsonSerializer.Serialize(new
                 {
                     type = "usage",
                     usage = delta.Usage,
-                    totalInTokens = session.TotalInTokens,
-                    totalOutTokens = session.TotalOutTokens,
-                    sessionId
                 }),
                 _ => System.Text.Json.JsonSerializer.Serialize(new
                 {
                     type = "delta",
                     content = delta.Content,
-                    sessionId
                 })
             };
             await Response.WriteAsync($"data: {json}\n\n", ct);
@@ -109,18 +81,8 @@ public class ChatController : ControllerBase
         {
             type = "done",
             id = chatId,
-            sessionId
         });
         await Response.WriteAsync($"data: {done}\n\n", ct);
         await Response.Body.FlushAsync(ct);
-    }
-
-    /// <summary>清空指定会话的历史记录。</summary>
-    /// <param name="sessionId">会话 ID</param>
-    [HttpDelete("session/{sessionId}")]
-    public ActionResult ClearSession(string sessionId)
-    {
-        _sessionService.ClearSession(sessionId);
-        return Ok(new { message = "Session cleared" });
     }
 }

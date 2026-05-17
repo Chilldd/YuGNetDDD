@@ -18,7 +18,7 @@ public static class ServiceCollectionExtensions
         return services;
     }
 
-    /// <summary>注册 AI 核心服务（Kernel、ISessionService、IChatService）。</summary>
+    /// <summary>注册 AI 核心服务（Kernel、IChatService）。</summary>
     /// <param name="services">服务集合</param>
     /// <returns>服务集合</returns>
     public static IServiceCollection AddAiCoreServices(this IServiceCollection services)
@@ -43,7 +43,6 @@ public static class ServiceCollectionExtensions
             return builder.Build();
         });
 
-        services.AddSingleton<ISessionService, SessionService>();
         services.AddScoped<IChatService, ChatService>();
 
         return services;

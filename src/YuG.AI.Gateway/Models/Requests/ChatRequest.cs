@@ -1,11 +1,11 @@
 namespace YuG.AI.Gateway.Models.Requests;
 
-/// <summary>聊天请求，包含用户输入消息。</summary>
+/// <summary>聊天请求，包含用户标识和完整消息历史。</summary>
 public class ChatRequest
 {
-    /// <summary>用户输入消息内容。</summary>
-    public string Message { get; set; } = string.Empty;
+    /// <summary>用户标识。</summary>
+    public long? UserId { get; set; }
 
-    /// <summary>会话 ID。为空则服务端自动创建新会话。</summary>
-    public string? SessionId { get; set; }
+    /// <summary>完整消息历史列表。</summary>
+    public List<ChatMessageDto> Messages { get; set; } = [];
 }

@@ -5,11 +5,12 @@ using Microsoft.Extensions.Options;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.ChatCompletion;
 using YuG.AI.Gateway.Configuration;
+using YuG.AI.Gateway.Models.Requests;
 using YuG.AI.Gateway.Models.Responses;
 
 namespace YuG.AI.Gateway.Services;
 
-/// <summary>聊天服务实现，使用 Semantic Kernel 的 <see cref="IChatCompletionService"/> 和 <see cref="ChatHistory"/> 管理对话。</summary>
+/// <summary>聊天服务实现，使用 Semantic Kernel 的 <see cref="IChatCompletionService"/> 处理完整消息历史。</summary>
 public class ChatService : IChatService
 {
     private readonly Kernel _kernel;
@@ -25,19 +26,15 @@ public class ChatService : IChatService
     }
 
     /// <inheritdoc />
-    public async Task<ChatReplyResponse> ChatWithHistoryAsync(
-        ChatHistory history, string question, CancellationToken ct = default)
+    public async Task<ChatReplyResponse> ChatAsync(List<ChatMessageDto> messages, CancellationToken ct = default)
     {
-        history.AddUserMessage(question);
+        var history = BuildChatHistory(messages);
 
         var chatCompletion = _kernel.GetRequiredService<IChatCompletionService>();
         var results = await chatCompletion.GetChatMessageContentsAsync(history, null, null, ct);
 
         var last = results.LastOrDefault();
         var reply = last?.Content ?? string.Empty;
-
-        if (reply.Length > 0)
-            history.AddAssistantMessage(reply);
 
         return new ChatReplyResponse
         {
@@ -48,10 +45,10 @@ public class ChatService : IChatService
     }
 
     /// <inheritdoc />
-    public async IAsyncEnumerable<ChatStreamDelta> ChatStreamWithHistoryAsync(
-        ChatHistory history, string question, [EnumeratorCancellation] CancellationToken ct = default)
+    public async IAsyncEnumerable<ChatStreamDelta> ChatStreamAsync(
+        List<ChatMessageDto> messages, [EnumeratorCancellation] CancellationToken ct = default)
     {
-        history.AddUserMessage(question);
+        var history = BuildChatHistory(messages);
 
         var chatCompletion = _kernel.GetRequiredService<IChatCompletionService>();
         var fullReply = new StringBuilder();
@@ -70,21 +67,26 @@ public class ChatService : IChatService
         var usage = ExtractUsage(lastChunk);
         if (usage is not null)
             yield return new ChatStreamDelta { Type = "usage", Usage = usage };
-
-        if (fullReply.Length > 0)
-            history.AddAssistantMessage(fullReply.ToString());
     }
 
-    /// <summary>从 SK 响应中提取 Token 用量。</summary>
+    /// <summary>从消息列表构造 <see cref="ChatHistory"/>。</summary>
+    private static ChatHistory BuildChatHistory(List<ChatMessageDto> messages)
+    {
+        var history = new ChatHistory();
+        foreach (var msg in messages)
+        {
+            history.AddMessage(new AuthorRole(msg.Role), msg.Content);
+        }
+        return history;
+    }
+
     private static UsageData? ExtractUsage(ChatMessageContent? message)
     {
         if (message is null) return null;
 
-        // 策略 1：metadata["Usage"]
         if (message.Metadata?.TryGetValue("Usage", out var usageObj) == true && usageObj is not null)
             return ParseUsageObject(usageObj);
 
-        // 策略 2：InnerContent 上找 Usage 属性
         if (message.InnerContent is not null)
         {
             var usageProp = message.InnerContent.GetType().GetProperty("Usage");
@@ -99,16 +101,13 @@ public class ChatService : IChatService
         return null;
     }
 
-    /// <summary>从 SK 流式响应中提取 Token 用量。</summary>
     private static UsageData? ExtractUsage(StreamingChatMessageContent? chunk)
     {
         if (chunk is null) return null;
 
-        // 策略 1：metadata["Usage"]
         if (chunk.Metadata?.TryGetValue("Usage", out var usageObj) == true && usageObj is not null)
             return ParseUsageObject(usageObj);
 
-        // 策略 2：InnerContent 上找 Usage
         if (chunk.InnerContent is not null)
         {
             var usageProp = chunk.InnerContent.GetType().GetProperty("Usage");
@@ -123,7 +122,6 @@ public class ChatService : IChatService
         return null;
     }
 
-    /// <summary>从用量对象中反射提取各 Token 计数字段。</summary>
     private static UsageData ParseUsageObject(object obj)
     {
         static int GetInt(object target, string name1, string name2)
