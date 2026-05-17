@@ -4,13 +4,13 @@ using YuG.Domain.AI.Entities;
 
 namespace YuG.Infrastructure.Persistence.AI.Configurations;
 
-/// <summary>ChatSession 领域实体 EF Core 配置。</summary>
-public class ChatSessionConfiguration : IEntityTypeConfiguration<ChatSession>
+/// <summary>AiChatSession 领域实体 EF Core 配置。</summary>
+public class AiChatSessionConfiguration : IEntityTypeConfiguration<AiChatSession>
 {
     /// <inheritdoc />
-    public void Configure(EntityTypeBuilder<ChatSession> builder)
+    public void Configure(EntityTypeBuilder<AiChatSession> builder)
     {
-        builder.ToTable("ChatSession");
+        builder.ToTable("AiChatSession");
 
         // 主键（雪花 ID）
         builder.HasKey(s => s.Id);
@@ -52,8 +52,8 @@ public class ChatSessionConfiguration : IEntityTypeConfiguration<ChatSession>
         // 消息列表（值对象集合）
         builder.OwnsMany(s => s.Messages, msg =>
         {
-            msg.ToTable("ChatMessage");
-            msg.WithOwner().HasForeignKey("ChatSessionId");
+            msg.ToTable("AiChatMessage");
+            msg.WithOwner().HasForeignKey("AiChatSessionId");
 
             msg.Property<long>("Id");
             msg.HasKey("Id");

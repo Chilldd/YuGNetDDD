@@ -3,7 +3,7 @@ using YuG.Domain.Common;
 namespace YuG.Domain.AI.Entities;
 
 /// <summary>聊天会话聚合根，包含消息历史和会话元数据。</summary>
-public class ChatSession : AggregateRoot
+public class AiChatSession : AggregateRoot
 {
     /// <summary>外部会话标识，供客户端引用。</summary>
     public string SessionId { get; private set; } = string.Empty;
@@ -18,17 +18,17 @@ public class ChatSession : AggregateRoot
     public DateTime LastActiveAt { get; private set; } = DateTime.UtcNow;
 
     /// <summary>会话消息列表。</summary>
-    public List<ChatMessage> Messages { get; private set; } = [];
+    public List<AiChatMessage> Messages { get; private set; } = [];
 
     /// <summary>用于 ORM。</summary>
-    private ChatSession()
+    private AiChatSession()
     {
     }
 
     /// <summary>创建新聊天会话。</summary>
     /// <param name="userId">用户标识</param>
     /// <param name="systemPrompt">系统提示词，作为首条消息</param>
-    public ChatSession(long userId, string? systemPrompt)
+    public AiChatSession(long userId, string? systemPrompt)
     {
         SessionId = Guid.NewGuid().ToString("N");
         UserId = userId;
@@ -37,7 +37,7 @@ public class ChatSession : AggregateRoot
 
         if (!string.IsNullOrWhiteSpace(systemPrompt))
         {
-            Messages.Add(new ChatMessage("system", systemPrompt, 0));
+            Messages.Add(new AiChatMessage("system", systemPrompt, 0));
         }
     }
 
@@ -45,10 +45,10 @@ public class ChatSession : AggregateRoot
     /// <param name="role">消息角色（system/user/assistant）</param>
     /// <param name="content">消息内容</param>
     /// <param name="tokenCount">Token 数（可选）</param>
-    public ChatMessage AddMessage(string role, string content, int? tokenCount = null)
+    public AiChatMessage AddMessage(string role, string content, int? tokenCount = null)
     {
         var sequence = Messages.Count;
-        var message = new ChatMessage(role, content, sequence, tokenCount);
+        var message = new AiChatMessage(role, content, sequence, tokenCount);
         Messages.Add(message);
         LastActiveAt = DateTime.UtcNow;
         return message;

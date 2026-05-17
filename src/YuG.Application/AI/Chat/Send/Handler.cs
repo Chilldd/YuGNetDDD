@@ -11,7 +11,7 @@ namespace YuG.Application.AI.Chat.Send;
 public class ChatCommandHandler : IRequestHandler<ChatCommand, ChatReplyResult>
 {
     private readonly IChatService _chatService;
-    private readonly IChatSessionRepository _sessionRepository;
+    private readonly IAiChatSessionRepository _sessionRepository;
     private readonly IUserIdentity _userIdentity;
     private readonly string? _systemPrompt;
 
@@ -22,7 +22,7 @@ public class ChatCommandHandler : IRequestHandler<ChatCommand, ChatReplyResult>
     /// <param name="configuration">应用配置</param>
     public ChatCommandHandler(
         IChatService chatService,
-        IChatSessionRepository sessionRepository,
+        IAiChatSessionRepository sessionRepository,
         IUserIdentity userIdentity,
         IConfiguration configuration)
     {
@@ -59,7 +59,7 @@ public class ChatCommandHandler : IRequestHandler<ChatCommand, ChatReplyResult>
         return result with { SessionId = session.SessionId };
     }
 
-    private async Task<ChatSession> LoadOrCreateSessionAsync(string? sessionId, long userId, CancellationToken ct)
+    private async Task<AiChatSession> LoadOrCreateSessionAsync(string? sessionId, long userId, CancellationToken ct)
     {
         if (!string.IsNullOrWhiteSpace(sessionId))
         {
@@ -71,7 +71,7 @@ public class ChatCommandHandler : IRequestHandler<ChatCommand, ChatReplyResult>
             }
         }
 
-        var session = new ChatSession(userId, _systemPrompt);
+        var session = new AiChatSession(userId, _systemPrompt);
         await _sessionRepository.AddAsync(session, ct);
         return session;
     }

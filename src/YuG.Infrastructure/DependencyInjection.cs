@@ -63,7 +63,7 @@ public static class DependencyInjection
         services.AddScoped<IRoleRepository, RoleRepository>();
 
         // 注册聊天会话仓储
-        services.AddScoped<IChatSessionRepository, ChatSessionRepository>();
+        services.AddScoped<IAiChatSessionRepository, AiChatSessionRepository>();
 
         // 注册服务器信息服务
         services.AddSingleton<IServerInfoService, ServerInfoService>();

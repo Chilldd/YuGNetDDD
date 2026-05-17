@@ -47,6 +47,49 @@ namespace YuG.Infrastructure.Migrations
                     b.ToTable("UserRole", (string)null);
                 });
 
+            modelBuilder.Entity("YuG.Domain.AI.Entities.AiChatSession", b =>
+                {
+                    b.Property<long>("Id")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT")
+                        .HasDefaultValue(new DateTime(2026, 5, 17, 10, 56, 33, 233, DateTimeKind.Utc).AddTicks(7072));
+
+                    b.Property<DateTime>("LastActiveAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("SessionId")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(200)
+                        .HasColumnType("TEXT")
+                        .HasDefaultValue("新对话");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("TEXT")
+                        .HasDefaultValue(new DateTime(2026, 5, 17, 10, 56, 33, 235, DateTimeKind.Utc).AddTicks(5606));
+
+                    b.Property<long>("UserId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SessionId")
+                        .IsUnique();
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("AiChatSession", (string)null);
+                });
+
             modelBuilder.Entity("YuG.Domain.Identity.Entities.Role", b =>
                 {
                     b.Property<long>("Id")
@@ -60,7 +103,7 @@ namespace YuG.Infrastructure.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT")
-                        .HasDefaultValue(new DateTime(2026, 5, 15, 3, 32, 48, 547, DateTimeKind.Utc).AddTicks(4909));
+                        .HasDefaultValue(new DateTime(2026, 5, 17, 10, 56, 33, 265, DateTimeKind.Utc).AddTicks(5858));
 
                     b.Property<string>("Description")
                         .HasMaxLength(500)
@@ -86,7 +129,7 @@ namespace YuG.Infrastructure.Migrations
                     b.Property<DateTime>("UpdatedAt")
                         .ValueGeneratedOnAddOrUpdate()
                         .HasColumnType("TEXT")
-                        .HasDefaultValue(new DateTime(2026, 5, 15, 3, 32, 48, 549, DateTimeKind.Utc).AddTicks(9773));
+                        .HasDefaultValue(new DateTime(2026, 5, 17, 10, 56, 33, 265, DateTimeKind.Utc).AddTicks(6061));
 
                     b.HasKey("Id");
 
@@ -104,7 +147,7 @@ namespace YuG.Infrastructure.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT")
-                        .HasDefaultValue(new DateTime(2026, 5, 15, 3, 32, 48, 562, DateTimeKind.Utc).AddTicks(1480));
+                        .HasDefaultValue(new DateTime(2026, 5, 17, 10, 56, 33, 272, DateTimeKind.Utc).AddTicks(5274));
 
                     b.Property<int>("Generation")
                         .ValueGeneratedOnAdd()
@@ -126,7 +169,7 @@ namespace YuG.Infrastructure.Migrations
                     b.Property<DateTime>("UpdatedAt")
                         .ValueGeneratedOnAddOrUpdate()
                         .HasColumnType("TEXT")
-                        .HasDefaultValue(new DateTime(2026, 5, 15, 3, 32, 48, 562, DateTimeKind.Utc).AddTicks(1706));
+                        .HasDefaultValue(new DateTime(2026, 5, 17, 10, 56, 33, 272, DateTimeKind.Utc).AddTicks(5481));
 
                     b.Property<string>("Username")
                         .IsRequired()
@@ -158,7 +201,7 @@ namespace YuG.Infrastructure.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT")
-                        .HasDefaultValue(new DateTime(2026, 5, 15, 3, 32, 48, 590, DateTimeKind.Utc).AddTicks(1422));
+                        .HasDefaultValue(new DateTime(2026, 5, 17, 10, 56, 33, 276, DateTimeKind.Utc).AddTicks(9439));
 
                     b.Property<string>("Description")
                         .HasMaxLength(500)
@@ -219,7 +262,7 @@ namespace YuG.Infrastructure.Migrations
                     b.Property<DateTime>("UpdatedAt")
                         .ValueGeneratedOnAddOrUpdate()
                         .HasColumnType("TEXT")
-                        .HasDefaultValue(new DateTime(2026, 5, 15, 3, 32, 48, 590, DateTimeKind.Utc).AddTicks(1646));
+                        .HasDefaultValue(new DateTime(2026, 5, 17, 10, 56, 33, 276, DateTimeKind.Utc).AddTicks(9836));
 
                     b.HasKey("Id");
 
@@ -264,6 +307,50 @@ namespace YuG.Infrastructure.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("YuG.Domain.AI.Entities.AiChatSession", b =>
+                {
+                    b.OwnsMany("YuG.Domain.AI.Entities.AiChatMessage", "Messages", b1 =>
+                        {
+                            b1.Property<long>("Id")
+                                .ValueGeneratedOnAdd()
+                                .HasColumnType("INTEGER");
+
+                            b1.Property<long>("AiChatSessionId")
+                                .HasColumnType("INTEGER");
+
+                            b1.Property<string>("Content")
+                                .IsRequired()
+                                .HasColumnType("TEXT");
+
+                            b1.Property<DateTime>("CreatedAt")
+                                .ValueGeneratedOnAdd()
+                                .HasColumnType("TEXT")
+                                .HasDefaultValue(new DateTime(2026, 5, 17, 10, 56, 33, 264, DateTimeKind.Utc).AddTicks(961));
+
+                            b1.Property<string>("Role")
+                                .IsRequired()
+                                .HasMaxLength(20)
+                                .HasColumnType("TEXT");
+
+                            b1.Property<int>("SequenceNumber")
+                                .HasColumnType("INTEGER");
+
+                            b1.Property<int?>("TokenCount")
+                                .HasColumnType("INTEGER");
+
+                            b1.HasKey("Id");
+
+                            b1.HasIndex("AiChatSessionId");
+
+                            b1.ToTable("AiChatMessage", (string)null);
+
+                            b1.WithOwner()
+                                .HasForeignKey("AiChatSessionId");
+                        });
+
+                    b.Navigation("Messages");
+                });
+
             modelBuilder.Entity("YuG.Domain.Identity.Entities.User", b =>
                 {
                     b.OwnsMany("YuG.Domain.Identity.ValueObjects.RefreshToken", "RefreshTokens", b1 =>
@@ -275,7 +362,7 @@ namespace YuG.Infrastructure.Migrations
                             b1.Property<DateTime>("CreatedAt")
                                 .ValueGeneratedOnAdd()
                                 .HasColumnType("TEXT")
-                                .HasDefaultValue(new DateTime(2026, 5, 15, 3, 32, 48, 588, DateTimeKind.Utc).AddTicks(807));
+                                .HasDefaultValue(new DateTime(2026, 5, 17, 10, 56, 33, 275, DateTimeKind.Utc).AddTicks(890));
 
                             b1.Property<DateTime>("ExpiresAt")
                                 .HasColumnType("TEXT");

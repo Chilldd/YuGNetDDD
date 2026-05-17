@@ -1,7 +1,7 @@
 namespace YuG.Domain.AI.Entities;
 
 /// <summary>聊天消息值对象。</summary>
-public class ChatMessage
+public class AiChatMessage
 {
     /// <summary>消息角色（system、user、assistant）。</summary>
     public string Role { get; private set; } = string.Empty;
@@ -19,7 +19,7 @@ public class ChatMessage
     public DateTime CreatedAt { get; private set; } = DateTime.UtcNow;
 
     /// <summary>用于 ORM。</summary>
-    private ChatMessage()
+    private AiChatMessage()
     {
     }
 
@@ -28,7 +28,7 @@ public class ChatMessage
     /// <param name="content">消息内容</param>
     /// <param name="sequenceNumber">序号</param>
     /// <param name="tokenCount">Token 数（可选）</param>
-    public ChatMessage(string role, string content, int sequenceNumber, int? tokenCount = null)
+    public AiChatMessage(string role, string content, int sequenceNumber, int? tokenCount = null)
     {
         if (string.IsNullOrWhiteSpace(role))
             throw new ArgumentException("消息角色不能为空", nameof(role));

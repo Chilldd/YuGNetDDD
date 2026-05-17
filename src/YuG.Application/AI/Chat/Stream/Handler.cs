@@ -13,7 +13,7 @@ namespace YuG.Application.AI.Chat.Stream;
 public class StreamChatCommandHandler : IRequestHandler<StreamChatCommand, IAsyncEnumerable<ChatStreamDeltaResult>>
 {
     private readonly IChatService _chatService;
-    private readonly IChatSessionRepository _sessionRepository;
+    private readonly IAiChatSessionRepository _sessionRepository;
     private readonly IUserIdentity _userIdentity;
     private readonly string? _systemPrompt;
 
@@ -24,7 +24,7 @@ public class StreamChatCommandHandler : IRequestHandler<StreamChatCommand, IAsyn
     /// <param name="configuration">应用配置</param>
     public StreamChatCommandHandler(
         IChatService chatService,
-        IChatSessionRepository sessionRepository,
+        IAiChatSessionRepository sessionRepository,
         IUserIdentity userIdentity,
         IConfiguration configuration)
     {
@@ -59,7 +59,7 @@ public class StreamChatCommandHandler : IRequestHandler<StreamChatCommand, IAsyn
 
     private async IAsyncEnumerable<ChatStreamDeltaResult> WrapStreamWithPersistence(
         IAsyncEnumerable<ChatStreamDeltaResult> rawStream,
-        ChatSession session,
+        AiChatSession session,
         string userMessage,
         [EnumeratorCancellation] CancellationToken ct)
     {
@@ -81,7 +81,7 @@ public class StreamChatCommandHandler : IRequestHandler<StreamChatCommand, IAsyn
         }
     }
 
-    private async Task<ChatSession> LoadOrCreateSessionAsync(string? sessionId, long userId, CancellationToken ct)
+    private async Task<AiChatSession> LoadOrCreateSessionAsync(string? sessionId, long userId, CancellationToken ct)
     {
         if (!string.IsNullOrWhiteSpace(sessionId))
         {
@@ -93,7 +93,7 @@ public class StreamChatCommandHandler : IRequestHandler<StreamChatCommand, IAsyn
             }
         }
 
-        var session = new ChatSession(userId, _systemPrompt);
+        var session = new AiChatSession(userId, _systemPrompt);
         await _sessionRepository.AddAsync(session, ct);
         return session;
     }

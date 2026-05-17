@@ -59,7 +59,7 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
     /// <summary>
     /// 聊天会话数据集
     /// </summary>
-    public DbSet<ChatSession> ChatSessions => Set<ChatSession>();
+    public DbSet<AiChatSession> AiChatSessions => Set<AiChatSession>();
 
     /// <summary>
     /// 保存所有变更到数据库
