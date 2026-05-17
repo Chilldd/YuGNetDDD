@@ -1,3 +1,4 @@
+using YuG.Common.Models;
 using YuG.Domain.Common;
 using YuG.Domain.Identity.Entities;
 
@@ -39,4 +40,13 @@ public interface IUserRepository : IRepository<User>
     /// <param name="cancellationToken">取消令牌</param>
     /// <returns>用户实体，不存在则返回 null</returns>
     Task<User?> GetByIdWithRefreshTokensAsync(long id, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// 分页获取用户列表。
+    /// </summary>
+    /// <param name="page">页码，从 1 开始</param>
+    /// <param name="pageSize">每页条数</param>
+    /// <param name="cancellationToken">取消令牌</param>
+    /// <returns>用户分页结果</returns>
+    Task<PageResult<User>> GetUsersPagedAsync(int page, int pageSize, CancellationToken cancellationToken = default);
 }

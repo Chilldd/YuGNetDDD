@@ -1,4 +1,6 @@
 using Microsoft.EntityFrameworkCore;
+using YuG.Common.Extensions;
+using YuG.Common.Models;
 using YuG.Domain.Permission.Entities;
 using YuG.Domain.Permission.Enums;
 using YuG.Domain.Permission.Repositories;
@@ -144,5 +146,24 @@ public class ResourceRepository : Repository<Resource>, IResourceRepository
         return await _context.Resources
             .Where(r => idList.Contains(r.Id))
             .ToListAsync(cancellationToken);
+    }
+
+    /// <inheritdoc />
+    public async Task<PageResult<Resource>> GetResourcesPagedAsync(
+        int page, int pageSize,
+        ResourceType? type, ResourceHttpMethod? httpMethod, long? parentId, ResourceStatus? status,
+        CancellationToken cancellationToken = default)
+    {
+        var query = _context.Resources
+            .AsNoTracking()
+            .WhereIf(type.HasValue, r => r.Type == type!.Value)
+            .WhereIf(httpMethod.HasValue, r => r.HttpMethod == httpMethod!.Value)
+            .WhereIf(parentId.HasValue, r => r.ParentId == parentId!.Value)
+            .WhereIf(status.HasValue, r => r.Status == status!.Value);
+
+        return await query
+            .OrderBy(r => r.SortOrder)
+            .ThenBy(r => r.Id)
+            .ToPageResultAsync(page, pageSize, cancellationToken);
     }
 }

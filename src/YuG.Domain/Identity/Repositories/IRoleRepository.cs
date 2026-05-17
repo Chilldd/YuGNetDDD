@@ -1,3 +1,4 @@
+using YuG.Common.Models;
 using YuG.Domain.Common;
 using YuG.Domain.Identity.Entities;
 
@@ -63,4 +64,13 @@ public interface IRoleRepository : IRepository<Role>
     /// <param name="cancellationToken">取消令牌</param>
     /// <returns>角色列表</returns>
     Task<IReadOnlyList<Role>> GetByUserIdWithResourcesAsync(long userId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// 分页获取角色列表。
+    /// </summary>
+    /// <param name="page">页码，从 1 开始</param>
+    /// <param name="pageSize">每页条数</param>
+    /// <param name="cancellationToken">取消令牌</param>
+    /// <returns>角色分页结果</returns>
+    Task<PageResult<Role>> GetRolesPagedAsync(int page, int pageSize, CancellationToken cancellationToken = default);
 }

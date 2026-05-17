@@ -1,4 +1,6 @@
 using Microsoft.EntityFrameworkCore;
+using YuG.Common.Extensions;
+using YuG.Common.Models;
 using YuG.Domain.Common;
 using YuG.Domain.Identity.Entities;
 using YuG.Domain.Identity.Repositories;
@@ -61,6 +63,15 @@ public class UserRepository : Repository<User>, IUserRepository
         return await _context.Users
             .Include(u => u.RefreshTokens)
             .FirstOrDefaultAsync(u => u.Id == id, cancellationToken);
+    }
+
+    /// <inheritdoc />
+    public async Task<PageResult<User>> GetUsersPagedAsync(int page, int pageSize, CancellationToken cancellationToken = default)
+    {
+        return await _context.Users
+            .AsNoTracking()
+            .OrderBy(u => u.Id)
+            .ToPageResultAsync(page, pageSize, cancellationToken);
     }
 }
 

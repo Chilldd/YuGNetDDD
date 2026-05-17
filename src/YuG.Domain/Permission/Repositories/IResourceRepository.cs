@@ -1,3 +1,4 @@
+using YuG.Common.Models;
 using YuG.Domain.Common;
 using YuG.Domain.Permission.Entities;
 using YuG.Domain.Permission.Enums;
@@ -79,4 +80,20 @@ public interface IResourceRepository : IRepository<Resource>
     /// <param name="cancellationToken">取消令牌</param>
     /// <returns>资源列表</returns>
     Task<IReadOnlyList<Resource>> GetByIdsAsync(IEnumerable<long> ids, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// 分页获取资源列表。
+    /// </summary>
+    /// <param name="page">页码，从 1 开始</param>
+    /// <param name="pageSize">每页条数</param>
+    /// <param name="type">资源类型筛选（可选）</param>
+    /// <param name="httpMethod">HTTP 方法筛选（可选）</param>
+    /// <param name="parentId">父级资源标识筛选（可选）</param>
+    /// <param name="status">资源状态筛选（可选）</param>
+    /// <param name="cancellationToken">取消令牌</param>
+    /// <returns>资源分页结果</returns>
+    Task<PageResult<Resource>> GetResourcesPagedAsync(
+        int page, int pageSize,
+        ResourceType? type, ResourceHttpMethod? httpMethod, long? parentId, ResourceStatus? status,
+        CancellationToken cancellationToken = default);
 }
