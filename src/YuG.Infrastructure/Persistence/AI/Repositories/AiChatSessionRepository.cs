@@ -31,6 +31,7 @@ public class AiChatSessionRepository : Repository<AiChatSession>, IAiChatSession
     public async Task<PageResult<AiChatMessage>> GetMessagesPagedAsync(string sessionId, int page, int pageSize, CancellationToken cancellationToken = default)
     {
         var query = _dbSet
+            .AsNoTracking()
             .Where(s => s.SessionId == sessionId)
             .SelectMany(s => s.Messages);
 
