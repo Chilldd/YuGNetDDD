@@ -7,6 +7,9 @@ namespace YuG.Domain.AI.Entities;
 /// <summary>聊天会话聚合根，包含消息历史和会话元数据。</summary>
 public class AiChatSession : AggregateRoot
 {
+    /// <summary>默认标题。</summary>
+    public const string DefaultTitle = "新对话";
+
     /// <summary>外部会话标识，供客户端引用。</summary>
     public string SessionId { get; private set; } = string.Empty;
 
@@ -34,7 +37,7 @@ public class AiChatSession : AggregateRoot
     {
         SessionId = Guid.NewGuid().ToString("N");
         UserId = userId;
-        Title = "新对话";
+        Title = DefaultTitle;
         LastActiveAt = DateTime.UtcNow;
 
         if (!string.IsNullOrWhiteSpace(systemPrompt))
@@ -55,7 +58,7 @@ public class AiChatSession : AggregateRoot
         LastActiveAt = DateTime.UtcNow;
 
         // 首次 assistant 回复后请求 AI 生成会话标题
-        if (Title == "新对话" && role == "assistant")
+        if (Title == DefaultTitle && role == "assistant")
         {
             AddDomainEvent(new SessionTitleGenerationRequested(SessionId, UserId));
         }

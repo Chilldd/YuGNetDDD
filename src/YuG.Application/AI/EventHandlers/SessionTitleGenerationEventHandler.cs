@@ -1,6 +1,9 @@
 using MediatR;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using YuG.Application.AI.Chat.Common;
 using YuG.Application.Common.Interfaces;
+using YuG.Domain.AI.Entities;
 using YuG.Domain.AI.Events;
 using YuG.Domain.AI.Repositories;
 
@@ -11,16 +14,25 @@ public class SessionTitleGenerationEventHandler : INotificationHandler<SessionTi
 {
     private readonly IAiChatSessionRepository _sessionRepository;
     private readonly IChatService _chatService;
+    private readonly string _systemPrompt;
+    private readonly ILogger<SessionTitleGenerationEventHandler> _logger;
 
     /// <summary>初始化处理器。</summary>
     /// <param name="sessionRepository">会话仓储</param>
     /// <param name="chatService">AI 聊天服务</param>
+    /// <param name="configuration">应用配置</param>
+    /// <param name="logger">日志记录器</param>
     public SessionTitleGenerationEventHandler(
         IAiChatSessionRepository sessionRepository,
-        IChatService chatService)
+        IChatService chatService,
+        IConfiguration configuration,
+        ILogger<SessionTitleGenerationEventHandler> logger)
     {
         _sessionRepository = sessionRepository;
         _chatService = chatService;
+        _systemPrompt = configuration["AI:TitleGenerationPrompt"]
+            ?? "根据以下对话内容生成一个简短的会话标题，不超过6个字。只返回标题文本，不要有多余内容。";
+        _logger = logger;
     }
 
     /// <inheritdoc />
@@ -29,7 +41,7 @@ public class SessionTitleGenerationEventHandler : INotificationHandler<SessionTi
         try
         {
             var session = await _sessionRepository.GetBySessionIdAsync(notification.SessionId, cancellationToken);
-            if (session is null || session.Title != "新对话")
+            if (session is null || session.Title != AiChatSession.DefaultTitle)
                 return;
 
             var messages = session.Messages.OrderBy(m => m.SequenceNumber).ToList();
@@ -40,7 +52,7 @@ public class SessionTitleGenerationEventHandler : INotificationHandler<SessionTi
 
             var titleMessages = new List<ChatMessageDto>
             {
-                new("system", "根据以下对话内容生成一个简短的会话标题，不超过6个字。只返回标题文本，不要有多余内容。"),
+                new("system", _systemPrompt),
                 new("user", firstUserMsg.Content),
                 new("assistant", firstAssistantMsg.Content),
             };
@@ -52,11 +64,12 @@ public class SessionTitleGenerationEventHandler : INotificationHandler<SessionTi
             {
                 session.Rename(title);
                 await _sessionRepository.SaveChangesAsync(cancellationToken);
+                _logger.LogInformation("会话 {SessionId} 标题已自动生成为: {Title}", notification.SessionId, title);
             }
         }
-        catch
+        catch (Exception ex)
         {
-            // 标题生成失败不影响正常聊天流程，下次消息会重试
+            _logger.LogWarning(ex, "会话 {SessionId} 标题自动生成失败，将在下次消息时重试", notification.SessionId);
         }
     }
 }

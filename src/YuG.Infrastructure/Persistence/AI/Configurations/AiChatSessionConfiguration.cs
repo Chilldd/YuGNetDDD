@@ -44,7 +44,7 @@ public class AiChatSessionConfiguration : IEntityTypeConfiguration<AiChatSession
         builder.Property(s => s.Title)
             .HasMaxLength(200)
             .IsRequired()
-            .HasDefaultValue("新对话");
+            .HasDefaultValue(AiChatSession.DefaultTitle);
 
         // 最后活动时间
         builder.Property(s => s.LastActiveAt)
