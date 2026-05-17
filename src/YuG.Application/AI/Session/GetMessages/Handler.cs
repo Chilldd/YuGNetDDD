@@ -39,9 +39,7 @@ public class Handler : IRequestHandler<GetSessionMessagesQuery, PageResult<Messa
         var pageResult = await _sessionRepository.GetMessagesPagedAsync(
             request.SessionId, request.Page, request.PageSize, cancellationToken);
 
-        var items = pageResult.Items
-            .OrderBy(m => m.SequenceNumber)
-            .Select(m => new MessageItem
+        var items = pageResult.Items.Select(m => new MessageItem
             {
                 Role = m.Role,
                 Content = m.Content,
