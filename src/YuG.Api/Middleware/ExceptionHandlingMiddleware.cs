@@ -1,5 +1,6 @@
 using System.Net;
 using System.Text.Json;
+using Refit;
 using YuG.Application.Common.Exceptions;
 using YuG.Domain.Common;
 
@@ -67,6 +68,14 @@ public class ExceptionHandlingMiddleware
                 {
                     StatusCode = (int)HttpStatusCode.BadRequest,
                     Message = exception.Message
+                }
+            ),
+            ApiException apiEx => (
+                apiEx.StatusCode,
+                new ErrorResponse
+                {
+                    StatusCode = (int)apiEx.StatusCode,
+                    Message = apiEx.Message
                 }
             ),
             _ => (
