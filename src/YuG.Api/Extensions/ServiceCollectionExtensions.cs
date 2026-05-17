@@ -1,5 +1,7 @@
 using FluentValidation;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
+using YuG.Api.Authorization;
 using YuG.Api.Helpers;
 using YuG.Api.Services;
 using YuG.Application.Common;
@@ -49,6 +51,18 @@ public static class ServiceCollectionExtensions
         // 注册当前用户身份信息（Scoped，每个请求解析一次）
         services.AddScoped<IUserIdentity, UserIdentity>();
 
+        return services;
+    }
+
+    /// <summary>
+    /// 注册 API 层授权策略和权限鉴权处理器
+    /// </summary>
+    /// <param name="services">服务集合</param>
+    /// <returns>服务集合</returns>
+    public static IServiceCollection AddPermissionAuthorization(this IServiceCollection services)
+    {
+        services.AddScoped<IAuthorizationHandler, PermissionAuthorizationHandler>();
+        services.AddSingleton<IAuthorizationPolicyProvider, PermissionPolicyProvider>();
         return services;
     }
 
