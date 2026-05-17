@@ -11,6 +11,12 @@ public class UsageData
 
     /// <summary>总 Token 数。</summary>
     public int TotalTokens { get; set; }
+
+    /// <summary>缓存命中 Token 数（DeepSeek 等 Provider 支持）。</summary>
+    public int? PromptCacheHitTokens { get; set; }
+
+    /// <summary>缓存未命中 Token 数（DeepSeek 等 Provider 支持）。</summary>
+    public int? PromptCacheMissTokens { get; set; }
 }
 
 /// <summary>聊天回复响应。</summary>

@@ -91,11 +91,24 @@ public class ChatService : IChatService
             return prop is not null ? (int)(prop.GetValue(target) ?? 0) : 0;
         }
 
+        static int? GetNestedInt(object target, string outerProp, string innerProp1, string innerProp2)
+        {
+            var outer = target.GetType().GetProperty(outerProp, BindingFlags.Public | BindingFlags.Instance);
+            var inner = outer?.GetValue(target);
+            return inner is not null ? GetInt(inner, innerProp1, innerProp2) : null;
+        }
+
+        var hit = GetNestedInt(obj, "InputTokenDetails", "CachedTokens", "CachedTokensCount")
+               ?? GetInt(obj, "PromptCacheHitTokens", "prompt_cache_hit_tokens");
+        var miss = GetInt(obj, "PromptCacheMissTokens", "prompt_cache_miss_tokens");
+
         return new UsageData
         {
             PromptTokens = GetInt(obj, "InputTokenCount", "InputTokens"),
             CompletionTokens = GetInt(obj, "OutputTokenCount", "OutputTokens"),
             TotalTokens = GetInt(obj, "TotalTokenCount", "TotalTokens"),
+            PromptCacheHitTokens = hit > 0 ? hit : null,
+            PromptCacheMissTokens = miss > 0 ? miss : null,
         };
     }
 }
