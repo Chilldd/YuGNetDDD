@@ -5,7 +5,7 @@ using YuG.Domain.AI.Repositories;
 namespace YuG.Application.AI.Session.GetList;
 
 /// <summary>获取会话列表查询处理器。</summary>
-public class Handler : IRequestHandler<GetSessionListQuery, GetSessionListResult>
+public class Handler : IRequestHandler<GetSessionListQuery, IReadOnlyList<SessionListItem>>
 {
     private readonly IAiChatSessionRepository _sessionRepository;
     private readonly IUserIdentity _userIdentity;
@@ -22,13 +22,13 @@ public class Handler : IRequestHandler<GetSessionListQuery, GetSessionListResult
     }
 
     /// <inheritdoc />
-    public async Task<GetSessionListResult> Handle(GetSessionListQuery request, CancellationToken cancellationToken)
+    public async Task<IReadOnlyList<SessionListItem>> Handle(GetSessionListQuery request, CancellationToken cancellationToken)
     {
         var userId = _userIdentity.UserId;
 
         var sessions = await _sessionRepository.FindAsync(s => s.UserId == userId, cancellationToken);
 
-        var items = sessions
+        return sessions
             .OrderByDescending(s => s.LastActiveAt)
             .Select(s => new SessionListItem
             {
@@ -37,7 +37,5 @@ public class Handler : IRequestHandler<GetSessionListQuery, GetSessionListResult
                 LastActiveAt = s.LastActiveAt,
             })
             .ToList();
-
-        return new GetSessionListResult { Items = items };
     }
 }

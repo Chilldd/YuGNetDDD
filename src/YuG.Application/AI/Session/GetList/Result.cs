@@ -1,12 +1,5 @@
 namespace YuG.Application.AI.Session.GetList;
 
-/// <summary>会话列表结果。</summary>
-public record GetSessionListResult
-{
-    /// <summary>会话列表项。</summary>
-    public IReadOnlyList<SessionListItem> Items { get; init; } = [];
-}
-
 /// <summary>会话列表项。</summary>
 public record SessionListItem
 {

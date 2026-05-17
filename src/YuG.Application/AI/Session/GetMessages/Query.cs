@@ -1,10 +1,11 @@
 using FluentValidation;
 using MediatR;
+using YuG.Common.Models;
 
 namespace YuG.Application.AI.Session.GetMessages;
 
 /// <summary>获取会话消息历史查询。</summary>
-public class GetSessionMessagesQuery : IRequest<GetSessionMessagesResult>
+public class GetSessionMessagesQuery : IRequest<PageResult<MessageItem>>
 {
     /// <summary>会话 ID。</summary>
     public string SessionId { get; init; } = string.Empty;

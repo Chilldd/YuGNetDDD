@@ -9,6 +9,7 @@ using YuG.Application.AI.Session.Delete;
 using YuG.Application.AI.Session.GetList;
 using YuG.Application.AI.Session.GetMessages;
 using YuG.Application.AI.Session.Rename;
+using YuG.Common.Models;
 
 namespace YuG.Api.Controllers;
 
@@ -84,9 +85,9 @@ public class AIController : ControllerBase
     /// <response code="404">会话不存在</response>
     [HttpGet("sessions/{sessionId}/messages")]
     [ApiDescription("获取会话消息历史")]
-    [ProducesResponseType(typeof(GetSessionMessagesResult), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(PageResult<MessageItem>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult<GetSessionMessagesResult>> GetSessionMessages(
+    public async Task<ActionResult<PageResult<MessageItem>>> GetSessionMessages(
         string sessionId,
         [FromQuery] int page = 1,
         [FromQuery] int pageSize = 10)
@@ -106,8 +107,8 @@ public class AIController : ControllerBase
     /// <response code="200">获取成功</response>
     [HttpGet("sessions")]
     [ApiDescription("获取会话列表")]
-    [ProducesResponseType(typeof(GetSessionListResult), StatusCodes.Status200OK)]
-    public async Task<ActionResult<GetSessionListResult>> GetSessions()
+    [ProducesResponseType(typeof(IReadOnlyList<SessionListItem>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<IReadOnlyList<SessionListItem>>> GetSessions()
     {
         var result = await _mediator.Send(new GetSessionListQuery(), HttpContext.RequestAborted);
         return Ok(result);

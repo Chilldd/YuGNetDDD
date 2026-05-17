@@ -1,9 +1,4 @@
-using YuG.Common.Models;
-
 namespace YuG.Application.AI.Session.GetMessages;
-
-/// <summary>会话消息历史结果。</summary>
-public record GetSessionMessagesResult : PageResult<MessageItem>;
 
 /// <summary>消息项。</summary>
 public record MessageItem

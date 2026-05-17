@@ -2,13 +2,14 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using YuG.Application.Common.Exceptions;
 using YuG.Application.Common.Interfaces;
+using YuG.Common.Models;
 using YuG.Domain.AI.Entities;
 using YuG.Domain.AI.Repositories;
 
 namespace YuG.Application.AI.Session.GetMessages;
 
 /// <summary>获取会话消息历史查询处理器。</summary>
-public class Handler : IRequestHandler<GetSessionMessagesQuery, GetSessionMessagesResult>
+public class Handler : IRequestHandler<GetSessionMessagesQuery, PageResult<MessageItem>>
 {
     private readonly IAiChatSessionRepository _sessionRepository;
     private readonly IUserIdentity _userIdentity;
@@ -25,7 +26,7 @@ public class Handler : IRequestHandler<GetSessionMessagesQuery, GetSessionMessag
     }
 
     /// <inheritdoc />
-    public async Task<GetSessionMessagesResult> Handle(GetSessionMessagesQuery request, CancellationToken cancellationToken)
+    public async Task<PageResult<MessageItem>> Handle(GetSessionMessagesQuery request, CancellationToken cancellationToken)
     {
         var userId = _userIdentity.UserId;
 
@@ -50,7 +51,7 @@ public class Handler : IRequestHandler<GetSessionMessagesQuery, GetSessionMessag
             })
             .ToList();
 
-        return new GetSessionMessagesResult
+        return new PageResult<MessageItem>
         {
             Items = items,
             TotalCount = pageResult.TotalCount,
