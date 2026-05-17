@@ -69,7 +69,13 @@
       "mcp__plugin_context7_context7__resolve-library-id",
       "mcp__plugin_context7_context7__query-docs",
       "Bash(git --no-pager diff --cached --stat)",
-      "Bash(git reset *)"
+      "Bash(git reset *)",
+      "Bash(echo \"EXIT=$?\")",
+      "Bash(git mv *)",
+      "Skill(lark-task)",
+      "Bash(npm update *)",
+      "Bash(npx skills *)",
+      "Bash(sudo npm update -g @larksuite/cli)"
     ]
   }
 }

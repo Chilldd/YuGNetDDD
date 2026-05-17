@@ -30,8 +30,7 @@ public class SessionTitleGenerationEventHandler : INotificationHandler<SessionTi
     {
         _sessionRepository = sessionRepository;
         _chatService = chatService;
-        _systemPrompt = configuration["AI:TitleGenerationPrompt"]
-            ?? "根据以下对话内容生成一个简短的会话标题，不超过6个字。只返回标题文本，不要有多余内容。";
+        _systemPrompt = configuration["AI:TitleGenerationPrompt"]!;
         _logger = logger;
     }
 

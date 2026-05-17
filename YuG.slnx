@@ -1,9 +1,15 @@
 <Solution>
-  <Project Path="src/YuG.AI.Gateway/YuG.AI.Gateway.csproj" />
-  <Project Path="src/YuG.Api/YuG.Api.csproj" />
-  <Project Path="src/YuG.CodeAnalyzers/YuG.CodeAnalyzers.csproj" />
-  <Project Path="src/YuG.Domain/YuG.Domain.csproj" />
-  <Project Path="src/YuG.Application/YuG.Application.csproj" />
-  <Project Path="src/YuG.Infrastructure/YuG.Infrastructure.csproj" />
-  <Project Path="src/YuG.Common/YuG.Common.csproj" />
+  <Folder Name="/ai/">
+	<Project Path="src/YuG.AI.Gateway/YuG.AI.Gateway.csproj" />
+  </Folder>
+  <Folder Name="/api/">
+  	<Project Path="src/YuG.Api/YuG.Api.csproj" />
+  	<Project Path="src/YuG.Domain/YuG.Domain.csproj" />
+  	<Project Path="src/YuG.Application/YuG.Application.csproj" />
+  	<Project Path="src/YuG.Infrastructure/YuG.Infrastructure.csproj" />
+  	<Project Path="src/YuG.Common/YuG.Common.csproj" />
+  	</Folder>
+  <Folder Name="/other/">
+  	<Project Path="src/YuG.CodeAnalyzers/YuG.CodeAnalyzers.csproj" />
+  </Folder>
 </Solution>

@@ -87,6 +87,7 @@ paths:
 - 使用 `Where`、`Select` 等 LINQ 方法时，优先使用 lambda 表达式而非匿名方法
 - 使用 `.Any()` 检查是否存在元素，而非 `.Count() > 0`
 - 使用 `.FirstOrDefault()` 获取单个元素，处理 null 情况
+- 分页查询必须使用 `ToPageResultAsync`（位于 `YuG.Common.Extensions`），禁止在内存中手动 Skip/Take 分页
 
 ### 字符串处理
 - 字符串比较使用 `string.Equals(a, b, StringComparison.OrdinalIgnoreCase)` 而非 `==` 或 `.ToLower()`
@@ -105,3 +106,4 @@ paths:
 - 禁止在 finally 块中抛出异常
 - 禁止使用魔数，应定义常量或配置项
 - 禁止在业务逻辑中硬编码字符串，应使用常量或资源文件
+- 禁止在内存中做分页操作，分页必须下推到数据库层通过 `IQueryable` 执行
