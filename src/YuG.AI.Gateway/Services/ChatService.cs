@@ -43,7 +43,7 @@ public class ChatService : IChatService
         {
             Reply = reply,
             Model = last?.ModelId ?? _options.DeepSeek.ModelId,
-            Usage = ExtractUsage(last?.Metadata),
+            Usage = ExtractUsage(last),
         };
     }
 
@@ -67,8 +67,7 @@ public class ChatService : IChatService
             }
         }
 
-        // 发送用量信息
-        var usage = ExtractUsage(lastChunk?.Metadata);
+        var usage = ExtractUsage(lastChunk);
         if (usage is not null)
             yield return new ChatStreamDelta { Type = "usage", Usage = usage };
 
@@ -76,14 +75,56 @@ public class ChatService : IChatService
             history.AddAssistantMessage(fullReply.ToString());
     }
 
-    /// <summary>从 SK 响应元数据中提取 Token 用量。</summary>
-    private static UsageData? ExtractUsage(IReadOnlyDictionary<string, object?>? metadata)
+    /// <summary>从 SK 响应中提取 Token 用量。</summary>
+    private static UsageData? ExtractUsage(ChatMessageContent? message)
     {
-        if (metadata is null) return null;
-        if (!metadata.TryGetValue("Usage", out var obj) || obj is null) return null;
+        if (message is null) return null;
 
-        var type = obj.GetType();
+        // 策略 1：metadata["Usage"]
+        if (message.Metadata?.TryGetValue("Usage", out var usageObj) == true && usageObj is not null)
+            return ParseUsageObject(usageObj);
 
+        // 策略 2：InnerContent 上找 Usage 属性
+        if (message.InnerContent is not null)
+        {
+            var usageProp = message.InnerContent.GetType().GetProperty("Usage");
+            if (usageProp is not null)
+            {
+                var usage = usageProp.GetValue(message.InnerContent);
+                if (usage is not null)
+                    return ParseUsageObject(usage);
+            }
+        }
+
+        return null;
+    }
+
+    /// <summary>从 SK 流式响应中提取 Token 用量。</summary>
+    private static UsageData? ExtractUsage(StreamingChatMessageContent? chunk)
+    {
+        if (chunk is null) return null;
+
+        // 策略 1：metadata["Usage"]
+        if (chunk.Metadata?.TryGetValue("Usage", out var usageObj) == true && usageObj is not null)
+            return ParseUsageObject(usageObj);
+
+        // 策略 2：InnerContent 上找 Usage
+        if (chunk.InnerContent is not null)
+        {
+            var usageProp = chunk.InnerContent.GetType().GetProperty("Usage");
+            if (usageProp is not null)
+            {
+                var usage = usageProp.GetValue(chunk.InnerContent);
+                if (usage is not null)
+                    return ParseUsageObject(usage);
+            }
+        }
+
+        return null;
+    }
+
+    private static UsageData ParseUsageObject(object obj)
+    {
         static int GetInt(object target, string name1, string name2)
         {
             var prop = target.GetType().GetProperty(name1, BindingFlags.Public | BindingFlags.Instance)
@@ -98,7 +139,7 @@ public class ChatService : IChatService
             return inner is not null ? GetInt(inner, innerProp1, innerProp2) : null;
         }
 
-        var hit = GetNestedInt(obj, "InputTokenDetails", "CachedTokens", "CachedTokensCount")
+        var hit = GetNestedInt(obj, "InputTokenDetails", "CachedTokenCount", "CachedTokens")
                ?? GetInt(obj, "PromptCacheHitTokens", "prompt_cache_hit_tokens");
         var miss = GetInt(obj, "PromptCacheMissTokens", "prompt_cache_miss_tokens");
 
@@ -107,8 +148,8 @@ public class ChatService : IChatService
             InTokens = GetInt(obj, "InputTokenCount", "InputTokens"),
             OutTokens = GetInt(obj, "OutputTokenCount", "OutputTokens"),
             TotalTokens = GetInt(obj, "TotalTokenCount", "TotalTokens"),
-            PromptCacheHitTokens = hit > 0 ? hit : null,
-            PromptCacheMissTokens = miss > 0 ? miss : null,
+            PromptCacheHitTokens = hit,
+            PromptCacheMissTokens = miss,
         };
     }
 }
