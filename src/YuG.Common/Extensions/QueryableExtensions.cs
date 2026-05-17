@@ -1,4 +1,5 @@
 using System.Linq.Expressions;
+using Microsoft.EntityFrameworkCore;
 
 namespace YuG.Common.Extensions;
 
@@ -20,18 +21,20 @@ public static class QueryableExtensions
         return condition ? source.OrderBy(keySelector) : source;
     }
 
-    public static PageResult<T> ToPageResult<T>(
+    public static async Task<PageResult<T>> ToPageResultAsync<T>(
         this IQueryable<T> source,
         int pageIndex,
-        int pageSize)
+        int pageSize,
+        CancellationToken cancellationToken = default)
     {
         Guard.AgainstNegativeOrZero(pageSize, nameof(pageSize));
+        Guard.AgainstNegativeOrZero(pageIndex, nameof(pageIndex));
 
-        var count = source.Count();
-        var items = source
+        var count = await source.CountAsync(cancellationToken);
+        var items = await source
             .Skip((pageIndex - 1) * pageSize)
             .Take(pageSize)
-            .ToList();
+            .ToListAsync(cancellationToken);
 
         return new PageResult<T>
         {

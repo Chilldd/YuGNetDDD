@@ -60,6 +60,12 @@ public interface IRepository<TEntity> where TEntity : AggregateRoot
     Task<bool> AnyAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// 获取可查询接口（用于查询场景，绕过仓储直接构建 IQueryable）
+    /// </summary>
+    /// <returns>实体查询接口</returns>
+    IQueryable<TEntity> GetQueryable();
+
+    /// <summary>
     /// 保存所有变更
     /// </summary>
     /// <param name="cancellationToken">取消令牌</param>

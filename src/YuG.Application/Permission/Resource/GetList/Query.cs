@@ -10,6 +10,16 @@ namespace YuG.Application.Permission.Resource.GetList;
 public class GetResourceListQuery : IRequest<GetResourceListResult>
 {
     /// <summary>
+    /// 当前页码（从 1 开始）
+    /// </summary>
+    public int PageIndex { get; init; } = 1;
+
+    /// <summary>
+    /// 每页条数
+    /// </summary>
+    public int PageSize { get; init; } = 10;
+
+    /// <summary>
     /// 资源类型筛选（可选，Menu/Page/Api）
     /// </summary>
     public string? Type { get; init; }

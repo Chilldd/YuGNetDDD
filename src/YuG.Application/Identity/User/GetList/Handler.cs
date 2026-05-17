@@ -1,4 +1,6 @@
 using MediatR;
+using Microsoft.EntityFrameworkCore;
+using YuG.Common.Extensions;
 using YuG.Domain.Identity.Repositories;
 
 namespace YuG.Application.Identity.User.GetList;
@@ -27,23 +29,22 @@ public class Handler : IRequestHandler<GetUserListQuery, GetUserListResult>
     /// <returns>用户列表结果</returns>
     public async Task<GetUserListResult> Handle(GetUserListQuery query, CancellationToken cancellationToken)
     {
-        var users = await _userRepository.GetAllAsync(cancellationToken);
-        var totalCount = users.Count;
-
-        var items = users.Select(u => new UserListItem
-        {
-            Id = u.Id,
-            Username = u.Username,
-            Status = u.Status.ToString(),
-            CreatedAt = u.CreatedAt
-        }).ToList();
+        var pageResult = await _userRepository.GetQueryable()
+            .Select(u => new UserListItem
+            {
+                Id = u.Id,
+                Username = u.Username,
+                Status = u.Status.ToString(),
+                CreatedAt = u.CreatedAt
+            })
+            .ToPageResultAsync(query.PageIndex, query.PageSize, cancellationToken);
 
         return new GetUserListResult
         {
-            Items = items,
-            TotalCount = totalCount,
-            Page = 1,
-            PageSize = totalCount
+            Items = pageResult.Items,
+            TotalCount = pageResult.TotalCount,
+            Page = pageResult.Page,
+            PageSize = pageResult.PageSize
         };
     }
 }

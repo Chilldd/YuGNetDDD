@@ -1,4 +1,6 @@
 using MediatR;
+using Microsoft.EntityFrameworkCore;
+using YuG.Common.Extensions;
 using YuG.Domain.Identity.Repositories;
 
 namespace YuG.Application.Identity.Role.GetList;
@@ -27,26 +29,25 @@ public class Handler : IRequestHandler<GetRoleListQuery, GetRoleListResult>
     /// <returns>角色列表结果</returns>
     public async Task<GetRoleListResult> Handle(GetRoleListQuery query, CancellationToken cancellationToken)
     {
-        var roles = await _roleRepository.GetAllAsync(cancellationToken);
-        var totalCount = roles.Count;
-
-        var items = roles.Select(r => new RoleListItem
-        {
-            Id = r.Id,
-            Name = r.Name,
-            Code = r.Code,
-            Description = r.Description,
-            Status = r.Status.ToString(),
-            IsSystem = r.IsSystem,
-            CreatedAt = r.CreatedAt
-        }).ToList();
+        var pageResult = await _roleRepository.GetQueryable()
+            .Select(r => new RoleListItem
+            {
+                Id = r.Id,
+                Name = r.Name,
+                Code = r.Code,
+                Description = r.Description,
+                Status = r.Status.ToString(),
+                IsSystem = r.IsSystem,
+                CreatedAt = r.CreatedAt
+            })
+            .ToPageResultAsync(query.PageIndex, query.PageSize, cancellationToken);
 
         return new GetRoleListResult
         {
-            Items = items,
-            TotalCount = totalCount,
-            Page = 1,
-            PageSize = totalCount
+            Items = pageResult.Items,
+            TotalCount = pageResult.TotalCount,
+            Page = pageResult.Page,
+            PageSize = pageResult.PageSize
         };
     }
 }

@@ -1,4 +1,6 @@
 using MediatR;
+using Microsoft.EntityFrameworkCore;
+using YuG.Common.Extensions;
 using YuG.Domain.Permission.Enums;
 using YuG.Domain.Permission.Repositories;
 
@@ -28,61 +30,57 @@ public class Handler : IRequestHandler<GetResourceListQuery, GetResourceListResu
     /// <returns>资源列表结果</returns>
     public async Task<GetResourceListResult> Handle(GetResourceListQuery query, CancellationToken cancellationToken)
     {
-        var resources = await _resourceRepository.GetAllAsync(cancellationToken);
-
-        // 应用筛选
-        var filtered = resources.AsEnumerable();
+        var queryable = _resourceRepository.GetQueryable();
 
         if (!string.IsNullOrEmpty(query.Type))
         {
             var type = Enum.Parse<ResourceType>(query.Type, ignoreCase: true);
-            filtered = filtered.Where(r => r.Type == type);
+            queryable = queryable.Where(r => r.Type == type);
         }
 
         if (!string.IsNullOrEmpty(query.HttpMethod))
         {
             var method = Enum.Parse<ResourceHttpMethod>(query.HttpMethod, ignoreCase: true);
-            filtered = filtered.Where(r => r.HttpMethod == method);
+            queryable = queryable.Where(r => r.HttpMethod == method);
         }
 
         if (query.ParentId.HasValue)
         {
-            filtered = filtered.Where(r => r.ParentId == query.ParentId);
+            queryable = queryable.Where(r => r.ParentId == query.ParentId);
         }
 
         if (query.Status.HasValue)
         {
-            filtered = filtered.Where(r => r.Status == query.Status.Value);
+            queryable = queryable.Where(r => r.Status == query.Status.Value);
         }
 
-        var list = filtered.ToList();
-        var totalCount = list.Count;
-
-        var items = list.Select(r => new ResourceListItem
-        {
-            Id = r.Id,
-            Name = r.Name,
-            Code = r.Code,
-            Description = r.Description,
-            Type = r.Type.ToString(),
-            HttpMethod = r.HttpMethod?.ToString(),
-            Path = r.Path,
-            Icon = r.Icon,
-            Route = r.Route,
-            IsHidden = r.IsHidden,
-            Badge = r.Badge,
-            PermissionCode = r.PermissionCode,
-            ParentId = r.ParentId,
-            SortOrder = r.SortOrder,
-            Status = r.Status.ToString()
-        }).ToList();
+        var pageResult = await queryable
+            .Select(r => new ResourceListItem
+            {
+                Id = r.Id,
+                Name = r.Name,
+                Code = r.Code,
+                Description = r.Description,
+                Type = r.Type.ToString(),
+                HttpMethod = r.HttpMethod!.ToString(),
+                Path = r.Path,
+                Icon = r.Icon,
+                Route = r.Route,
+                IsHidden = r.IsHidden,
+                Badge = r.Badge,
+                PermissionCode = r.PermissionCode,
+                ParentId = r.ParentId,
+                SortOrder = r.SortOrder,
+                Status = r.Status.ToString()
+            })
+            .ToPageResultAsync(query.PageIndex, query.PageSize, cancellationToken);
 
         return new GetResourceListResult
         {
-            Items = items,
-            TotalCount = totalCount,
-            Page = 1,
-            PageSize = totalCount
+            Items = pageResult.Items,
+            TotalCount = pageResult.TotalCount,
+            Page = pageResult.Page,
+            PageSize = pageResult.PageSize
         };
     }
 }

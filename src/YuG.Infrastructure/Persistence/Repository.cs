@@ -41,6 +41,12 @@ public abstract class Repository<TAggregate> : IRepository<TAggregate>
     }
 
     /// <inheritdoc />
+    public IQueryable<TAggregate> GetQueryable()
+    {
+        return _dbSet;
+    }
+
+    /// <inheritdoc />
     public async Task<IReadOnlyList<TAggregate>> FindAsync(Expression<Func<TAggregate, bool>> predicate, CancellationToken cancellationToken = default)
     {
         return await _dbSet.Where(predicate).ToListAsync(cancellationToken);
