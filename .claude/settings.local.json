@@ -62,7 +62,14 @@
       "Bash(rm -f /home/yug/workspace/YuGProject/src/YuG.Infrastructure/Persistence/Mappings/*.cs)",
       "Bash(rm -f /home/yug/workspace/YuGProject/src/YuG.Infrastructure/Persistence/Entities/**/*.cs)",
       "Bash(sqlite3 *)",
-      "Bash(git checkout *)"
+      "Bash(git checkout *)",
+      "Bash(gh auth *)",
+      "Bash(mkdir -p /tmp/meai-test)",
+      "Bash(cat)",
+      "mcp__plugin_context7_context7__resolve-library-id",
+      "mcp__plugin_context7_context7__query-docs",
+      "Bash(git --no-pager diff --cached --stat)",
+      "Bash(git reset *)"
     ]
   }
 }
