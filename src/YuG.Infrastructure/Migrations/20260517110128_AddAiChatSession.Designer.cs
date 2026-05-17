@@ -11,7 +11,7 @@ using YuG.Infrastructure.Persistence;
 namespace YuG.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260517105633_AddAiChatSession")]
+    [Migration("20260517110128_AddAiChatSession")]
     partial class AddAiChatSession
     {
         /// <inheritdoc />
@@ -58,7 +58,7 @@ namespace YuG.Infrastructure.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT")
-                        .HasDefaultValue(new DateTime(2026, 5, 17, 10, 56, 33, 233, DateTimeKind.Utc).AddTicks(7072));
+                        .HasDefaultValue(new DateTime(2026, 5, 17, 11, 1, 27, 789, DateTimeKind.Utc).AddTicks(6517));
 
                     b.Property<DateTime>("LastActiveAt")
                         .HasColumnType("TEXT");
@@ -78,7 +78,7 @@ namespace YuG.Infrastructure.Migrations
                     b.Property<DateTime>("UpdatedAt")
                         .ValueGeneratedOnAddOrUpdate()
                         .HasColumnType("TEXT")
-                        .HasDefaultValue(new DateTime(2026, 5, 17, 10, 56, 33, 235, DateTimeKind.Utc).AddTicks(5606));
+                        .HasDefaultValue(new DateTime(2026, 5, 17, 11, 1, 27, 791, DateTimeKind.Utc).AddTicks(4284));
 
                     b.Property<long>("UserId")
                         .HasColumnType("INTEGER");
@@ -106,7 +106,7 @@ namespace YuG.Infrastructure.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT")
-                        .HasDefaultValue(new DateTime(2026, 5, 17, 10, 56, 33, 265, DateTimeKind.Utc).AddTicks(5858));
+                        .HasDefaultValue(new DateTime(2026, 5, 17, 11, 1, 27, 823, DateTimeKind.Utc).AddTicks(1958));
 
                     b.Property<string>("Description")
                         .HasMaxLength(500)
@@ -132,7 +132,7 @@ namespace YuG.Infrastructure.Migrations
                     b.Property<DateTime>("UpdatedAt")
                         .ValueGeneratedOnAddOrUpdate()
                         .HasColumnType("TEXT")
-                        .HasDefaultValue(new DateTime(2026, 5, 17, 10, 56, 33, 265, DateTimeKind.Utc).AddTicks(6061));
+                        .HasDefaultValue(new DateTime(2026, 5, 17, 11, 1, 27, 823, DateTimeKind.Utc).AddTicks(2194));
 
                     b.HasKey("Id");
 
@@ -150,7 +150,7 @@ namespace YuG.Infrastructure.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT")
-                        .HasDefaultValue(new DateTime(2026, 5, 17, 10, 56, 33, 272, DateTimeKind.Utc).AddTicks(5274));
+                        .HasDefaultValue(new DateTime(2026, 5, 17, 11, 1, 27, 829, DateTimeKind.Utc).AddTicks(8011));
 
                     b.Property<int>("Generation")
                         .ValueGeneratedOnAdd()
@@ -172,7 +172,7 @@ namespace YuG.Infrastructure.Migrations
                     b.Property<DateTime>("UpdatedAt")
                         .ValueGeneratedOnAddOrUpdate()
                         .HasColumnType("TEXT")
-                        .HasDefaultValue(new DateTime(2026, 5, 17, 10, 56, 33, 272, DateTimeKind.Utc).AddTicks(5481));
+                        .HasDefaultValue(new DateTime(2026, 5, 17, 11, 1, 27, 829, DateTimeKind.Utc).AddTicks(8228));
 
                     b.Property<string>("Username")
                         .IsRequired()
@@ -204,7 +204,7 @@ namespace YuG.Infrastructure.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT")
-                        .HasDefaultValue(new DateTime(2026, 5, 17, 10, 56, 33, 276, DateTimeKind.Utc).AddTicks(9439));
+                        .HasDefaultValue(new DateTime(2026, 5, 17, 11, 1, 27, 834, DateTimeKind.Utc).AddTicks(4285));
 
                     b.Property<string>("Description")
                         .HasMaxLength(500)
@@ -265,7 +265,7 @@ namespace YuG.Infrastructure.Migrations
                     b.Property<DateTime>("UpdatedAt")
                         .ValueGeneratedOnAddOrUpdate()
                         .HasColumnType("TEXT")
-                        .HasDefaultValue(new DateTime(2026, 5, 17, 10, 56, 33, 276, DateTimeKind.Utc).AddTicks(9836));
+                        .HasDefaultValue(new DateTime(2026, 5, 17, 11, 1, 27, 834, DateTimeKind.Utc).AddTicks(4503));
 
                     b.HasKey("Id");
 
@@ -312,7 +312,7 @@ namespace YuG.Infrastructure.Migrations
 
             modelBuilder.Entity("YuG.Domain.AI.Entities.AiChatSession", b =>
                 {
-                    b.OwnsMany("YuG.Domain.AI.Entities.AiChatMessage", "Messages", b1 =>
+                    b.OwnsMany("YuG.Domain.AI.ValueObjects.AiChatMessage", "Messages", b1 =>
                         {
                             b1.Property<long>("Id")
                                 .ValueGeneratedOnAdd()
@@ -328,7 +328,7 @@ namespace YuG.Infrastructure.Migrations
                             b1.Property<DateTime>("CreatedAt")
                                 .ValueGeneratedOnAdd()
                                 .HasColumnType("TEXT")
-                                .HasDefaultValue(new DateTime(2026, 5, 17, 10, 56, 33, 264, DateTimeKind.Utc).AddTicks(961));
+                                .HasDefaultValue(new DateTime(2026, 5, 17, 11, 1, 27, 821, DateTimeKind.Utc).AddTicks(5157));
 
                             b1.Property<string>("Role")
                                 .IsRequired()
@@ -365,7 +365,7 @@ namespace YuG.Infrastructure.Migrations
                             b1.Property<DateTime>("CreatedAt")
                                 .ValueGeneratedOnAdd()
                                 .HasColumnType("TEXT")
-                                .HasDefaultValue(new DateTime(2026, 5, 17, 10, 56, 33, 275, DateTimeKind.Utc).AddTicks(890));
+                                .HasDefaultValue(new DateTime(2026, 5, 17, 11, 1, 27, 832, DateTimeKind.Utc).AddTicks(5235));
 
                             b1.Property<DateTime>("ExpiresAt")
                                 .HasColumnType("TEXT");

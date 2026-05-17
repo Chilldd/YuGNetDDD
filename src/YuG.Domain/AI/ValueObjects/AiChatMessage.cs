@@ -1,4 +1,4 @@
-namespace YuG.Domain.AI.Entities;
+namespace YuG.Domain.AI.ValueObjects;
 
 /// <summary>聊天消息值对象。</summary>
 public class AiChatMessage

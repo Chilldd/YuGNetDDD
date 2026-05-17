@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using YuG.Domain.AI.Entities;
+using YuG.Domain.AI.ValueObjects;
 
 namespace YuG.Infrastructure.Persistence.AI.Configurations;
 

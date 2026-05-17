@@ -1,4 +1,5 @@
 using YuG.Domain.Common;
+using YuG.Domain.AI.ValueObjects;
 
 namespace YuG.Domain.AI.Entities;
 

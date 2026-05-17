@@ -16,7 +16,7 @@ namespace YuG.Infrastructure.Migrations
                 table: "User",
                 type: "TEXT",
                 nullable: false,
-                defaultValue: new DateTime(2026, 5, 17, 10, 56, 33, 272, DateTimeKind.Utc).AddTicks(5481),
+                defaultValue: new DateTime(2026, 5, 17, 11, 1, 27, 829, DateTimeKind.Utc).AddTicks(8228),
                 oldClrType: typeof(DateTime),
                 oldType: "TEXT",
                 oldDefaultValue: new DateTime(2026, 5, 15, 3, 32, 48, 562, DateTimeKind.Utc).AddTicks(1706));
@@ -26,7 +26,7 @@ namespace YuG.Infrastructure.Migrations
                 table: "User",
                 type: "TEXT",
                 nullable: false,
-                defaultValue: new DateTime(2026, 5, 17, 10, 56, 33, 272, DateTimeKind.Utc).AddTicks(5274),
+                defaultValue: new DateTime(2026, 5, 17, 11, 1, 27, 829, DateTimeKind.Utc).AddTicks(8011),
                 oldClrType: typeof(DateTime),
                 oldType: "TEXT",
                 oldDefaultValue: new DateTime(2026, 5, 15, 3, 32, 48, 562, DateTimeKind.Utc).AddTicks(1480));
@@ -36,7 +36,7 @@ namespace YuG.Infrastructure.Migrations
                 table: "Role",
                 type: "TEXT",
                 nullable: false,
-                defaultValue: new DateTime(2026, 5, 17, 10, 56, 33, 265, DateTimeKind.Utc).AddTicks(6061),
+                defaultValue: new DateTime(2026, 5, 17, 11, 1, 27, 823, DateTimeKind.Utc).AddTicks(2194),
                 oldClrType: typeof(DateTime),
                 oldType: "TEXT",
                 oldDefaultValue: new DateTime(2026, 5, 15, 3, 32, 48, 549, DateTimeKind.Utc).AddTicks(9773));
@@ -46,7 +46,7 @@ namespace YuG.Infrastructure.Migrations
                 table: "Role",
                 type: "TEXT",
                 nullable: false,
-                defaultValue: new DateTime(2026, 5, 17, 10, 56, 33, 265, DateTimeKind.Utc).AddTicks(5858),
+                defaultValue: new DateTime(2026, 5, 17, 11, 1, 27, 823, DateTimeKind.Utc).AddTicks(1958),
                 oldClrType: typeof(DateTime),
                 oldType: "TEXT",
                 oldDefaultValue: new DateTime(2026, 5, 15, 3, 32, 48, 547, DateTimeKind.Utc).AddTicks(4909));
@@ -56,7 +56,7 @@ namespace YuG.Infrastructure.Migrations
                 table: "Resource",
                 type: "TEXT",
                 nullable: false,
-                defaultValue: new DateTime(2026, 5, 17, 10, 56, 33, 276, DateTimeKind.Utc).AddTicks(9836),
+                defaultValue: new DateTime(2026, 5, 17, 11, 1, 27, 834, DateTimeKind.Utc).AddTicks(4503),
                 oldClrType: typeof(DateTime),
                 oldType: "TEXT",
                 oldDefaultValue: new DateTime(2026, 5, 15, 3, 32, 48, 590, DateTimeKind.Utc).AddTicks(1646));
@@ -66,7 +66,7 @@ namespace YuG.Infrastructure.Migrations
                 table: "Resource",
                 type: "TEXT",
                 nullable: false,
-                defaultValue: new DateTime(2026, 5, 17, 10, 56, 33, 276, DateTimeKind.Utc).AddTicks(9439),
+                defaultValue: new DateTime(2026, 5, 17, 11, 1, 27, 834, DateTimeKind.Utc).AddTicks(4285),
                 oldClrType: typeof(DateTime),
                 oldType: "TEXT",
                 oldDefaultValue: new DateTime(2026, 5, 15, 3, 32, 48, 590, DateTimeKind.Utc).AddTicks(1422));
@@ -76,7 +76,7 @@ namespace YuG.Infrastructure.Migrations
                 table: "RefreshToken",
                 type: "TEXT",
                 nullable: false,
-                defaultValue: new DateTime(2026, 5, 17, 10, 56, 33, 275, DateTimeKind.Utc).AddTicks(890),
+                defaultValue: new DateTime(2026, 5, 17, 11, 1, 27, 832, DateTimeKind.Utc).AddTicks(5235),
                 oldClrType: typeof(DateTime),
                 oldType: "TEXT",
                 oldDefaultValue: new DateTime(2026, 5, 15, 3, 32, 48, 588, DateTimeKind.Utc).AddTicks(807));
@@ -90,8 +90,8 @@ namespace YuG.Infrastructure.Migrations
                     UserId = table.Column<long>(type: "INTEGER", nullable: false),
                     Title = table.Column<string>(type: "TEXT", maxLength: 200, nullable: false, defaultValue: "新对话"),
                     LastActiveAt = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false, defaultValue: new DateTime(2026, 5, 17, 10, 56, 33, 233, DateTimeKind.Utc).AddTicks(7072)),
-                    UpdatedAt = table.Column<DateTime>(type: "TEXT", nullable: false, defaultValue: new DateTime(2026, 5, 17, 10, 56, 33, 235, DateTimeKind.Utc).AddTicks(5606))
+                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false, defaultValue: new DateTime(2026, 5, 17, 11, 1, 27, 789, DateTimeKind.Utc).AddTicks(6517)),
+                    UpdatedAt = table.Column<DateTime>(type: "TEXT", nullable: false, defaultValue: new DateTime(2026, 5, 17, 11, 1, 27, 791, DateTimeKind.Utc).AddTicks(4284))
                 },
                 constraints: table =>
                 {
@@ -108,7 +108,7 @@ namespace YuG.Infrastructure.Migrations
                     Content = table.Column<string>(type: "TEXT", nullable: false),
                     SequenceNumber = table.Column<int>(type: "INTEGER", nullable: false),
                     TokenCount = table.Column<int>(type: "INTEGER", nullable: true),
-                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false, defaultValue: new DateTime(2026, 5, 17, 10, 56, 33, 264, DateTimeKind.Utc).AddTicks(961)),
+                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false, defaultValue: new DateTime(2026, 5, 17, 11, 1, 27, 821, DateTimeKind.Utc).AddTicks(5157)),
                     AiChatSessionId = table.Column<long>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
@@ -156,7 +156,7 @@ namespace YuG.Infrastructure.Migrations
                 defaultValue: new DateTime(2026, 5, 15, 3, 32, 48, 562, DateTimeKind.Utc).AddTicks(1706),
                 oldClrType: typeof(DateTime),
                 oldType: "TEXT",
-                oldDefaultValue: new DateTime(2026, 5, 17, 10, 56, 33, 272, DateTimeKind.Utc).AddTicks(5481));
+                oldDefaultValue: new DateTime(2026, 5, 17, 11, 1, 27, 829, DateTimeKind.Utc).AddTicks(8228));
 
             migrationBuilder.AlterColumn<DateTime>(
                 name: "CreatedAt",
@@ -166,7 +166,7 @@ namespace YuG.Infrastructure.Migrations
                 defaultValue: new DateTime(2026, 5, 15, 3, 32, 48, 562, DateTimeKind.Utc).AddTicks(1480),
                 oldClrType: typeof(DateTime),
                 oldType: "TEXT",
-                oldDefaultValue: new DateTime(2026, 5, 17, 10, 56, 33, 272, DateTimeKind.Utc).AddTicks(5274));
+                oldDefaultValue: new DateTime(2026, 5, 17, 11, 1, 27, 829, DateTimeKind.Utc).AddTicks(8011));
 
             migrationBuilder.AlterColumn<DateTime>(
                 name: "UpdatedAt",
@@ -176,7 +176,7 @@ namespace YuG.Infrastructure.Migrations
                 defaultValue: new DateTime(2026, 5, 15, 3, 32, 48, 549, DateTimeKind.Utc).AddTicks(9773),
                 oldClrType: typeof(DateTime),
                 oldType: "TEXT",
-                oldDefaultValue: new DateTime(2026, 5, 17, 10, 56, 33, 265, DateTimeKind.Utc).AddTicks(6061));
+                oldDefaultValue: new DateTime(2026, 5, 17, 11, 1, 27, 823, DateTimeKind.Utc).AddTicks(2194));
 
             migrationBuilder.AlterColumn<DateTime>(
                 name: "CreatedAt",
@@ -186,7 +186,7 @@ namespace YuG.Infrastructure.Migrations
                 defaultValue: new DateTime(2026, 5, 15, 3, 32, 48, 547, DateTimeKind.Utc).AddTicks(4909),
                 oldClrType: typeof(DateTime),
                 oldType: "TEXT",
-                oldDefaultValue: new DateTime(2026, 5, 17, 10, 56, 33, 265, DateTimeKind.Utc).AddTicks(5858));
+                oldDefaultValue: new DateTime(2026, 5, 17, 11, 1, 27, 823, DateTimeKind.Utc).AddTicks(1958));
 
             migrationBuilder.AlterColumn<DateTime>(
                 name: "UpdatedAt",
@@ -196,7 +196,7 @@ namespace YuG.Infrastructure.Migrations
                 defaultValue: new DateTime(2026, 5, 15, 3, 32, 48, 590, DateTimeKind.Utc).AddTicks(1646),
                 oldClrType: typeof(DateTime),
                 oldType: "TEXT",
-                oldDefaultValue: new DateTime(2026, 5, 17, 10, 56, 33, 276, DateTimeKind.Utc).AddTicks(9836));
+                oldDefaultValue: new DateTime(2026, 5, 17, 11, 1, 27, 834, DateTimeKind.Utc).AddTicks(4503));
 
             migrationBuilder.AlterColumn<DateTime>(
                 name: "CreatedAt",
@@ -206,7 +206,7 @@ namespace YuG.Infrastructure.Migrations
                 defaultValue: new DateTime(2026, 5, 15, 3, 32, 48, 590, DateTimeKind.Utc).AddTicks(1422),
                 oldClrType: typeof(DateTime),
                 oldType: "TEXT",
-                oldDefaultValue: new DateTime(2026, 5, 17, 10, 56, 33, 276, DateTimeKind.Utc).AddTicks(9439));
+                oldDefaultValue: new DateTime(2026, 5, 17, 11, 1, 27, 834, DateTimeKind.Utc).AddTicks(4285));
 
             migrationBuilder.AlterColumn<DateTime>(
                 name: "CreatedAt",
@@ -216,7 +216,7 @@ namespace YuG.Infrastructure.Migrations
                 defaultValue: new DateTime(2026, 5, 15, 3, 32, 48, 588, DateTimeKind.Utc).AddTicks(807),
                 oldClrType: typeof(DateTime),
                 oldType: "TEXT",
-                oldDefaultValue: new DateTime(2026, 5, 17, 10, 56, 33, 275, DateTimeKind.Utc).AddTicks(890));
+                oldDefaultValue: new DateTime(2026, 5, 17, 11, 1, 27, 832, DateTimeKind.Utc).AddTicks(5235));
         }
     }
 }
