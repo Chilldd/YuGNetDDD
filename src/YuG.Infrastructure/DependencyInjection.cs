@@ -4,10 +4,12 @@ using Microsoft.Extensions.DependencyInjection;
 using YuG.Application.Common.Interfaces;
 using YuG.Domain.Common;
 using YuG.Common.Interfaces;
+using YuG.Domain.AI.Repositories;
 using YuG.Domain.Identity.Repositories;
 using YuG.Domain.Permission.Repositories;
 using YuG.Infrastructure.DomainEvents;
 using YuG.Infrastructure.Persistence;
+using YuG.Infrastructure.Persistence.AI.Repositories;
 using YuG.Infrastructure.Persistence.Identity.Repositories;
 using YuG.Infrastructure.Persistence.Permission.Repositories;
 using YuG.Infrastructure.Services;
@@ -59,6 +61,9 @@ public static class DependencyInjection
 
         // 注册角色仓储
         services.AddScoped<IRoleRepository, RoleRepository>();
+
+        // 注册聊天会话仓储
+        services.AddScoped<IChatSessionRepository, ChatSessionRepository>();
 
         // 注册服务器信息服务
         services.AddSingleton<IServerInfoService, ServerInfoService>();
