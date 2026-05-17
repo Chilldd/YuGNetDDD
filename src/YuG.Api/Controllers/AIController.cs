@@ -8,16 +8,16 @@ using YuG.Application.AI.Chat.Stream;
 
 namespace YuG.Api.Controllers;
 
-/// <summary>AI 聊天控制器。</summary>
+/// <summary>AI 能力控制器，提供对话、Agent 等 AI 相关接口。</summary>
 [ApiController]
 [Route("api/[controller]")]
-public class ChatController : ControllerBase
+public class AIController : ControllerBase
 {
     private readonly IMediator _mediator;
 
     /// <summary>初始化聊天控制器。</summary>
     /// <param name="mediator">MediatR 发送器</param>
-    public ChatController(IMediator mediator)
+    public AIController(IMediator mediator)
     {
         _mediator = mediator;
     }
