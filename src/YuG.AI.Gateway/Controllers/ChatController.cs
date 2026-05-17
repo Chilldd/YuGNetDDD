@@ -64,12 +64,21 @@ public class ChatController : ControllerBase
 
         await foreach (var delta in _chatService.ChatStreamWithHistoryAsync(history, request.Message, ct))
         {
-            var json = System.Text.Json.JsonSerializer.Serialize(new
+            var json = delta.Type switch
             {
-                type = "delta",
-                content = delta.Content,
-                sessionId
-            });
+                "usage" => System.Text.Json.JsonSerializer.Serialize(new
+                {
+                    type = "usage",
+                    usage = delta.Usage,
+                    sessionId
+                }),
+                _ => System.Text.Json.JsonSerializer.Serialize(new
+                {
+                    type = "delta",
+                    content = delta.Content,
+                    sessionId
+                })
+            };
             await Response.WriteAsync($"data: {json}\n\n", ct);
             await Response.Body.FlushAsync(ct);
         }

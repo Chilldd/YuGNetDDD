@@ -1,5 +1,18 @@
 namespace YuG.AI.Gateway.Models.Responses;
 
+/// <summary>Token 用量数据。</summary>
+public class UsageData
+{
+    /// <summary>输入 Token 数。</summary>
+    public int PromptTokens { get; set; }
+
+    /// <summary>输出 Token 数。</summary>
+    public int CompletionTokens { get; set; }
+
+    /// <summary>总 Token 数。</summary>
+    public int TotalTokens { get; set; }
+}
+
 /// <summary>聊天回复响应。</summary>
 public class ChatReplyResponse
 {
@@ -11,4 +24,7 @@ public class ChatReplyResponse
 
     /// <summary>使用的模型标识。</summary>
     public string Model { get; set; } = string.Empty;
+
+    /// <summary>Token 用量信息。</summary>
+    public UsageData? Usage { get; set; }
 }

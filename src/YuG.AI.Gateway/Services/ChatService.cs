@@ -1,3 +1,4 @@
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
 using Microsoft.Extensions.Options;
@@ -32,7 +33,8 @@ public class ChatService : IChatService
         var chatCompletion = _kernel.GetRequiredService<IChatCompletionService>();
         var results = await chatCompletion.GetChatMessageContentsAsync(history, null, null, ct);
 
-        var reply = results is [.., var last] ? last.Content ?? string.Empty : string.Empty;
+        var last = results.LastOrDefault();
+        var reply = last?.Content ?? string.Empty;
 
         if (reply.Length > 0)
             history.AddAssistantMessage(reply);
@@ -40,7 +42,8 @@ public class ChatService : IChatService
         return new ChatReplyResponse
         {
             Reply = reply,
-            Model = results.LastOrDefault()?.ModelId ?? _options.DeepSeek.ModelId,
+            Model = last?.ModelId ?? _options.DeepSeek.ModelId,
+            Usage = ExtractUsage(last?.Metadata),
         };
     }
 
@@ -52,17 +55,47 @@ public class ChatService : IChatService
 
         var chatCompletion = _kernel.GetRequiredService<IChatCompletionService>();
         var fullReply = new StringBuilder();
+        StreamingChatMessageContent? lastChunk = null;
 
-        await foreach (var content in chatCompletion.GetStreamingChatMessageContentsAsync(history, null, null, ct))
+        await foreach (var chunk in chatCompletion.GetStreamingChatMessageContentsAsync(history, null, null, ct))
         {
-            if (content.Content is { Length: > 0 } text)
+            lastChunk = chunk;
+            if (chunk.Content is { Length: > 0 } text)
             {
                 fullReply.Append(text);
                 yield return new ChatStreamDelta(text);
             }
         }
 
+        // 发送用量信息
+        var usage = ExtractUsage(lastChunk?.Metadata);
+        if (usage is not null)
+            yield return new ChatStreamDelta { Type = "usage", Usage = usage };
+
         if (fullReply.Length > 0)
             history.AddAssistantMessage(fullReply.ToString());
+    }
+
+    /// <summary>从 SK 响应元数据中提取 Token 用量。</summary>
+    private static UsageData? ExtractUsage(IReadOnlyDictionary<string, object?>? metadata)
+    {
+        if (metadata is null) return null;
+        if (!metadata.TryGetValue("Usage", out var obj) || obj is null) return null;
+
+        var type = obj.GetType();
+
+        static int GetInt(object target, string name1, string name2)
+        {
+            var prop = target.GetType().GetProperty(name1, BindingFlags.Public | BindingFlags.Instance)
+                     ?? target.GetType().GetProperty(name2, BindingFlags.Public | BindingFlags.Instance);
+            return prop is not null ? (int)(prop.GetValue(target) ?? 0) : 0;
+        }
+
+        return new UsageData
+        {
+            PromptTokens = GetInt(obj, "InputTokenCount", "InputTokens"),
+            CompletionTokens = GetInt(obj, "OutputTokenCount", "OutputTokens"),
+            TotalTokens = GetInt(obj, "TotalTokenCount", "TotalTokens"),
+        };
     }
 }
