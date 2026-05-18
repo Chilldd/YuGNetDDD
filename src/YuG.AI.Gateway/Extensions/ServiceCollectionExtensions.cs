@@ -42,16 +42,18 @@ public static class ServiceCollectionExtensions
             {
                 case "deepseek":
                 {
-                    HttpClient? httpClient = null;
+                    HttpMessageHandler innerHandler = new HttpClientHandler();
+
                     if (options.DeepSeek.DisableThinking)
                     {
-                        var handler = new DisableThinkingHandler
-                        {
-                            InnerHandler = new HttpClientHandler()
-                        };
-                        httpClient = new HttpClient(handler);
+                        innerHandler = new DisableThinkingHandler { InnerHandler = innerHandler };
+                    }
+                    else
+                    {
+                        innerHandler = new ReasoningContentHandler { InnerHandler = innerHandler };
                     }
 
+                    var httpClient = new HttpClient(innerHandler);
                     builder.AddOpenAIChatCompletion(
                         options.DeepSeek.ModelId,
                         new Uri(options.DeepSeek.BaseUrl),
