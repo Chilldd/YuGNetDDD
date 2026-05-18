@@ -96,12 +96,6 @@ public class ChatService : IChatService
                         {
                             existing = (fc.Name ?? string.Empty, new StringBuilder());
                             pendingFunctions[callId] = existing;
-
-                            // 首次检测到此工具调用时，将已累积的 reasoning_content 与之关联
-                            if (reasoningText.Length > 0 && !string.IsNullOrEmpty(fc.CallId))
-                            {
-                                ReasoningContentHandler.CacheReasoningContent(fc.CallId, reasoningText.ToString());
-                            }
                         }
                         if (fc.Arguments is { Length: > 0 })
                         {
@@ -114,6 +108,15 @@ public class ChatService : IChatService
                 if (chunk.Content?.Length > 0)
                 {
                     yield return new ChatStreamDelta(chunk.Content);
+                }
+            }
+
+            // 流结束：将累积的 reasoning_content 与所有工具调用 ID 关联
+            if (reasoningText.Length > 0)
+            {
+                foreach (var callId in pendingFunctions.Keys)
+                {
+                    ReasoningContentHandler.CacheReasoningContent(callId, reasoningText.ToString());
                 }
             }
 
