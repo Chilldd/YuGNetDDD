@@ -21,6 +21,9 @@ public class AiOptions
     /// <summary>Ollama 配置。</summary>
     public OllamaConfig Ollama { get; set; } = new();
 
+    /// <summary>工具调用最大轮数（防止无限循环，默认 10）。</summary>
+    public int MaxToolCallRounds { get; set; } = 10;
+
     /// <summary>启动时校验配置是否有效。</summary>
     /// <exception cref="InvalidOperationException">配置不完整时抛出</exception>
     public void Validate()

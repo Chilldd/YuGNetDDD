@@ -11,6 +11,9 @@ public class ChatReplyResponse
 
     /// <summary>Token 用量信息（本轮请求）。</summary>
     public UsageData? Usage { get; set; }
+
+    /// <summary>工具调用记录（非流式模式下，AI 调用过的工具列表）。</summary>
+    public List<ToolCallRecord>? ToolCalls { get; set; }
 }
 
 /// <summary>Token 用量数据。</summary>

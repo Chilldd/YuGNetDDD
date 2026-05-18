@@ -3,6 +3,7 @@ using Microsoft.Extensions.Options;
 using YuG.AI.Gateway.Configuration;
 using YuG.AI.Gateway.Extensions;
 using YuG.AI.Gateway.Middleware;
+using YuG.AI.Gateway.Plugins;
 using YuG.AI.Gateway.Services;
 using YuG.Common.Extensions;
 using YuG.Common.Interfaces;
@@ -21,6 +22,7 @@ builder.Services.AddSwaggerServices("YuG AI Gateway API");
 builder.Services.AddJwtAuthentication(builder.Configuration);
 
 builder.Services.AddAiOptions(builder.Configuration);
+builder.Services.AddAiPlugin<TimePlugin>();
 builder.Services.AddAiCoreServices();
 builder.Services.AddSingleton<AiExceptionHandlingMiddleware>();
 

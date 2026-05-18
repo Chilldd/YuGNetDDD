@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Options;
 using Microsoft.SemanticKernel;
 using YuG.AI.Gateway.Configuration;
+using YuG.AI.Gateway.Plugins;
 using YuG.AI.Gateway.Services;
 
 namespace YuG.AI.Gateway.Extensions;
@@ -17,6 +18,14 @@ public static class ServiceCollectionExtensions
         services.Configure<AiOptions>(configuration.GetSection(AiOptions.SectionName));
         return services;
     }
+
+    /// <summary>注册 AI 插件。</summary>
+    /// <param name="services">服务集合</param>
+    /// <typeparam name="T">插件类型，需实现 <see cref="IAiPlugin"/></typeparam>
+    /// <returns>服务集合</returns>
+    public static IServiceCollection AddAiPlugin<T>(this IServiceCollection services)
+        where T : class, IAiPlugin
+        => services.AddSingleton<IAiPlugin, T>();
 
     /// <summary>注册 AI 核心服务（Kernel、IChatService）。</summary>
     /// <param name="services">服务集合</param>
@@ -38,6 +47,12 @@ public static class ServiceCollectionExtensions
                     break;
                 default:
                     throw new InvalidOperationException($"Unsupported AI provider: {options.Provider}");
+            }
+
+            // 注册所有插件
+            foreach (var plugin in sp.GetServices<IAiPlugin>())
+            {
+                builder.Plugins.AddFromObject(plugin, plugin.Name);
             }
 
             return builder.Build();
