@@ -21,6 +21,12 @@ internal sealed class ReasoningContentHandler : DelegatingHandler
     /// <summary>缓存条目，带时间戳用于过期清理。</summary>
     private sealed record CacheEntry(string Content, DateTime CreatedAt);
 
+    /// <summary>供 ChatService 手动缓存 streaming 响应中提取的 reasoning_content。</summary>
+    public static void CacheReasoningContent(string callId, string content)
+    {
+        ReasoningCache[callId] = new CacheEntry(content, DateTime.UtcNow);
+    }
+
     /// <inheritdoc />
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {
