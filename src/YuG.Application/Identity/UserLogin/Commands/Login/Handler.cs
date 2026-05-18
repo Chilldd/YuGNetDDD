@@ -47,7 +47,7 @@ public class Handler : IRequestHandler<LoginCommand, LoginResult>
     {
         // 获取用户
         var user = await _userRepository.GetByUsernameAsync(request.Username, cancellationToken);
-        if (user == null)
+        if (user is null)
         {
             throw new DomainException("用户名或密码不正确");
         }

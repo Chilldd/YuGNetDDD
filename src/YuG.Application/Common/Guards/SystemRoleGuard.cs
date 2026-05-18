@@ -20,4 +20,21 @@ public static class SystemRoleGuard
             throw new DomainException("系统内置角色不允许修改");
         }
     }
+
+    /// <summary>
+    /// 检查角色列表中是否包含系统内置角色，包含则抛出异常
+    /// </summary>
+    /// <param name="roles">角色列表</param>
+    /// <exception cref="DomainException">系统内置角色不允许通过接口分配</exception>
+    public static void AgainstAssigningSystemRoles(IEnumerable<Role> roles)
+    {
+        var systemRoles = roles.Where(r => r.IsSystem).ToList();
+        if (systemRoles.Count == 0)
+        {
+            return;
+        }
+
+        var names = string.Join(", ", systemRoles.Select(r => $"'{r.Name}'"));
+        throw new DomainException($"系统内置角色不允许通过接口分配：{names}");
+    }
 }

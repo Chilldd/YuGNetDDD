@@ -62,4 +62,12 @@ public class UserRepository : Repository<User>, IUserRepository
             .Include(u => u.RefreshTokens)
             .FirstOrDefaultAsync(u => u.Id == id, cancellationToken);
     }
+
+    /// <inheritdoc />
+    public async Task<User?> GetByRefreshTokenAsync(string refreshToken, CancellationToken cancellationToken = default)
+    {
+        return await _context.Users
+            .Include(u => u.RefreshTokens)
+            .FirstOrDefaultAsync(u => u.RefreshTokens.Any(rt => rt.Token == refreshToken), cancellationToken);
+    }
 }

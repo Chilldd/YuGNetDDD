@@ -120,40 +120,15 @@ public class Handler : IRequestHandler<SyncApiEndpointsCommand, SyncApiEndpoints
         DiscoveredEndpointInfo endpoint,
         ref int updatedCount)
     {
-        var needUpdate = false;
+        var changed = resource.SyncFromEndpoints(
+            endpoint.Description,
+            endpoint.GeneratedCode,
+            endpoint.Description,
+            endpoint.Path,
+            endpoint.HttpMethod,
+            endpoint.PermissionCode);
 
-        if (resource.Name != endpoint.Description)
-        {
-            resource.Rename(endpoint.Description);
-            needUpdate = true;
-        }
-
-        if (resource.Code != endpoint.GeneratedCode)
-        {
-            resource.ChangeCode(endpoint.GeneratedCode);
-            needUpdate = true;
-        }
-
-        if (resource.Path != endpoint.Path ||
-            resource.HttpMethod != endpoint.HttpMethod)
-        {
-            resource.ChangeEndpoint(endpoint.Path, endpoint.HttpMethod);
-            needUpdate = true;
-        }
-
-        if (resource.Description != endpoint.Description)
-        {
-            resource.ChangeDescription(endpoint.Description);
-            needUpdate = true;
-        }
-
-        if (resource.PermissionCode != endpoint.PermissionCode)
-        {
-            resource.ConfigureApiPermission(endpoint.PermissionCode);
-            needUpdate = true;
-        }
-
-        if (needUpdate)
+        if (changed)
         {
             _resourceRepository.Update(resource);
             updatedCount++;

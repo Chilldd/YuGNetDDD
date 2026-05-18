@@ -1,6 +1,7 @@
 using MediatR;
 using YuG.Domain.Common;
 using YuG.Domain.Identity.Repositories;
+using YuG.Application.Identity.Role.DTOs;
 using RoleEntity = YuG.Domain.Identity.Entities.Role;
 
 namespace YuG.Application.Identity.Role.Commands.Create;
@@ -43,24 +44,6 @@ public class Handler : IRequestHandler<CreateRoleCommand, RoleResult>
         await _roleRepository.SaveChangesAsync(cancellationToken);
 
         // 返回响应
-        return MapToResult(role);
-    }
-
-    /// <summary>
-    /// 将角色实体映射为响应结果
-    /// </summary>
-    internal static RoleResult MapToResult(RoleEntity role)
-    {
-        return new RoleResult
-        {
-            Id = role.Id,
-            Name = role.Name,
-            Code = role.Code,
-            Description = role.Description,
-            Status = role.Status.ToString(),
-            IsSystem = role.IsSystem,
-            CreatedAt = role.CreatedAt,
-            UpdatedAt = role.UpdatedAt
-        };
+        return RoleResult.FromEntity(role);
     }
 }

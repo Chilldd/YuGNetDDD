@@ -1,6 +1,6 @@
 using FluentValidation;
 using YuG.Application.Common;
-using UserResult = YuG.Application.Identity.User.Commands.Create.UserResult;
+using YuG.Application.Identity.User.DTOs;
 
 namespace YuG.Application.Identity.User.Commands.Disable;
 

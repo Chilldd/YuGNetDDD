@@ -358,6 +358,93 @@ if (permissionCode?.Length > 100)
     }
 
     /// <summary>
+    /// 根据端点发现结果同步更新资源属性。返回是否有变更。
+    /// </summary>
+    /// <param name="name">资源名称</param>
+    /// <param name="code">资源编码</param>
+    /// <param name="description">资源描述</param>
+    /// <param name="path">API 路径</param>
+    /// <param name="httpMethod">HTTP 方法</param>
+    /// <param name="permissionCode">权限编码</param>
+    /// <returns>是否有属性发生变更</returns>
+    public bool SyncFromEndpoints(
+        string name,
+        string code,
+        string description,
+        string path,
+        ResourceHttpMethod httpMethod,
+        string? permissionCode)
+    {
+        var changed = false;
+
+        if (Name != name) { Rename(name); changed = true; }
+        if (Code != code) { ChangeCode(code); changed = true; }
+        if (Description != description) { ChangeDescription(description); changed = true; }
+        if (Path != path || HttpMethod != httpMethod) { ChangeEndpoint(path, httpMethod); changed = true; }
+        if (PermissionCode != permissionCode) { ConfigureApiPermission(permissionCode); changed = true; }
+
+        return changed;
+    }
+
+    /// <summary>
+    /// 获取资源的所有后代列表，按从深到浅的顺序排列（叶子在前，适合删除）
+    /// </summary>
+    /// <param name="resourceId">资源标识</param>
+    /// <param name="allResources">全部资源列表</param>
+    /// <returns>后代资源列表，叶子节点在前</returns>
+    public static IReadOnlyList<Resource> GetDescendantsInDeleteOrder(
+        long resourceId,
+        IReadOnlyCollection<Resource> allResources)
+    {
+        var childrenMap = allResources
+            .Where(r => r.ParentId.HasValue)
+            .GroupBy(r => r.ParentId!.Value)
+            .ToDictionary(g => g.Key, g => g.ToList());
+
+        var result = new List<Resource>();
+        CollectDescendants(resourceId, childrenMap, result);
+        return result;
+    }
+
+    /// <summary>
+    /// 验证移动资源不会导致循环引用
+    /// </summary>
+    /// <param name="resourceId">要移动的资源标识</param>
+    /// <param name="targetParentId">目标父级标识（null 表示根级别）</param>
+    /// <param name="allResources">全部资源列表</param>
+    /// <exception cref="DomainException">会导致循环引用时抛出</exception>
+    public static void ValidateNoCircularReference(
+        long resourceId,
+        long? targetParentId,
+        IReadOnlyCollection<Resource> allResources)
+    {
+        if (!targetParentId.HasValue) return;
+
+        var descendants = GetDescendantsInDeleteOrder(resourceId, allResources);
+        if (descendants.Any(d => d.Id == targetParentId.Value))
+        {
+            throw new DomainException("不能将资源移动到自己或自己的子资源下");
+        }
+    }
+
+    /// <summary>
+    /// 递归收集所有子资源（深度优先，子节点在结果中按从深到浅排列）
+    /// </summary>
+    private static void CollectDescendants(
+        long parentId,
+        Dictionary<long, List<Resource>> childrenMap,
+        List<Resource> result)
+    {
+        if (!childrenMap.TryGetValue(parentId, out var children)) return;
+
+        foreach (var child in children)
+        {
+            CollectDescendants(child.Id, childrenMap, result);
+            result.Add(child);
+        }
+    }
+
+    /// <summary>
     /// 验证基础信息
     /// </summary>
     private static void ValidateBasicInfo(string name, string code, string? description)

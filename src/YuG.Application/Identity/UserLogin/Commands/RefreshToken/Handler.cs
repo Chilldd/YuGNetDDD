@@ -46,17 +46,15 @@ public class Handler : IRequestHandler<RefreshTokenCommand, RefreshTokenResult>
     public async Task<RefreshTokenResult> Handle(RefreshTokenCommand request, CancellationToken cancellationToken)
     {
         // 通过刷新令牌查找用户
-        var users = await _userRepository.GetAllAsync(cancellationToken);
-        var user = users.FirstOrDefault(u => u.RefreshTokens.Any(rt => rt.Token == request.RefreshToken));
-
-        if (user == null)
+        var user = await _userRepository.GetByRefreshTokenAsync(request.RefreshToken, cancellationToken);
+        if (user is null)
         {
             throw new DomainException("无效的刷新令牌");
         }
 
         // 验证刷新令牌是否有效
         var existingToken = user.GetValidRefreshToken(request.RefreshToken);
-        if (existingToken == null)
+        if (existingToken is null)
         {
             throw new DomainException("刷新令牌已过期或已撤销");
         }

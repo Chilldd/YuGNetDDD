@@ -2,6 +2,7 @@ using MediatR;
 using YuG.Domain.Common;
 using YuG.Common.Interfaces;
 using YuG.Domain.Identity.Repositories;
+using YuG.Application.Identity.User.DTOs;
 using UserEntity = YuG.Domain.Identity.Entities.User;
 
 namespace YuG.Application.Identity.User.Commands.Create;

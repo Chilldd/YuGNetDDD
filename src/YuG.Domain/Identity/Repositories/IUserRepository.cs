@@ -39,4 +39,12 @@ public interface IUserRepository : IRepository<User>
     /// <param name="cancellationToken">取消令牌</param>
     /// <returns>用户实体，不存在则返回 null</returns>
     Task<User?> GetByIdWithRefreshTokensAsync(long id, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// 根据刷新令牌值获取用户
+    /// </summary>
+    /// <param name="refreshToken">刷新令牌值</param>
+    /// <param name="cancellationToken">取消令牌</param>
+    /// <returns>用户实体，不存在则返回 null</returns>
+    Task<User?> GetByRefreshTokenAsync(string refreshToken, CancellationToken cancellationToken = default);
 }

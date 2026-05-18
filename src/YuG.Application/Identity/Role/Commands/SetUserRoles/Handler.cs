@@ -1,5 +1,6 @@
 using MediatR;
 using YuG.Application.Common.Exceptions;
+using YuG.Application.Common.Guards;
 using YuG.Domain.Common;
 using YuG.Domain.Identity.Repositories;
 using UserEntity = YuG.Domain.Identity.Entities.User;
@@ -50,12 +51,7 @@ public class Handler : IRequestHandler<SetUserRolesCommand>
         }
 
         // 排除系统内置角色（系统角色只能通过种子数据分配）
-        var systemRoles = roles.Where(r => r.IsSystem).ToList();
-        if (systemRoles.Count != 0)
-        {
-            var systemRoleNames = string.Join(", ", systemRoles.Select(r => $"'{r.Name}'"));
-            throw new DomainException($"系统内置角色不允许通过接口分配：{systemRoleNames}");
-        }
+        SystemRoleGuard.AgainstAssigningSystemRoles(roles);
 
         // 设置用户角色（覆盖模式）
         user.SetRoles(roles);

@@ -7,6 +7,7 @@ using YuG.Common.Models;
 using YuG.Application.Identity.User.Commands.Activate;
 using YuG.Application.Identity.User.Commands.Create;
 using YuG.Application.Identity.User.Commands.Delete;
+using YuG.Application.Identity.User.DTOs;
 using YuG.Application.Identity.User.Commands.Disable;
 using YuG.Application.Identity.User.Queries.Get;
 using YuG.Application.Identity.User.Queries.GetList;

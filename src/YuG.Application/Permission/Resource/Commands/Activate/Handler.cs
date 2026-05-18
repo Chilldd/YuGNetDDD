@@ -30,7 +30,7 @@ public class Handler : IRequestHandler<ActivateResourceCommand, ResourceResult>
     {
         // 获取资源
         var resource = await _resourceRepository.GetByIdAsync(request.Id, cancellationToken);
-        if (resource == null)
+        if (resource is null)
         {
             throw new DomainException($"资源 '{request.Id}' 不存在");
         }

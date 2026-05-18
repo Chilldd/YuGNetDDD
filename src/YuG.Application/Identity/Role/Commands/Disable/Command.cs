@@ -1,6 +1,6 @@
 using FluentValidation;
 using YuG.Application.Common;
-using RoleResult = YuG.Application.Identity.Role.Commands.Create.RoleResult;
+using YuG.Application.Identity.Role.DTOs;
 
 namespace YuG.Application.Identity.Role.Commands.Disable;
 

@@ -13,7 +13,7 @@ using YuG.Application.Identity.Role.Commands.AssignResource;
 using YuG.Application.Identity.Role.Commands.AssignUsers;
 using YuG.Application.Identity.Role.Queries.GetUsers;
 using YuG.Application.Identity.Role.Commands.UnassignResource;
-using CreateRoleCommands = YuG.Application.Identity.Role.Commands.Create;
+using YuG.Application.Identity.Role.DTOs;
 using UpdateRoleCommands = YuG.Application.Identity.Role.Commands.Update;
 
 namespace YuG.Api.Controllers.System;
@@ -86,9 +86,9 @@ public class RoleController : ControllerBase
     [HttpPost]
     [ApiDescription("创建角色")]
     [Authorize(Policy = "role:create")]
-    [ProducesResponseType(typeof(CreateRoleCommands.RoleResult), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(RoleResult), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<ActionResult<CreateRoleCommands.RoleResult>> Create([FromBody] CreateRoleCommand command)
+    public async Task<ActionResult<RoleResult>> Create([FromBody] CreateRoleCommand command)
     {
         var response = await _mediator.Send(command);
         return CreatedAtAction(nameof(GetById), new { id = response.Id }, response);
@@ -106,10 +106,10 @@ public class RoleController : ControllerBase
     [HttpPut("{id}")]
     [ApiDescription("更新角色")]
     [Authorize(Policy = "role:update")]
-    [ProducesResponseType(typeof(CreateRoleCommands.RoleResult), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(RoleResult), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult<CreateRoleCommands.RoleResult>> Update(long id, [FromBody] UpdateRoleCommands.UpdateRoleCommand command)
+    public async Task<ActionResult<RoleResult>> Update(long id, [FromBody] UpdateRoleCommands.UpdateRoleCommand command)
     {
         if (id != command.Id)
         {
@@ -149,9 +149,9 @@ public class RoleController : ControllerBase
     [HttpPost("{id}/activate")]
     [ApiDescription("激活角色")]
     [Authorize(Policy = "role:activate")]
-    [ProducesResponseType(typeof(CreateRoleCommands.RoleResult), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(RoleResult), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult<CreateRoleCommands.RoleResult>> Activate(long id)
+    public async Task<ActionResult<RoleResult>> Activate(long id)
     {
         var command = new ActivateRoleCommand { Id = id };
         var response = await _mediator.Send(command);
@@ -168,9 +168,9 @@ public class RoleController : ControllerBase
     [HttpPost("{id}/disable")]
     [ApiDescription("禁用角色")]
     [Authorize(Policy = "role:disable")]
-    [ProducesResponseType(typeof(CreateRoleCommands.RoleResult), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(RoleResult), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult<CreateRoleCommands.RoleResult>> Disable(long id)
+    public async Task<ActionResult<RoleResult>> Disable(long id)
     {
         var command = new DisableRoleCommand { Id = id };
         var response = await _mediator.Send(command);
@@ -189,10 +189,10 @@ public class RoleController : ControllerBase
     [HttpPost("{id}/resources")]
     [ApiDescription("给角色分配资源")]
     [Authorize(Policy = "role:assignresources")]
-    [ProducesResponseType(typeof(CreateRoleCommands.RoleResult), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(RoleResult), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult<CreateRoleCommands.RoleResult>> AssignResources(long id, [FromBody] AssignResourceCommand command)
+    public async Task<ActionResult<RoleResult>> AssignResources(long id, [FromBody] AssignResourceCommand command)
     {
         if (id != command.RoleId)
         {

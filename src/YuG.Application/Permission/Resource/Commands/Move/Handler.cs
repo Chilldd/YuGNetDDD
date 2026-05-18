@@ -32,7 +32,7 @@ public class Handler : IRequestHandler<MoveResourceCommand, ResourceResult>
     {
         // 获取要移动的资源
         var resource = await _resourceRepository.GetByIdAsync(request.Id, cancellationToken);
-        if (resource == null)
+        if (resource is null)
         {
             throw new DomainException($"资源 '{request.Id}' 不存在");
         }
@@ -53,10 +53,8 @@ public class Handler : IRequestHandler<MoveResourceCommand, ResourceResult>
         ResourceEntity.ValidateParentChildType(resource.Type, parentType);
 
         // 检查循环引用：目标父级不能是当前资源的后代
-        if (request.ParentId.HasValue)
-        {
-            await EnsureNoCircularReferenceAsync(request.Id, request.ParentId.Value, cancellationToken);
-        }
+        var allResources = await _resourceRepository.GetAllAsync(cancellationToken);
+        ResourceEntity.ValidateNoCircularReference(request.Id, request.ParentId, allResources);
 
         // 执行移动
         resource.MoveTo(request.ParentId);
@@ -86,45 +84,5 @@ public class Handler : IRequestHandler<MoveResourceCommand, ResourceResult>
             CreatedAt = resource.CreatedAt,
             UpdatedAt = resource.UpdatedAt
         };
-    }
-
-    /// <summary>
-    /// 确保目标父级不是当前资源的后代（防止循环引用）
-    /// </summary>
-    private async Task EnsureNoCircularReferenceAsync(long resourceId, long targetParentId, CancellationToken cancellationToken)
-    {
-        var allResources = await _resourceRepository.GetAllAsync(cancellationToken);
-        var childrenMap = allResources
-            .Where(r => r.ParentId.HasValue)
-            .GroupBy(r => r.ParentId!.Value)
-            .ToDictionary(g => g.Key, g => g.ToList());
-
-        var descendantIds = new HashSet<long>();
-        CollectDescendantIds(resourceId, childrenMap, descendantIds);
-
-        if (descendantIds.Contains(targetParentId))
-        {
-            throw new DomainException("不能将资源移动到自己或自己的子资源下");
-        }
-    }
-
-    /// <summary>
-    /// 递归收集所有后代 ID
-    /// </summary>
-    private static void CollectDescendantIds(
-        long parentId,
-        Dictionary<long, List<ResourceEntity>> childrenMap,
-        HashSet<long> result)
-    {
-        if (!childrenMap.TryGetValue(parentId, out var children))
-        {
-            return;
-        }
-
-        foreach (var child in children)
-        {
-            result.Add(child.Id);
-            CollectDescendantIds(child.Id, childrenMap, result);
-        }
     }
 }

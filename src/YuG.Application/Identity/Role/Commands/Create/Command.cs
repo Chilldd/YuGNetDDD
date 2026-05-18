@@ -1,53 +1,8 @@
 using FluentValidation;
 using YuG.Application.Common;
+using YuG.Application.Identity.Role.DTOs;
 
 namespace YuG.Application.Identity.Role.Commands.Create;
-
-/// <summary>
-/// 角色响应
-/// </summary>
-public record RoleResult
-{
-    /// <summary>
-    /// 角色标识
-    /// </summary>
-    public long Id { get; init; }
-
-    /// <summary>
-    /// 角色名称
-    /// </summary>
-    public string Name { get; init; } = string.Empty;
-
-    /// <summary>
-    /// 角色编码（唯一）
-    /// </summary>
-    public string Code { get; init; } = string.Empty;
-
-    /// <summary>
-    /// 角色描述
-    /// </summary>
-    public string? Description { get; init; }
-
-    /// <summary>
-    /// 角色状态（Active/Disabled）
-    /// </summary>
-    public string Status { get; init; } = "Active";
-
-    /// <summary>
-    /// 是否为系统内置角色
-    /// </summary>
-    public bool IsSystem { get; init; }
-
-    /// <summary>
-    /// 创建时间（UTC）
-    /// </summary>
-    public DateTime CreatedAt { get; init; }
-
-    /// <summary>
-    /// 最后更新时间（UTC）
-    /// </summary>
-    public DateTime UpdatedAt { get; init; }
-}
 
 /// <summary>
 /// 创建角色命令

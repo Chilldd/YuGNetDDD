@@ -31,26 +31,19 @@ public class Handler : IRequestHandler<DeleteResourceCommand, Unit>
     {
         // 获取资源
         var resource = await _resourceRepository.GetByIdAsync(request.Id, cancellationToken);
-        if (resource == null)
+        if (resource is null)
         {
             throw new DomainException($"资源 '{request.Id}' 不存在");
         }
 
-        // 一次性加载所有资源，构建父子关系映射
+        // 一次性加载所有资源，收集所有后代
         var allResources = await _resourceRepository.GetAllAsync(cancellationToken);
-        var childrenMap = allResources
-            .Where(r => r.ParentId.HasValue)
-            .GroupBy(r => r.ParentId!.Value)
-            .ToDictionary(g => g.Key, g => g.ToList());
+        var descendants = ResourceEntity.GetDescendantsInDeleteOrder(request.Id, allResources);
 
-        // 递归收集所有后代（深度优先，子节点在前）
-        var descendantsToDelete = new List<ResourceEntity>();
-        CollectDescendants(request.Id, childrenMap, descendantsToDelete);
-
-        // 从叶子到根删除（反向确保子节点先于父节点删除）
-        for (var i = descendantsToDelete.Count - 1; i >= 0; i--)
+        // 从叶子到根删除（子节点先于父节点删除）
+        foreach (var descendant in descendants)
         {
-            _resourceRepository.Delete(descendantsToDelete[i]);
+            _resourceRepository.Delete(descendant);
         }
 
         // 删除目标资源
@@ -58,25 +51,5 @@ public class Handler : IRequestHandler<DeleteResourceCommand, Unit>
         await _resourceRepository.SaveChangesAsync(cancellationToken);
 
         return Unit.Value;
-    }
-
-    /// <summary>
-    /// 递归收集所有子资源（深度优先，子节点在结果中按从深到浅排列）
-    /// </summary>
-    private static void CollectDescendants(
-        long parentId,
-        Dictionary<long, List<ResourceEntity>> childrenMap,
-        List<ResourceEntity> result)
-    {
-        if (!childrenMap.TryGetValue(parentId, out var children))
-        {
-            return;
-        }
-
-        foreach (var child in children)
-        {
-            CollectDescendants(child.Id, childrenMap, result);
-            result.Add(child);
-        }
     }
 }

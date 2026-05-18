@@ -3,7 +3,7 @@ using YuG.Application.Common.Exceptions;
 using YuG.Application.Common.Guards;
 using YuG.Domain.Common;
 using YuG.Domain.Identity.Repositories;
-using RoleResult = YuG.Application.Identity.Role.Commands.Create.RoleResult;
+using YuG.Application.Identity.Role.DTOs;
 using RoleEntity = YuG.Domain.Identity.Entities.Role;
 
 namespace YuG.Application.Identity.Role.Commands.Update;
@@ -68,6 +68,6 @@ public class Handler : IRequestHandler<UpdateRoleCommand, RoleResult>
         await _roleRepository.SaveChangesAsync(cancellationToken);
 
         // 返回响应
-        return Create.Handler.MapToResult(role);
+        return RoleResult.FromEntity(role);
     }
 }
