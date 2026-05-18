@@ -58,23 +58,47 @@ public class ChatController : ControllerBase
 
         var chatId = $"chatcmpl-{Guid.NewGuid():N}";
 
-        await foreach (var delta in _chatService.ChatStreamAsync(request.Messages, ct))
+        try
         {
-            var json = delta.Type switch
+            await foreach (var delta in _chatService.ChatStreamAsync(request.Messages, ct))
             {
-                "usage" => System.Text.Json.JsonSerializer.Serialize(new
+                var json = delta.Type switch
                 {
-                    type = "usage",
-                    usage = delta.Usage,
-                }),
-                _ => System.Text.Json.JsonSerializer.Serialize(new
-                {
-                    type = "delta",
-                    content = delta.Content,
-                })
-            };
-            await Response.WriteAsync($"data: {json}\n\n", ct);
+                    "tool_call" => System.Text.Json.JsonSerializer.Serialize(new
+                    {
+                        type = "tool_call",
+                        tool_call = delta.ToolCall,
+                    }),
+                    "tool_result" => System.Text.Json.JsonSerializer.Serialize(new
+                    {
+                        type = "tool_result",
+                        tool_result = delta.ToolResult,
+                    }),
+                    "usage" => System.Text.Json.JsonSerializer.Serialize(new
+                    {
+                        type = "usage",
+                        usage = delta.Usage,
+                    }),
+                    _ => System.Text.Json.JsonSerializer.Serialize(new
+                    {
+                        type = "delta",
+                        content = delta.Content,
+                    })
+                };
+                await Response.WriteAsync($"data: {json}\n\n", ct);
+                await Response.Body.FlushAsync(ct);
+            }
+        }
+        catch (Exception ex)
+        {
+            // 流开始后响应头已发送，不能抛给中间件改 StatusCode。
+            // 改为发一条 SSE error 事件通知客户端，然后吃掉异常（中间件已无法处理）。
+            var errorJson = System.Text.Json.JsonSerializer.Serialize(new { type = "error" });
+            await Response.WriteAsync($"data: {errorJson}\n\n", ct);
             await Response.Body.FlushAsync(ct);
+
+            var logger = HttpContext.RequestServices.GetRequiredService<ILogger<ChatController>>();
+            logger.LogError(ex, "Stream error after response started");
         }
 
         var done = System.Text.Json.JsonSerializer.Serialize(new
