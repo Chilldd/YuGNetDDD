@@ -146,8 +146,18 @@ public class Handler : IRequestHandler<GetUserMenuQuery, GetUserMenuResult>
 
     private sealed record RoleInfo(long Id, string Code, string Status);
 
-    private sealed record MenuResourceInfo(
-        long Id, string Name, string Code, string? Icon, string? Route,
-        bool IsHidden, string? Badge, int SortOrder, string? PermissionCode,
-        string Type, long? ParentId);
+    private sealed record MenuResourceInfo
+    {
+        public long Id { get; set; }
+        public string Name { get; set; } = default!;
+        public string Code { get; set; } = default!;
+        public string? Icon { get; set; }
+        public string? Route { get; set; }
+        public bool IsHidden { get; set; }
+        public string? Badge { get; set; }
+        public int SortOrder { get; set; }
+        public string? PermissionCode { get; set; }
+        public string Type { get; set; } = default!;
+        public long? ParentId { get; set; }
+    }
 }

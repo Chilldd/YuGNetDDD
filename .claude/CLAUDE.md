@@ -52,4 +52,4 @@ dotnet clean                    # 清理构建产物
 - 任务完成后必须编译通过没有报错才允许结束任务
 - 如果涉及数据库实体字段变更，代码编写完成编译通过后，必须执行 `dotnet ef migrations add <迁移名称> --project src/YuG.Infrastructure --startup-project src/YuG.Api` 同步迁移
 - 严禁删除本地 SQLite 数据库文件（`yug.db`、`cache.db` 等）
-- 任务开发完成且编译通过后，必须提交代码到 git
+- 任务开发完成且编译通过后，必须提交代码到 git !!!

@@ -42,7 +42,7 @@ public class Handler : IRequestHandler<GetRoleQuery, GetRoleResult?>
             return null;
 
         var resourceIds = (await conn.QueryAsync<long>(
-            "SELECT ResourceId FROM RoleResource WHERE RoleId = @Id",
+            "SELECT ResourcesId FROM RoleResource WHERE RoleId = @Id",
             new { query.Id })).ToList();
 
         return role with { ResourceIds = resourceIds };

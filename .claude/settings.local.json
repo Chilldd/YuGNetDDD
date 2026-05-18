@@ -77,7 +77,10 @@
       "Bash(npx skills *)",
       "Bash(sudo npm update -g @larksuite/cli)",
       "Bash(sed -i 's/using YuG\\\\.Application\\\\.Common;/using YuG.Application.Common.Queries;/' YuG.Application/Identity/Role/Queries/GetList/Query.cs YuG.Application/Identity/User/Queries/GetList/Query.cs YuG.Application/Permission/Resource/Queries/GetList/Query.cs YuG.Application/AI/Session/Queries/GetMessages/Query.cs)",
-      "Bash(sed -i 's/using YuG\\\\.Application\\\\.Common;/using YuG.Application.Common.Queries;/' YuG.Application/Identity/Role/Queries/GetList/Handler.cs YuG.Application/Identity/User/Queries/GetList/Handler.cs YuG.Application/Permission/Resource/Queries/GetList/Handler.cs YuG.Application/AI/Session/Queries/GetMessages/Handler.cs)"
+      "Bash(sed -i 's/using YuG\\\\.Application\\\\.Common;/using YuG.Application.Common.Queries;/' YuG.Application/Identity/Role/Queries/GetList/Handler.cs YuG.Application/Identity/User/Queries/GetList/Handler.cs YuG.Application/Permission/Resource/Queries/GetList/Handler.cs YuG.Application/AI/Session/Queries/GetMessages/Handler.cs)",
+      "Bash(mkdir -p /home/yug/workspace/YuG/backend/src/YuG.Application/Identity/Role/DTOs)",
+      "Bash(mkdir -p /home/yug/workspace/YuG/backend/src/YuG.Application/Identity/User/DTOs)",
+      "Bash(mkdir -p /home/yug/workspace/YuG/backend/src/YuG.Domain/Permission/Services)"
     ]
   }
 }
