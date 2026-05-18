@@ -30,7 +30,7 @@ public class Handler : IRequestHandler<GetUserMenuQuery, GetUserMenuResult>
     /// <returns>用户菜单结果</returns>
     public async Task<GetUserMenuResult> Handle(GetUserMenuQuery query, CancellationToken cancellationToken)
     {
-        using var conn = _connectionFactory.CreateConnection();
+        using var conn = await _connectionFactory.CreateConnectionAsync(cancellationToken);
 
         // 查询用户的所有角色
         var roles = (await conn.QueryAsync<RoleInfo>(

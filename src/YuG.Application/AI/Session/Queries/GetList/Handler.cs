@@ -24,7 +24,7 @@ public class Handler : IRequestHandler<GetSessionListQuery, IReadOnlyList<Sessio
     /// <inheritdoc />
     public async Task<IReadOnlyList<SessionListItem>> Handle(GetSessionListQuery request, CancellationToken cancellationToken)
     {
-        using var conn = _connectionFactory.CreateConnection();
+        using var conn = await _connectionFactory.CreateConnectionAsync(cancellationToken);
 
         var sessions = await conn.QueryAsync<SessionListItem>(
             """

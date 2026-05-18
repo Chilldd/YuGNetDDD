@@ -29,7 +29,7 @@ public class Handler : IRequestHandler<GetResourceTreeQuery, GetResourceTreeResu
     /// <returns>资源树结果</returns>
     public async Task<GetResourceTreeResult> Handle(GetResourceTreeQuery query, CancellationToken cancellationToken)
     {
-        using var conn = _connectionFactory.CreateConnection();
+        using var conn = await _connectionFactory.CreateConnectionAsync(cancellationToken);
 
         var resources = await conn.QueryAsync<ResourceTreeItem>(
             """

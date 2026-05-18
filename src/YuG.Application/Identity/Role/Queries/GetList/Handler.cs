@@ -1,5 +1,6 @@
 using Dapper;
 using MediatR;
+using YuG.Application.Common;
 using YuG.Application.Common.Interfaces;
 using YuG.Common.Models;
 
@@ -24,26 +25,16 @@ public class Handler : IRequestHandler<GetRoleListQuery, PageResult<RoleListItem
     /// <inheritdoc />
     public async Task<PageResult<RoleListItem>> Handle(GetRoleListQuery query, CancellationToken cancellationToken)
     {
-        using var conn = _connectionFactory.CreateConnection();
+        using var conn = await _connectionFactory.CreateConnectionAsync(cancellationToken);
 
-        var totalCount = await conn.ExecuteScalarAsync<int>("SELECT COUNT(1) FROM Role");
-
-        var offset = (query.Page - 1) * query.PageSize;
-        var items = await conn.QueryAsync<RoleListItem>(
+        return await conn.ToPageResultAsync<RoleListItem>(
+            "SELECT COUNT(1) FROM Role",
             """
             SELECT Id, Name, Code, Description, Status, IsSystem, CreatedAt
             FROM Role
             ORDER BY Id
             LIMIT @PageSize OFFSET @Offset
             """,
-            new { query.PageSize, Offset = offset });
-
-        return new PageResult<RoleListItem>
-        {
-            Items = items.ToList(),
-            TotalCount = totalCount,
-            Page = query.Page,
-            PageSize = query.PageSize,
-        };
+            query.Page, query.PageSize);
     }
 }

@@ -25,4 +25,12 @@ internal sealed class SqlConnectionFactory : ISqlConnectionFactory
         connection.Open();
         return connection;
     }
+
+    /// <inheritdoc />
+    public async Task<IDbConnection> CreateConnectionAsync(CancellationToken cancellationToken = default)
+    {
+        var connection = new SqliteConnection(_connectionString);
+        await connection.OpenAsync(cancellationToken);
+        return connection;
+    }
 }

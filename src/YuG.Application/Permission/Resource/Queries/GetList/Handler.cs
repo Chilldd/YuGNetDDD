@@ -1,5 +1,6 @@
 using Dapper;
 using MediatR;
+using YuG.Application.Common;
 using YuG.Application.Common.Interfaces;
 using YuG.Common.Models;
 
@@ -20,7 +21,7 @@ public class Handler : IRequestHandler<GetResourceListQuery, PageResult<Resource
     /// <inheritdoc />
     public async Task<PageResult<ResourceListItem>> Handle(GetResourceListQuery query, CancellationToken cancellationToken)
     {
-        using var conn = _connectionFactory.CreateConnection();
+        using var conn = await _connectionFactory.CreateConnectionAsync(cancellationToken);
 
         var whereClauses = new List<string>();
         var parameters = new DynamicParameters();
@@ -51,14 +52,8 @@ public class Handler : IRequestHandler<GetResourceListQuery, PageResult<Resource
 
         var whereSql = whereClauses.Count > 0 ? "WHERE " + string.Join(" AND ", whereClauses) : "";
 
-        var totalCount = await conn.ExecuteScalarAsync<int>(
-            $"SELECT COUNT(1) FROM Resource {whereSql}", parameters);
-
-        var offset = (query.Page - 1) * query.PageSize;
-        parameters.Add("PageSize", query.PageSize);
-        parameters.Add("Offset", offset);
-
-        var items = await conn.QueryAsync<ResourceListItem>(
+        return await conn.ToPageResultAsync<ResourceListItem>(
+            $"SELECT COUNT(1) FROM Resource {whereSql}",
             $"""
             SELECT Id, Name, Code, Description, Type, HttpMethod, Path,
                    Icon, Route, IsHidden, Badge, PermissionCode,
@@ -68,14 +63,7 @@ public class Handler : IRequestHandler<GetResourceListQuery, PageResult<Resource
             ORDER BY SortOrder, Id
             LIMIT @PageSize OFFSET @Offset
             """,
+            query.Page, query.PageSize,
             parameters);
-
-        return new PageResult<ResourceListItem>
-        {
-            Items = items.ToList(),
-            TotalCount = totalCount,
-            Page = query.Page,
-            PageSize = query.PageSize,
-        };
     }
 }

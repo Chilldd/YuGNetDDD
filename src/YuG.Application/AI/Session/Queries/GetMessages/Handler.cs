@@ -1,5 +1,6 @@
 using Dapper;
 using MediatR;
+using YuG.Application.Common;
 using YuG.Application.Common.Exceptions;
 using YuG.Application.Common.Interfaces;
 using YuG.Common.Models;
@@ -26,7 +27,7 @@ public class Handler : IRequestHandler<GetSessionMessagesQuery, PageResult<Messa
     /// <inheritdoc />
     public async Task<PageResult<MessageItem>> Handle(GetSessionMessagesQuery request, CancellationToken cancellationToken)
     {
-        using var conn = _connectionFactory.CreateConnection();
+        using var conn = await _connectionFactory.CreateConnectionAsync(cancellationToken);
 
         // 检查会话是否存在且属于当前用户
         var sessionPkId = await conn.QueryFirstOrDefaultAsync<long?>(
@@ -36,14 +37,8 @@ public class Handler : IRequestHandler<GetSessionMessagesQuery, PageResult<Messa
         if (sessionPkId is null)
             throw new NotFoundException(nameof(Domain.AI.Entities.AiChatSession), request.SessionId);
 
-        // 查询总数
-        var totalCount = await conn.ExecuteScalarAsync<int>(
+        return await conn.ToPageResultAsync<MessageItem>(
             "SELECT COUNT(1) FROM AiChatMessage WHERE AiChatSessionId = @SessionPkId",
-            new { SessionPkId = sessionPkId.Value });
-
-        // 分页查询消息（倒序，Page 1 为最新）
-        var offset = (request.Page - 1) * request.PageSize;
-        var items = await conn.QueryAsync<MessageItem>(
             """
             SELECT Role, Content, SequenceNumber, TokenCount, CreatedAt
             FROM AiChatMessage
@@ -51,14 +46,7 @@ public class Handler : IRequestHandler<GetSessionMessagesQuery, PageResult<Messa
             ORDER BY Id DESC
             LIMIT @PageSize OFFSET @Offset
             """,
-            new { SessionPkId = sessionPkId.Value, request.PageSize, Offset = offset });
-
-        return new PageResult<MessageItem>
-        {
-            Items = items.ToList(),
-            TotalCount = totalCount,
-            Page = request.Page,
-            PageSize = request.PageSize,
-        };
+            request.Page, request.PageSize,
+            new { SessionPkId = sessionPkId.Value });
     }
 }

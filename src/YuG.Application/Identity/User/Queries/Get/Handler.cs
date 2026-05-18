@@ -28,7 +28,7 @@ public class Handler : IRequestHandler<GetUserQuery, GetUserResult?>
     /// <returns>用户查询结果，不存在则返回 null</returns>
     public async Task<GetUserResult?> Handle(GetUserQuery query, CancellationToken cancellationToken)
     {
-        using var conn = _connectionFactory.CreateConnection();
+        using var conn = await _connectionFactory.CreateConnectionAsync(cancellationToken);
 
         var user = await conn.QueryFirstOrDefaultAsync<GetUserResult>(
             "SELECT Id, Username, Status, CreatedAt, UpdatedAt FROM User WHERE Id = @Id",

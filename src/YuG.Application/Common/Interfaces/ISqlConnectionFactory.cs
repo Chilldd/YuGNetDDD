@@ -8,7 +8,12 @@ namespace YuG.Application.Common.Interfaces;
 public interface ISqlConnectionFactory
 {
     /// <summary>
-    /// 创建并打开一个数据库连接
+    /// 创建并打开一个数据库连接（同步）
     /// </summary>
     IDbConnection CreateConnection();
+
+    /// <summary>
+    /// 创建并打开一个数据库连接（异步）
+    /// </summary>
+    Task<IDbConnection> CreateConnectionAsync(CancellationToken cancellationToken = default);
 }

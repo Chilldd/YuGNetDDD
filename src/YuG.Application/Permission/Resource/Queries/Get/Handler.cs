@@ -28,7 +28,7 @@ public class Handler : IRequestHandler<GetResourceQuery, GetResourceResult?>
     /// <returns>资源结果</returns>
     public async Task<GetResourceResult?> Handle(GetResourceQuery query, CancellationToken cancellationToken)
     {
-        using var conn = _connectionFactory.CreateConnection();
+        using var conn = await _connectionFactory.CreateConnectionAsync(cancellationToken);
 
         return await conn.QueryFirstOrDefaultAsync<GetResourceResult>(
             """

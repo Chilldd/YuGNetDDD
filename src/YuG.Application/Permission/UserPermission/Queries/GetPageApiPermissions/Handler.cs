@@ -30,7 +30,7 @@ public class Handler : IRequestHandler<GetPageApiPermissionsQuery, GetPageApiPer
     /// <returns>页面 API 权限结果</returns>
     public async Task<GetPageApiPermissionsResult> Handle(GetPageApiPermissionsQuery query, CancellationToken cancellationToken)
     {
-        using var conn = _connectionFactory.CreateConnection();
+        using var conn = await _connectionFactory.CreateConnectionAsync(cancellationToken);
 
         // 查询用户的所有角色
         var roles = (await conn.QueryAsync<RoleInfo>(

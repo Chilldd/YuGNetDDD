@@ -28,7 +28,7 @@ public class Handler : IRequestHandler<GetRoleQuery, GetRoleResult?>
     /// <returns>角色查询结果，不存在则返回 null</returns>
     public async Task<GetRoleResult?> Handle(GetRoleQuery query, CancellationToken cancellationToken)
     {
-        using var conn = _connectionFactory.CreateConnection();
+        using var conn = await _connectionFactory.CreateConnectionAsync(cancellationToken);
 
         var role = await conn.QueryFirstOrDefaultAsync<GetRoleResult>(
             """

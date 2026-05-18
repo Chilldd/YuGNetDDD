@@ -29,7 +29,7 @@ public class Handler : IRequestHandler<GetRoleUsersQuery, GetRoleUsersResult>
     /// <returns>角色关联用户结果</returns>
     public async Task<GetRoleUsersResult> Handle(GetRoleUsersQuery request, CancellationToken cancellationToken)
     {
-        using var conn = _connectionFactory.CreateConnection();
+        using var conn = await _connectionFactory.CreateConnectionAsync(cancellationToken);
 
         // 检查角色是否存在
         var roleExists = await conn.ExecuteScalarAsync<int>(
