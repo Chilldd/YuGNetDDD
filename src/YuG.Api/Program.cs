@@ -8,6 +8,9 @@ using YuG.Infrastructure.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// 加载本地开发配置（仅本地，不提交到 git）
+builder.Configuration.AddJsonFile("appsettings.Local.json", optional: true, reloadOnChange: true);
+
 builder.Services.AddMcpServer()
     .WithHttpTransport(options =>
     {

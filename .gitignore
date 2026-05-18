@@ -25,3 +25,6 @@ Thumbs.db
 
 # Claude Code
 settings.local.json
+
+# Local-only configuration (secrets, API keys, etc.)
+appsettings.Local.json

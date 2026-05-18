@@ -10,6 +10,9 @@ using YuG.Common.Jwt;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// 加载本地开发配置（仅本地，不提交到 git）
+builder.Configuration.AddJsonFile("appsettings.Local.json", optional: true, reloadOnChange: true);
+
 builder.Services.AddControllers();
 builder.Services.AddSingleton<ICache, InMemoryCache>();
 builder.Services.AddSwaggerServices("YuG AI Gateway API");
