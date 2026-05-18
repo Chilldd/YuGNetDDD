@@ -162,9 +162,11 @@ public class ChatService : IChatService
                     }
                 };
 
+                // ⚠️ FunctionResultContent 的 4 参构造函数是 (functionName, pluginName, callId, result)，
+                // 全部有默认值。必须使用命名参数，否则会错位。
                 history.Add(new ChatMessageContent(
                     AuthorRole.Tool,
-                    items: [new FunctionResultContent(callId, name, resultContent)]));
+                    items: [new FunctionResultContent(functionName: name, callId: callId, result: resultContent)]));
             }
 
             // 继续下一轮，LLM 将基于工具结果生成回复
@@ -236,7 +238,7 @@ public class ChatService : IChatService
                 case "tool":
                     history.Add(new ChatMessageContent(
                         AuthorRole.Tool,
-                        items: [new FunctionResultContent(msg.ToolCallId ?? string.Empty, string.Empty, msg.Content)]));
+                        items: [new FunctionResultContent(callId: msg.ToolCallId ?? string.Empty, result: msg.Content)]));
                     break;
             }
         }
