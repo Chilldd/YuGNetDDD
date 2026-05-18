@@ -53,6 +53,13 @@ public class DeepSeekConfig
 
     /// <summary>模型标识。</summary>
     public string ModelId { get; set; } = "deepseek-v4-flash";
+
+    /// <summary>
+    /// 禁用思考模式（reasoning_content）。DeepSeek 启用思考模式后返回 reasoning_content 字段，
+    /// 但 SK 1.76 的 OpenAI connector 在后续请求中不会自动回传该字段，导致工具调用时抛出 400 错误。
+    /// 设为 true 可在请求中添加 <c>thinking: {type: disabled}</c>，默认为 true。
+    /// </summary>
+    public bool DisableThinking { get; set; } = true;
 }
 
 /// <summary>Azure OpenAI 配置。</summary>

@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Options;
 using Microsoft.SemanticKernel;
 using YuG.AI.Gateway.Configuration;
+using YuG.AI.Gateway.Middleware;
 using YuG.AI.Gateway.Plugins;
 using YuG.AI.Gateway.Services;
 
@@ -40,11 +41,24 @@ public static class ServiceCollectionExtensions
             switch (options.Provider.ToLowerInvariant())
             {
                 case "deepseek":
+                {
+                    HttpClient? httpClient = null;
+                    if (options.DeepSeek.DisableThinking)
+                    {
+                        var handler = new DisableThinkingHandler
+                        {
+                            InnerHandler = new HttpClientHandler()
+                        };
+                        httpClient = new HttpClient(handler);
+                    }
+
                     builder.AddOpenAIChatCompletion(
                         options.DeepSeek.ModelId,
                         new Uri(options.DeepSeek.BaseUrl),
-                        options.DeepSeek.ApiKey);
+                        options.DeepSeek.ApiKey,
+                        httpClient: httpClient);
                     break;
+                }
                 default:
                     throw new InvalidOperationException($"Unsupported AI provider: {options.Provider}");
             }
