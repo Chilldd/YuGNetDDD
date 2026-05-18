@@ -70,7 +70,8 @@ public class ChatService : IChatService
 
         for (var round = 0; round < _options.MaxToolCallRounds; round++)
         {
-            var pendingFunctions = new Dictionary<string, (string Name, StringBuilder ArgsBuilder)>();
+            // 按 FunctionCallIndex 分组追踪流式工具调用（CallId 在后续 chunks 中可能为空）
+            var pendingFunctions = new Dictionary<int, PendingFunction>();
             var reasoningText = new StringBuilder();
             StreamingChatMessageContent? lastChunk = null;
 
@@ -91,16 +92,19 @@ public class ChatService : IChatService
                 {
                     if (item is StreamingFunctionCallUpdateContent fc)
                     {
-                        var callId = fc.CallId ?? Guid.NewGuid().ToString();
-                        if (!pendingFunctions.TryGetValue(callId, out var existing))
+                        if (!pendingFunctions.TryGetValue(fc.FunctionCallIndex, out var pf))
                         {
-                            existing = (fc.Name ?? string.Empty, new StringBuilder());
-                            pendingFunctions[callId] = existing;
+                            pf = new PendingFunction();
+                            pendingFunctions[fc.FunctionCallIndex] = pf;
                         }
+
+                        // 合并来自不同 chunks 的属性
+                        if (!string.IsNullOrEmpty(fc.CallId))
+                            pf.CallId = fc.CallId;
+                        if (!string.IsNullOrEmpty(fc.Name))
+                            pf.Name = fc.Name;
                         if (fc.Arguments is { Length: > 0 })
-                        {
-                            existing.ArgsBuilder.Append(fc.Arguments);
-                        }
+                            pf.Arguments.Append(fc.Arguments);
                     }
                 }
 
@@ -111,12 +115,16 @@ public class ChatService : IChatService
                 }
             }
 
-            // 流结束：将累积的 reasoning_content 与所有工具调用 ID 关联
+            // 流结束：将累积的 reasoning_content 与所有有有效 CallId 的工具调用关联
             if (reasoningText.Length > 0)
             {
-                foreach (var callId in pendingFunctions.Keys)
+                var rcText = reasoningText.ToString();
+                foreach (var pf in pendingFunctions.Values)
                 {
-                    ReasoningContentHandler.CacheReasoningContent(callId, reasoningText.ToString());
+                    if (!string.IsNullOrEmpty(pf.CallId))
+                    {
+                        ReasoningContentHandler.CacheReasoningContent(pf.CallId, rcText);
+                    }
                 }
             }
 
@@ -129,38 +137,43 @@ public class ChatService : IChatService
                 yield break;
             }
 
-            // 将 LLM 的 tool_calls 加入历史
+            // 将 LLM 的 tool_calls 加入历史（跳过 Name 为空的无效条目）
             var callItems = new ChatMessageContentItemCollection();
-            foreach (var (callId, (name, argsBuilder)) in pendingFunctions)
+            foreach (var pf in pendingFunctions.Values)
             {
-                var args = ParseArguments(argsBuilder.ToString());
-                callItems.Add(new FunctionCallContent(name, id: callId, arguments: args));
+                if (string.IsNullOrEmpty(pf.Name))
+                    continue;
+                var args = ParseArguments(pf.Arguments.ToString());
+                callItems.Add(new FunctionCallContent(pf.Name, id: pf.CallId, arguments: args));
             }
             history.Add(new ChatMessageContent(AuthorRole.Assistant, items: callItems));
 
             // 依次执行，发送 tool_call / tool_result SSE 事件
-            foreach (var (callId, (name, argsBuilder)) in pendingFunctions)
+            foreach (var pf in pendingFunctions.Values)
             {
+                if (string.IsNullOrEmpty(pf.Name))
+                    continue;
+
                 yield return new ChatStreamDelta
                 {
                     Type = "tool_call",
                     ToolCall = new ToolCallDelta
                     {
-                        Id = callId,
-                        Name = name,
-                        Arguments = argsBuilder.ToString()
+                        Id = pf.CallId,
+                        Name = pf.Name,
+                        Arguments = pf.Arguments.ToString()
                     }
                 };
 
-                var resultContent = await ExecuteFunctionCall(name, argsBuilder.ToString(), ct);
+                var resultContent = await ExecuteFunctionCall(pf.Name, pf.Arguments.ToString(), ct);
 
                 yield return new ChatStreamDelta
                 {
                     Type = "tool_result",
                     ToolResult = new ToolCallResultDelta
                     {
-                        Id = callId,
-                        Name = name,
+                        Id = pf.CallId,
+                        Name = pf.Name,
                         Content = resultContent
                     }
                 };
@@ -169,7 +182,7 @@ public class ChatService : IChatService
                 // 全部有默认值。必须使用命名参数，否则会错位。
                 history.Add(new ChatMessageContent(
                     AuthorRole.Tool,
-                    items: [new FunctionResultContent(functionName: name, callId: callId, result: resultContent)]));
+                    items: [new FunctionResultContent(functionName: pf.Name, callId: pf.CallId, result: resultContent)]));
             }
 
             // 继续下一轮，LLM 将基于工具结果生成回复
@@ -389,4 +402,17 @@ public class ChatService : IChatService
     }
 
     #endregion
+
+    /// <summary>流式工具调用追踪辅助类，按 FunctionCallIndex 分组跨 chunks 合并数据。</summary>
+    private sealed class PendingFunction
+    {
+        /// <summary>工具调用 ID。</summary>
+        public string CallId { get; set; } = string.Empty;
+
+        /// <summary>函数名称。</summary>
+        public string Name { get; set; } = string.Empty;
+
+        /// <summary>累积的参数 JSON。</summary>
+        public StringBuilder Arguments { get; } = new();
+    }
 }
