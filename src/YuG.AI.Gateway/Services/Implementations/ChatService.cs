@@ -46,7 +46,8 @@ public class ChatService : IChatService
             .Select(fc => new ToolCallRecord
             {
                 Id = fc.Id ?? string.Empty,
-                Name = fc.FunctionName,
+                Name = fc.FunctionName ?? string.Empty,
+                DisplayName = GetFunctionDisplayName(fc.FunctionName ?? string.Empty),
                 Arguments = SerializeArguments(fc.Arguments),
             }).ToList();
 
@@ -143,6 +144,7 @@ public class ChatService : IChatService
                     {
                         Id = pf.CallId,
                         Name = pf.Name,
+                        DisplayName = GetFunctionDisplayName(pf.Name),
                         Arguments = pf.Arguments.ToString()
                     }
                 };
@@ -156,6 +158,7 @@ public class ChatService : IChatService
                     {
                         Id = pf.CallId,
                         Name = pf.Name,
+                        DisplayName = GetFunctionDisplayName(pf.Name),
                         Content = resultContent
                     }
                 };
@@ -211,6 +214,22 @@ public class ChatService : IChatService
         return separatorIndex > 0
             ? (name[..separatorIndex], name[(separatorIndex + 1)..])
             : (null, name);
+    }
+
+    /// <summary>获取函数的 Description 特性中的友好名称，找不到时回退为原始名称。</summary>
+    private string GetFunctionDisplayName(string name)
+    {
+        var (pluginName, functionName) = ParsePluginFunctionName(name);
+        try
+        {
+            var function = _kernel.Plugins.GetFunction(pluginName, functionName);
+            var description = function.Metadata.Description;
+            return string.IsNullOrEmpty(description) ? name : description;
+        }
+        catch
+        {
+            return name;
+        }
     }
 
     /// <summary>将 <see cref="ChatMessageDto"/> 列表转换为 SK 的 <see cref="ChatHistory"/>。</summary>

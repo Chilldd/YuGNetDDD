@@ -62,6 +62,7 @@ public class ChatService : IChatService
             {
                 Id = tc.Id,
                 Name = tc.Name,
+                DisplayName = tc.DisplayName,
                 Arguments = tc.Arguments,
                 Result = tc.Result,
             }).ToList(),
@@ -130,6 +131,7 @@ public class ChatService : IChatService
                     {
                         Id = infraDelta.ToolCall.Id,
                         Name = infraDelta.ToolCall.Name,
+                        DisplayName = infraDelta.ToolCall.DisplayName,
                         Arguments = infraDelta.ToolCall.Arguments,
                     }
                     : null,
@@ -138,6 +140,7 @@ public class ChatService : IChatService
                     {
                         Id = infraDelta.ToolResult.Id,
                         Name = infraDelta.ToolResult.Name,
+                        DisplayName = infraDelta.ToolResult.DisplayName,
                         Content = infraDelta.ToolResult.Content,
                     }
                     : null,

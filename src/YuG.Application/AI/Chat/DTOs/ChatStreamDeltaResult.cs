@@ -28,8 +28,11 @@ public record ToolCallDeltaResult
     /// <summary>工具调用 ID。</summary>
     public string Id { get; init; } = string.Empty;
 
-    /// <summary>函数名称。</summary>
+    /// <summary>函数名称（内部标识）。</summary>
     public string Name { get; init; } = string.Empty;
+
+    /// <summary>函数友好名称（Description 特性值），用于 UI 展示。</summary>
+    public string? DisplayName { get; init; }
 
     /// <summary>函数参数 JSON。</summary>
     public string Arguments { get; init; } = string.Empty;
@@ -41,8 +44,11 @@ public record ToolCallResultDeltaResult
     /// <summary>工具调用 ID。</summary>
     public string Id { get; init; } = string.Empty;
 
-    /// <summary>函数名称。</summary>
+    /// <summary>函数名称（内部标识）。</summary>
     public string Name { get; init; } = string.Empty;
+
+    /// <summary>函数友好名称（Description 特性值），用于 UI 展示。</summary>
+    public string? DisplayName { get; init; }
 
     /// <summary>工具执行结果。</summary>
     public string Content { get; init; } = string.Empty;
