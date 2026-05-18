@@ -89,20 +89,20 @@ public abstract class Repository<TAggregate> : IRepository<TAggregate>
         // 保存变更到数据库
         var result = await _context.SaveChangesAsync(cancellationToken);
 
-        // 收集并发布领域事件
+        // 收集领域事件
         var domainEvents = aggregatesWithEvents
             .SelectMany(a => a.DomainEvents)
             .ToList();
 
-        if (domainEvents.Count > 0)
-        {
-            await _domainEventPublisher.PublishAsync(domainEvents, cancellationToken);
-        }
-
-        // 清空所有领域事件
+        // 先清空，再发布。防止事件 handler 中再次 SaveChangesAsync 时重复发布
         foreach (var aggregate in aggregatesWithEvents)
         {
             aggregate.ClearDomainEvents();
+        }
+
+        if (domainEvents.Count > 0)
+        {
+            await _domainEventPublisher.PublishAsync(domainEvents, cancellationToken);
         }
 
         return result;

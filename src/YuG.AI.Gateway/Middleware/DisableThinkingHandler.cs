@@ -5,9 +5,10 @@ using System.Text.Json;
 namespace YuG.AI.Gateway.Middleware;
 
 /// <summary>
-/// 向 DeepSeek 请求体中注入 <c>thinking: {type: disabled}</c>，用于禁用思考模式。
-/// DeepSeek 启用思考模式后会在响应中返回 <c>reasoning_content</c> 字段，
-/// 但 SK 1.76 的 OpenAI connector 在后续工具调用轮次中不会回传该字段，导致 400 错误。
+/// 向 DeepSeek 请求体中注入 <c>thinking: {type: disabled}</c>，禁用思考模式。
+/// 思考模式启用时 DeepSeek 会返回 <c>reasoning_content</c>，
+/// 但 SK 序列化不支持将该字段回传，导致工具调用多轮交互时 HTTP 400。
+/// 禁用思考模式可彻底绕开此问题。
 /// </summary>
 internal sealed class DisableThinkingHandler : DelegatingHandler
 {
@@ -17,35 +18,31 @@ internal sealed class DisableThinkingHandler : DelegatingHandler
     /// <inheritdoc />
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {
-        if (request.Content is null ||
-            request.Content.Headers.ContentType?.MediaType != "application/json")
+        if (request.Content?.Headers.ContentType?.MediaType == "application/json")
         {
-            return await base.SendAsync(request, cancellationToken);
+            var body = await request.Content.ReadAsStringAsync(cancellationToken);
+
+            using var doc = JsonDocument.Parse(body);
+
+            using var stream = new MemoryStream(body.Length + 64);
+            using var writer = new Utf8JsonWriter(stream, JsonWriterOptions);
+            writer.WriteStartObject();
+
+            foreach (var prop in doc.RootElement.EnumerateObject())
+            {
+                prop.WriteTo(writer);
+            }
+
+            writer.WriteStartObject("thinking");
+            writer.WriteString("type", "disabled");
+            writer.WriteEndObject();
+
+            writer.WriteEndObject();
+            writer.Flush();
+
+            request.Content = new ByteArrayContent(stream.ToArray());
+            request.Content.Headers.ContentType = JsonMediaType;
         }
-
-        var body = await request.Content.ReadAsStringAsync(cancellationToken);
-        using var doc = JsonDocument.Parse(body);
-
-        using var stream = new MemoryStream();
-        using var writer = new Utf8JsonWriter(stream, JsonWriterOptions);
-
-        writer.WriteStartObject();
-
-        foreach (var prop in doc.RootElement.EnumerateObject())
-        {
-            prop.WriteTo(writer);
-        }
-
-        // 注入 thinking: {type: disabled}
-        writer.WriteStartObject("thinking");
-        writer.WriteString("type", "disabled");
-        writer.WriteEndObject();
-
-        writer.WriteEndObject();
-        writer.Flush();
-
-        request.Content = new ByteArrayContent(stream.ToArray());
-        request.Content.Headers.ContentType = JsonMediaType;
 
         return await base.SendAsync(request, cancellationToken);
     }

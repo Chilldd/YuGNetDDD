@@ -7,7 +7,6 @@ using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.ChatCompletion;
 using Microsoft.SemanticKernel.Connectors.OpenAI;
 using YuG.AI.Gateway.Configuration;
-using YuG.AI.Gateway.Middleware;
 using YuG.AI.Gateway.Models.Requests;
 using YuG.AI.Gateway.Models.Responses;
 
@@ -34,26 +33,29 @@ public class ChatService : IChatService
         var history = BuildChatHistory(messages);
         var chatCompletion = _kernel.GetRequiredService<IChatCompletionService>();
 
-        // 使用 AutoInvokeKernelFunctions 让 SK 内部处理多轮工具调用。
-        // SK 内部会保留 reasoning_content 的正确回传，避免 HTTP 400。
         var settings = new OpenAIPromptExecutionSettings
         {
-            ToolCallBehavior = ToolCallBehavior.AutoInvokeKernelFunctions
+            ToolCallBehavior = ToolCallBehavior.EnableKernelFunctions
         };
 
-        var originalCount = history.Count;
         var results = await chatCompletion.GetChatMessageContentsAsync(history, settings, _kernel, ct);
         var last = results.LastOrDefault();
 
-        // 从 history 中提取 SK 自动执行的工具调用记录
-        var toolCallRecords = ExtractToolCallRecords(history, originalCount);
+        // 从结果中提取工具调用
+        var toolCallRecords = last?.Items.OfType<FunctionCallContent>()
+            .Select(fc => new ToolCallRecord
+            {
+                Id = fc.Id ?? string.Empty,
+                Name = fc.FunctionName,
+                Arguments = SerializeArguments(fc.Arguments),
+            }).ToList();
 
         return new ChatReplyResponse
         {
             Reply = last?.Content ?? string.Empty,
             Model = last?.ModelId ?? _options.DeepSeek.ModelId,
             Usage = ExtractUsage(last),
-            ToolCalls = toolCallRecords.Count > 0 ? toolCallRecords : null
+            ToolCalls = toolCallRecords?.Count > 0 ? toolCallRecords : null
         };
     }
 
@@ -72,7 +74,6 @@ public class ChatService : IChatService
         {
             // 按 FunctionCallIndex 分组追踪流式工具调用（CallId 在后续 chunks 中可能为空）
             var pendingFunctions = new Dictionary<int, PendingFunction>();
-            var reasoningText = new StringBuilder();
             StreamingChatMessageContent? lastChunk = null;
 
             // 第一轮流式回复：可能包含文本（直接推 SSE）和/或工具调用
@@ -80,12 +81,6 @@ public class ChatService : IChatService
                 history, settings, _kernel, ct))
             {
                 lastChunk = chunk;
-
-                // 累积 reasoning_content（DeepSeek 可能通过 metadata 返回）
-                if (chunk.Metadata?.TryGetValue("reasoning_content", out var rc) == true && rc is string rcText)
-                {
-                    reasoningText.Append(rcText);
-                }
 
                 // 追踪流式工具调用更新（跨 chunks 累积 arguments）
                 foreach (var item in chunk.Items)
@@ -112,19 +107,6 @@ public class ChatService : IChatService
                 if (chunk.Content?.Length > 0)
                 {
                     yield return new ChatStreamDelta(chunk.Content);
-                }
-            }
-
-            // 流结束：将累积的 reasoning_content 与所有有有效 CallId 的工具调用关联
-            if (reasoningText.Length > 0)
-            {
-                var rcText = reasoningText.ToString();
-                foreach (var pf in pendingFunctions.Values)
-                {
-                    if (!string.IsNullOrEmpty(pf.CallId))
-                    {
-                        ReasoningContentHandler.CacheReasoningContent(pf.CallId, rcText);
-                    }
                 }
             }
 
@@ -200,7 +182,9 @@ public class ChatService : IChatService
     {
         try
         {
-            var function = _kernel.Plugins.GetFunction(null, name);
+            // LLM 返回的全名格式为 "{pluginName}-{functionName}"，需要解析后查找
+            var (pluginName, functionName) = ParsePluginFunctionName(name);
+            var function = _kernel.Plugins.GetFunction(pluginName, functionName);
             if (function is null)
                 return $"Error: Function '{name}' not found";
 
@@ -218,6 +202,15 @@ public class ChatService : IChatService
     {
         var args = ParseArguments(argsJson);
         return await ExecuteFunctionCall(name, args, ct);
+    }
+
+    /// <summary>解析 LLM 返回的全名"{pluginName}-{functionName}"，无分隔符时 pluginName 为 null。</summary>
+    private static (string? pluginName, string functionName) ParsePluginFunctionName(string name)
+    {
+        var separatorIndex = name.IndexOf('-');
+        return separatorIndex > 0
+            ? (name[..separatorIndex], name[(separatorIndex + 1)..])
+            : (null, name);
     }
 
     /// <summary>将 <see cref="ChatMessageDto"/> 列表转换为 SK 的 <see cref="ChatHistory"/>。</summary>
@@ -286,45 +279,6 @@ public class ChatService : IChatService
             return "{}";
 
         return JsonSerializer.Serialize(args.ToDictionary(kvp => kvp.Key, kvp => kvp.Value));
-    }
-
-    /// <summary>从 <see cref="ChatHistory"/> 中提取 SK 自动执行的工具调用记录。</summary>
-    private static List<ToolCallRecord> ExtractToolCallRecords(ChatHistory history, int startIndex)
-    {
-        var records = new List<ToolCallRecord>();
-
-        for (var i = startIndex; i < history.Count; i++)
-        {
-            var msg = history[i];
-            if (msg.Role != AuthorRole.Assistant)
-                continue;
-
-            foreach (var fc in msg.Items.OfType<FunctionCallContent>())
-            {
-                // 查找紧随其后的对应 tool 结果
-                string resultContent = string.Empty;
-                for (var j = i + 1; j < history.Count; j++)
-                {
-                    var toolResult = history[j].Items.OfType<FunctionResultContent>()
-                        .FirstOrDefault(fr => fr.CallId == fc.Id);
-                    if (toolResult is not null)
-                    {
-                        resultContent = toolResult.Result?.ToString() ?? string.Empty;
-                        break;
-                    }
-                }
-
-                records.Add(new ToolCallRecord
-                {
-                    Id = fc.Id ?? string.Empty,
-                    Name = fc.FunctionName,
-                    Arguments = SerializeArguments(fc.Arguments),
-                    Result = resultContent
-                });
-            }
-        }
-
-        return records;
     }
 
     #region Usage extraction

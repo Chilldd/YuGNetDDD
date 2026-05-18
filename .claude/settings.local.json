@@ -80,7 +80,18 @@
       "Bash(sed -i 's/using YuG\\\\.Application\\\\.Common;/using YuG.Application.Common.Queries;/' YuG.Application/Identity/Role/Queries/GetList/Handler.cs YuG.Application/Identity/User/Queries/GetList/Handler.cs YuG.Application/Permission/Resource/Queries/GetList/Handler.cs YuG.Application/AI/Session/Queries/GetMessages/Handler.cs)",
       "Bash(mkdir -p /home/yug/workspace/YuG/backend/src/YuG.Application/Identity/Role/DTOs)",
       "Bash(mkdir -p /home/yug/workspace/YuG/backend/src/YuG.Application/Identity/User/DTOs)",
-      "Bash(mkdir -p /home/yug/workspace/YuG/backend/src/YuG.Domain/Permission/Services)"
+      "Bash(mkdir -p /home/yug/workspace/YuG/backend/src/YuG.Domain/Permission/Services)",
+      "Read(//tmp/test_sk/**)",
+      "Bash(xargs cat)",
+      "Bash(rg -z \"GetOpenAIClientOptions\" /home/yug/.nuget/packages/microsoft.semantickernel.connectors.openai/1.76.0/lib/net10.0/Microsoft.SemanticKernel.Connectors.OpenAI.dll)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(gh api *)",
+      "Bash(dotnet-ildasm /home/yug/.nuget/packages/microsoft.semantickernel.connectors.openai/1.76.0/lib/net10.0/Microsoft.SemanticKernel.Connectors.OpenAI.dll)",
+      "WebFetch(domain:github.com)",
+      "Bash(gh search *)",
+      "Read(//tmp/**)",
+      "Bash(mkdir -p /tmp/ildasm_output)",
+      "Bash(dotnet-ildasm /home/yug/.nuget/packages/microsoft.semantickernel.connectors.openai/1.76.0/lib/net10.0/Microsoft.SemanticKernel.Connectors.OpenAI.dll -o=/tmp/ildasm_output/sk.il)"
     ]
   }
 }

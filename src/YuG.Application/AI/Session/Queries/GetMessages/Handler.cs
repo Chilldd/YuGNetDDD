@@ -42,7 +42,7 @@ public class Handler : IRequestHandler<GetSessionMessagesQuery, PageResult<Messa
             """
             SELECT Role, Content, SequenceNumber, TokenCount, CreatedAt, ToolCallId, ToolCalls
             FROM AiChatMessage
-            WHERE AiChatSessionId = @SessionPkId
+            WHERE AiChatSessionId = @SessionPkId and Role != 'system'
             ORDER BY Id DESC
             LIMIT @PageSize OFFSET @Offset
             """,

@@ -42,23 +42,24 @@ public static class ServiceCollectionExtensions
             {
                 case "deepseek":
                 {
-                    HttpMessageHandler innerHandler = new HttpClientHandler();
-
                     if (options.DeepSeek.DisableThinking)
                     {
-                        innerHandler = new DisableThinkingHandler { InnerHandler = innerHandler };
+                        var innerHandler = new HttpClientHandler();
+                        var thinkingHandler = new DisableThinkingHandler { InnerHandler = innerHandler };
+                        var httpClient = new HttpClient(thinkingHandler);
+                        builder.AddOpenAIChatCompletion(
+                            options.DeepSeek.ModelId,
+                            new Uri(options.DeepSeek.BaseUrl),
+                            options.DeepSeek.ApiKey,
+                            httpClient: httpClient);
                     }
                     else
                     {
-                        innerHandler = new ReasoningContentHandler { InnerHandler = innerHandler };
+                        builder.AddOpenAIChatCompletion(
+                            options.DeepSeek.ModelId,
+                            new Uri(options.DeepSeek.BaseUrl),
+                            options.DeepSeek.ApiKey);
                     }
-
-                    var httpClient = new HttpClient(innerHandler);
-                    builder.AddOpenAIChatCompletion(
-                        options.DeepSeek.ModelId,
-                        new Uri(options.DeepSeek.BaseUrl),
-                        options.DeepSeek.ApiKey,
-                        httpClient: httpClient);
                     break;
                 }
                 default:

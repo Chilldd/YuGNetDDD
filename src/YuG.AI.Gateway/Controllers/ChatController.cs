@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
@@ -6,6 +7,15 @@ using YuG.AI.Gateway.Models.Responses;
 using YuG.AI.Gateway.Services;
 
 namespace YuG.AI.Gateway.Controllers;
+
+/// <summary>JSON 序列化配置，使用 camelCase 以与下游客户端约定一致。</summary>
+internal static class SseJsonOptions
+{
+    internal static readonly JsonSerializerOptions Default = new()
+    {
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+    };
+}
 
 /// <summary>聊天补全接口控制器。</summary>
 [ApiController]
@@ -64,26 +74,26 @@ public class ChatController : ControllerBase
             {
                 var json = delta.Type switch
                 {
-                    "tool_call" => System.Text.Json.JsonSerializer.Serialize(new
+                    "tool_call" => JsonSerializer.Serialize(new
                     {
                         type = "tool_call",
                         tool_call = delta.ToolCall,
-                    }),
-                    "tool_result" => System.Text.Json.JsonSerializer.Serialize(new
+                    }, SseJsonOptions.Default),
+                    "tool_result" => JsonSerializer.Serialize(new
                     {
                         type = "tool_result",
                         tool_result = delta.ToolResult,
-                    }),
-                    "usage" => System.Text.Json.JsonSerializer.Serialize(new
+                    }, SseJsonOptions.Default),
+                    "usage" => JsonSerializer.Serialize(new
                     {
                         type = "usage",
                         usage = delta.Usage,
-                    }),
-                    _ => System.Text.Json.JsonSerializer.Serialize(new
+                    }, SseJsonOptions.Default),
+                    _ => JsonSerializer.Serialize(new
                     {
                         type = "delta",
                         content = delta.Content,
-                    })
+                    }, SseJsonOptions.Default)
                 };
                 await Response.WriteAsync($"data: {json}\n\n", ct);
                 await Response.Body.FlushAsync(ct);
@@ -93,7 +103,7 @@ public class ChatController : ControllerBase
         {
             // 流开始后响应头已发送，不能抛给中间件改 StatusCode。
             // 改为发一条 SSE error 事件通知客户端，然后吃掉异常（中间件已无法处理）。
-            var errorJson = System.Text.Json.JsonSerializer.Serialize(new { type = "error" });
+            var errorJson = JsonSerializer.Serialize(new { type = "error" }, SseJsonOptions.Default);
             await Response.WriteAsync($"data: {errorJson}\n\n", ct);
             await Response.Body.FlushAsync(ct);
 
@@ -101,11 +111,11 @@ public class ChatController : ControllerBase
             logger.LogError(ex, "Stream error after response started");
         }
 
-        var done = System.Text.Json.JsonSerializer.Serialize(new
+        var done = JsonSerializer.Serialize(new
         {
             type = "done",
             id = chatId,
-        });
+        }, SseJsonOptions.Default);
         await Response.WriteAsync($"data: {done}\n\n", ct);
         await Response.Body.FlushAsync(ct);
     }

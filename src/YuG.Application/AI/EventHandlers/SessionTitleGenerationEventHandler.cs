@@ -45,15 +45,16 @@ public class SessionTitleGenerationEventHandler : INotificationHandler<SessionTi
 
             var messages = session.Messages.OrderBy(m => m.SequenceNumber).ToList();
             var firstUserMsg = messages.FirstOrDefault(m => m.Role == "user");
-            var firstAssistantMsg = messages.FirstOrDefault(m => m.Role == "assistant");
+            // 取第一条有非空内容的 assistant 消息（跳过 tool_calls 的空内容消息）
+            var firstAssistantMsg = messages.FirstOrDefault(m => m.Role == "assistant" && !string.IsNullOrEmpty(m.Content));
             if (firstUserMsg is null || firstAssistantMsg is null)
                 return;
 
+            // 将对话内容嵌入 system prompt，避免模型把 user/assistant 消息误解为待继续的对话
+            var prompt = $"{_systemPrompt}\n\n用户：{firstUserMsg.Content}\n助手：{firstAssistantMsg.Content}";
             var titleMessages = new List<ChatMessageDto>
             {
-                new("system", _systemPrompt),
-                new("user", firstUserMsg.Content),
-                new("assistant", firstAssistantMsg.Content),
+                new("system", prompt),
             };
 
             var reply = await _chatService.ChatAsync(titleMessages, notification.UserId, cancellationToken);

@@ -56,11 +56,10 @@ public class DeepSeekConfig
 
     /// <summary>
     /// 是否禁用 DeepSeek 思考模式。设为 true 时注入 <c>thinking: {type: disabled}</c>，
-    /// 模型不会返回 <c>reasoning_content</c>（可避免 SK 1.76 不兼容问题）。
-    /// 设为 false 时启用思考模式，由 <c>ReasoningContentHandler</c> 自动处理 reasoning_content 回传。
-    /// 默认 false（启用思考模式）。
+    /// 模型不会返回 <c>reasoning_content</c>，避免 SK 序列化不支持该字段导致的 400 错误。
+    /// 默认 true（禁用思考模式）。
     /// </summary>
-    public bool DisableThinking { get; set; } = false;
+    public bool DisableThinking { get; set; } = true;
 }
 
 /// <summary>Azure OpenAI 配置。</summary>
