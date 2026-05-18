@@ -1,11 +1,7 @@
 using Microsoft.EntityFrameworkCore;
-using YuG.Common.Extensions;
-using YuG.Common.Models;
-using YuG.Domain.Permission.Entities;
-using YuG.Domain.Permission.Enums;
-using YuG.Domain.Permission.Repositories;
 using YuG.Domain.Common;
-using YuG.Infrastructure.Persistence;
+using YuG.Domain.Permission.Entities;
+using YuG.Domain.Permission.Repositories;
 
 namespace YuG.Infrastructure.Persistence.Permission.Repositories;
 
@@ -50,90 +46,6 @@ public class ResourceRepository : Repository<Resource>, IResourceRepository
             .AnyAsync(r => r.Code == code, cancellationToken);
     }
 
-    /// <summary>
-    /// 根据资源类型获取资源列表
-    /// </summary>
-    /// <param name="type">资源类型</param>
-    /// <param name="cancellationToken">取消令牌</param>
-    /// <returns>资源列表</returns>
-    public async Task<IReadOnlyList<Resource>> GetByTypeAsync(ResourceType type, CancellationToken cancellationToken = default)
-    {
-        return await _context.Resources
-            .AsNoTracking()
-            .Where(r => r.Type == type)
-            .OrderBy(r => r.SortOrder)
-            .ToListAsync(cancellationToken);
-    }
-
-    /// <summary>
-    /// 根据权限编码获取按钮资源
-    /// </summary>
-    /// <param name="permissionCode">权限编码</param>
-    /// <param name="cancellationToken">取消令牌</param>
-    /// <returns>资源实体，不存在则返回 null</returns>
-    public async Task<Resource?> GetByPermissionCodeAsync(string permissionCode, CancellationToken cancellationToken = default)
-    {
-        return await _context.Resources
-            .AsNoTracking()
-            .FirstOrDefaultAsync(r => r.PermissionCode == permissionCode, cancellationToken);
-    }
-
-    /// <summary>
-    /// 根据 HTTP 方法获取资源列表
-    /// </summary>
-    /// <param name="httpMethod">HTTP 方法</param>
-    /// <param name="cancellationToken">取消令牌</param>
-    /// <returns>资源列表</returns>
-    public async Task<IReadOnlyList<Resource>> GetByHttpMethodAsync(ResourceHttpMethod httpMethod, CancellationToken cancellationToken = default)
-    {
-        return await _context.Resources
-            .AsNoTracking()
-            .Where(r => r.HttpMethod == httpMethod)
-            .OrderBy(r => r.SortOrder)
-            .ToListAsync(cancellationToken);
-    }
-
-    /// <summary>
-    /// 根据 HTTP 方法获取资源列表
-    /// </summary>
-    /// <param name="httpMethod">HTTP 方法名称（GET/POST/PUT/DELETE）</param>
-    /// <param name="cancellationToken">取消令牌</param>
-    /// <returns>资源列表</returns>
-    public async Task<IReadOnlyList<Resource>> GetByHttpMethodAsync(string httpMethod, CancellationToken cancellationToken = default)
-    {
-        var parsed = Enum.Parse<ResourceHttpMethod>(httpMethod, ignoreCase: true);
-        return await GetByHttpMethodAsync(parsed, cancellationToken);
-    }
-
-    /// <summary>
-    /// 根据父级资源标识获取子资源列表
-    /// </summary>
-    /// <param name="parentId">父级资源标识</param>
-    /// <param name="cancellationToken">取消令牌</param>
-    /// <returns>子资源列表</returns>
-    public async Task<IReadOnlyList<Resource>> GetByParentIdAsync(long parentId, CancellationToken cancellationToken = default)
-    {
-        return await _context.Resources
-            .AsNoTracking()
-            .Where(r => r.ParentId == parentId)
-            .OrderBy(r => r.SortOrder)
-            .ToListAsync(cancellationToken);
-    }
-
-    /// <summary>
-    /// 获取所有激活状态的资源
-    /// </summary>
-    /// <param name="cancellationToken">取消令牌</param>
-    /// <returns>激活的资源列表</returns>
-    public async Task<IReadOnlyList<Resource>> GetActiveAsync(CancellationToken cancellationToken = default)
-    {
-        return await _context.Resources
-            .AsNoTracking()
-            .Where(r => r.Status == ResourceStatus.Active)
-            .OrderBy(r => r.SortOrder)
-            .ToListAsync(cancellationToken);
-    }
-
     /// <inheritdoc />
     public async Task<IReadOnlyList<Resource>> GetByIdsAsync(IEnumerable<long> ids, CancellationToken cancellationToken = default)
     {
@@ -146,24 +58,5 @@ public class ResourceRepository : Repository<Resource>, IResourceRepository
         return await _context.Resources
             .Where(r => idList.Contains(r.Id))
             .ToListAsync(cancellationToken);
-    }
-
-    /// <inheritdoc />
-    public async Task<PageResult<Resource>> GetResourcesPagedAsync(
-        int page, int pageSize,
-        ResourceType? type, ResourceHttpMethod? httpMethod, long? parentId, ResourceStatus? status,
-        CancellationToken cancellationToken = default)
-    {
-        var query = _context.Resources
-            .AsNoTracking()
-            .WhereIf(type.HasValue, r => r.Type == type!.Value)
-            .WhereIf(httpMethod.HasValue, r => r.HttpMethod == httpMethod!.Value)
-            .WhereIf(parentId.HasValue, r => r.ParentId == parentId!.Value)
-            .WhereIf(status.HasValue, r => r.Status == status!.Value);
-
-        return await query
-            .OrderBy(r => r.SortOrder)
-            .ThenBy(r => r.Id)
-            .ToPageResultAsync(page, pageSize, cancellationToken);
     }
 }

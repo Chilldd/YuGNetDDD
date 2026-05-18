@@ -1,10 +1,7 @@
 using Microsoft.EntityFrameworkCore;
-using YuG.Common.Extensions;
-using YuG.Common.Models;
 using YuG.Domain.Common;
 using YuG.Domain.Identity.Entities;
 using YuG.Domain.Identity.Repositories;
-using YuG.Infrastructure.Persistence;
 
 namespace YuG.Infrastructure.Persistence.Identity.Repositories;
 
@@ -30,14 +27,6 @@ public class RoleRepository : Repository<Role>, IRoleRepository
             .AsNoTracking()
             .Where(r => !r.IsSystem)
             .ToListAsync(cancellationToken);
-    }
-
-    /// <inheritdoc />
-    public async Task<Role?> GetByCodeAsync(string code, CancellationToken cancellationToken = default)
-    {
-        return await _context.Set<Role>()
-            .AsNoTracking()
-            .FirstOrDefaultAsync(r => r.Code == code, cancellationToken);
     }
 
     /// <inheritdoc />
@@ -95,15 +84,5 @@ public class RoleRepository : Repository<Role>, IRoleRepository
             .Include(r => r.Resources)
             .Where(r => r.Users.Any(u => u.Id == userId))
             .ToListAsync(cancellationToken);
-    }
-
-    /// <inheritdoc />
-    public async Task<PageResult<Role>> GetRolesPagedAsync(int page, int pageSize, CancellationToken cancellationToken = default)
-    {
-        return await _context.Set<Role>()
-            .AsNoTracking()
-            .Where(r => !r.IsSystem)
-            .OrderBy(r => r.Id)
-            .ToPageResultAsync(page, pageSize, cancellationToken);
     }
 }
