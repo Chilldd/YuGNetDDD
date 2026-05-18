@@ -1,3 +1,8 @@
+---
+paths:
+  - "src/YuG.Infrastructure/**/*.cs"
+---
+
 # Infrastructure 层开发规范
 
 Infrastructure 层负责领域层的持久化实现与外部服务调用，处于最底层，只被 Application 层（及更上层）引用。

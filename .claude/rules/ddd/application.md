@@ -1,3 +1,8 @@
+---
+paths:
+  - "src/YuG.Application/**/*.cs"
+---
+
 # DDD 领域建模核心规范
 
 ## 一、核心设计原则
