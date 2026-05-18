@@ -1,5 +1,6 @@
+using Dapper;
 using MediatR;
-using YuG.Domain.Identity.Repositories;
+using YuG.Application.Common.Interfaces;
 
 namespace YuG.Application.Identity.Role.Queries.Get;
 
@@ -8,15 +9,15 @@ namespace YuG.Application.Identity.Role.Queries.Get;
 /// </summary>
 public class Handler : IRequestHandler<GetRoleQuery, GetRoleResult?>
 {
-    private readonly IRoleRepository _roleRepository;
+    private readonly ISqlConnectionFactory _connectionFactory;
 
     /// <summary>
     /// 初始化获取单个角色查询处理器
     /// </summary>
-    /// <param name="roleRepository">角色仓储</param>
-    public Handler(IRoleRepository roleRepository)
+    /// <param name="connectionFactory">SQL 连接工厂</param>
+    public Handler(ISqlConnectionFactory connectionFactory)
     {
-        _roleRepository = roleRepository;
+        _connectionFactory = connectionFactory;
     }
 
     /// <summary>
@@ -27,23 +28,23 @@ public class Handler : IRequestHandler<GetRoleQuery, GetRoleResult?>
     /// <returns>角色查询结果，不存在则返回 null</returns>
     public async Task<GetRoleResult?> Handle(GetRoleQuery query, CancellationToken cancellationToken)
     {
-        var role = await _roleRepository.GetByIdWithResourcesAsync(query.Id, cancellationToken);
-        if (role is null || role.IsSystem)
-        {
-            return null;
-        }
+        using var conn = _connectionFactory.CreateConnection();
 
-        return new GetRoleResult
-        {
-            Id = role.Id,
-            Name = role.Name,
-            Code = role.Code,
-            Description = role.Description,
-            Status = role.Status.ToString(),
-            IsSystem = role.IsSystem,
-            ResourceIds = role.Resources.Select(r => r.Id).ToList(),
-            CreatedAt = role.CreatedAt,
-            UpdatedAt = role.UpdatedAt
-        };
+        var role = await conn.QueryFirstOrDefaultAsync<GetRoleResult>(
+            """
+            SELECT Id, Name, Code, Description, Status, IsSystem, CreatedAt, UpdatedAt
+            FROM Role
+            WHERE Id = @Id AND IsSystem = 0
+            """,
+            new { query.Id });
+
+        if (role is null)
+            return null;
+
+        var resourceIds = (await conn.QueryAsync<long>(
+            "SELECT ResourceId FROM RoleResource WHERE RoleId = @Id",
+            new { query.Id })).ToList();
+
+        return role with { ResourceIds = resourceIds };
     }
 }

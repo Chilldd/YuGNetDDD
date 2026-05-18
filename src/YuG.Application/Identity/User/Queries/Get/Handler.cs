@@ -1,5 +1,6 @@
+using Dapper;
 using MediatR;
-using YuG.Domain.Identity.Repositories;
+using YuG.Application.Common.Interfaces;
 
 namespace YuG.Application.Identity.User.Queries.Get;
 
@@ -8,15 +9,15 @@ namespace YuG.Application.Identity.User.Queries.Get;
 /// </summary>
 public class Handler : IRequestHandler<GetUserQuery, GetUserResult?>
 {
-    private readonly IUserRepository _userRepository;
+    private readonly ISqlConnectionFactory _connectionFactory;
 
     /// <summary>
     /// 初始化获取单个用户查询处理器
     /// </summary>
-    /// <param name="userRepository">用户仓储</param>
-    public Handler(IUserRepository userRepository)
+    /// <param name="connectionFactory">SQL 连接工厂</param>
+    public Handler(ISqlConnectionFactory connectionFactory)
     {
-        _userRepository = userRepository;
+        _connectionFactory = connectionFactory;
     }
 
     /// <summary>
@@ -27,20 +28,19 @@ public class Handler : IRequestHandler<GetUserQuery, GetUserResult?>
     /// <returns>用户查询结果，不存在则返回 null</returns>
     public async Task<GetUserResult?> Handle(GetUserQuery query, CancellationToken cancellationToken)
     {
-        var user = await _userRepository.GetByIdWithRolesAsync(query.Id, cancellationToken);
-        if (user is null)
-        {
-            return null;
-        }
+        using var conn = _connectionFactory.CreateConnection();
 
-        return new GetUserResult
-        {
-            Id = user.Id,
-            Username = user.Username,
-            Status = user.Status.ToString(),
-            RoleIds = user.Roles.Select(r => r.Id).ToList(),
-            CreatedAt = user.CreatedAt,
-            UpdatedAt = user.UpdatedAt
-        };
+        var user = await conn.QueryFirstOrDefaultAsync<GetUserResult>(
+            "SELECT Id, Username, Status, CreatedAt, UpdatedAt FROM User WHERE Id = @Id",
+            new { query.Id });
+
+        if (user is null)
+            return null;
+
+        var roleIds = (await conn.QueryAsync<long>(
+            "SELECT RolesId FROM UserRole WHERE UsersId = @Id",
+            new { query.Id })).ToList();
+
+        return user with { RoleIds = roleIds };
     }
 }

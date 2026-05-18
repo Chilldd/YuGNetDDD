@@ -1,6 +1,7 @@
+using Dapper;
 using MediatR;
+using YuG.Application.Common.Interfaces;
 using YuG.Common.Models;
-using YuG.Domain.Identity.Repositories;
 
 namespace YuG.Application.Identity.Role.Queries.GetList;
 
@@ -9,39 +10,40 @@ namespace YuG.Application.Identity.Role.Queries.GetList;
 /// </summary>
 public class Handler : IRequestHandler<GetRoleListQuery, PageResult<RoleListItem>>
 {
-    private readonly IRoleRepository _roleRepository;
+    private readonly ISqlConnectionFactory _connectionFactory;
 
     /// <summary>
     /// 初始化获取角色列表查询处理器
     /// </summary>
-    /// <param name="roleRepository">角色仓储</param>
-    public Handler(IRoleRepository roleRepository)
+    /// <param name="connectionFactory">SQL 连接工厂</param>
+    public Handler(ISqlConnectionFactory connectionFactory)
     {
-        _roleRepository = roleRepository;
+        _connectionFactory = connectionFactory;
     }
 
     /// <inheritdoc />
     public async Task<PageResult<RoleListItem>> Handle(GetRoleListQuery query, CancellationToken cancellationToken)
     {
-        var pageResult = await _roleRepository.GetRolesPagedAsync(query.Page, query.PageSize, cancellationToken);
+        using var conn = _connectionFactory.CreateConnection();
 
-        var items = pageResult.Items.Select(r => new RoleListItem
-        {
-            Id = r.Id,
-            Name = r.Name,
-            Code = r.Code,
-            Description = r.Description,
-            Status = r.Status.ToString(),
-            IsSystem = r.IsSystem,
-            CreatedAt = r.CreatedAt,
-        }).ToList();
+        var totalCount = await conn.ExecuteScalarAsync<int>("SELECT COUNT(1) FROM Role");
+
+        var offset = (query.Page - 1) * query.PageSize;
+        var items = await conn.QueryAsync<RoleListItem>(
+            """
+            SELECT Id, Name, Code, Description, Status, IsSystem, CreatedAt
+            FROM Role
+            ORDER BY Id
+            LIMIT @PageSize OFFSET @Offset
+            """,
+            new { query.PageSize, Offset = offset });
 
         return new PageResult<RoleListItem>
         {
-            Items = items,
-            TotalCount = pageResult.TotalCount,
-            Page = pageResult.Page,
-            PageSize = pageResult.PageSize,
+            Items = items.ToList(),
+            TotalCount = totalCount,
+            Page = query.Page,
+            PageSize = query.PageSize,
         };
     }
 }

@@ -1,10 +1,8 @@
+using Dapper;
 using MediatR;
-using YuG.Domain.Identity.Enums;
+using YuG.Application.Common.Interfaces;
 using YuG.Domain.Common.Constants;
-using YuG.Domain.Identity.Repositories;
 using YuG.Domain.Permission.Enums;
-using YuG.Domain.Permission.Repositories;
-using ResourceEntity = YuG.Domain.Permission.Entities.Resource;
 
 namespace YuG.Application.Permission.UserPermission.Queries.GetUserMenu;
 
@@ -13,18 +11,15 @@ namespace YuG.Application.Permission.UserPermission.Queries.GetUserMenu;
 /// </summary>
 public class Handler : IRequestHandler<GetUserMenuQuery, GetUserMenuResult>
 {
-    private readonly IRoleRepository _roleRepository;
-    private readonly IResourceRepository _resourceRepository;
+    private readonly ISqlConnectionFactory _connectionFactory;
 
     /// <summary>
     /// 初始化获取当前用户菜单查询处理器
     /// </summary>
-    /// <param name="roleRepository">角色仓储</param>
-    /// <param name="resourceRepository">资源仓储</param>
-    public Handler(IRoleRepository roleRepository, IResourceRepository resourceRepository)
+    /// <param name="connectionFactory">SQL 连接工厂</param>
+    public Handler(ISqlConnectionFactory connectionFactory)
     {
-        _roleRepository = roleRepository;
-        _resourceRepository = resourceRepository;
+        _connectionFactory = connectionFactory;
     }
 
     /// <summary>
@@ -35,44 +30,49 @@ public class Handler : IRequestHandler<GetUserMenuQuery, GetUserMenuResult>
     /// <returns>用户菜单结果</returns>
     public async Task<GetUserMenuResult> Handle(GetUserMenuQuery query, CancellationToken cancellationToken)
     {
-        var roles = await _roleRepository.GetByUserIdWithResourcesAsync(query.UserId, cancellationToken);
+        using var conn = _connectionFactory.CreateConnection();
+
+        // 查询用户的所有角色
+        var roles = (await conn.QueryAsync<RoleInfo>(
+            "SELECT Id, Code, Status FROM Role r INNER JOIN UserRole ur ON r.Id = ur.RolesId WHERE ur.UsersId = @UserId",
+            new { query.UserId })).ToList();
 
         // 超级管理员角色拥有所有资源权限
         var isSuperAdmin = roles.Any(r => r.Code == RoleCodes.SuperAdmin);
 
-        IReadOnlyCollection<ResourceEntity> resources;
+        IReadOnlyCollection<MenuResourceInfo> resources;
         if (isSuperAdmin)
         {
-            resources = await _resourceRepository.GetActiveAsync(cancellationToken);
+            resources = (await conn.QueryAsync<MenuResourceInfo>(
+                """
+                SELECT Id, Name, Code, Icon, Route, IsHidden, Badge, SortOrder, PermissionCode, Type, ParentId
+                FROM Resource
+                WHERE Status = 'Active' AND (Type = 'Menu' OR Type = 'Page')
+                """)).ToList();
         }
         else
         {
-            // 收集用户所有角色下的激活资源
-            var resourceIds = new HashSet<long>();
-            var resourceList = new List<ResourceEntity>();
+            var activeRoleIds = roles.Where(r => r.Status == "Active").Select(r => r.Id).ToList();
 
-            foreach (var role in roles.Where(r => r.Status == RoleStatus.Active))
+            if (activeRoleIds.Count == 0)
             {
-                foreach (var resource in role.Resources.Where(r => r.Status == ResourceStatus.Active))
-                {
-                    if (resourceIds.Add(resource.Id))
-                    {
-                        resourceList.Add(resource);
-                    }
-                }
+                return new GetUserMenuResult();
             }
 
-            resources = resourceList;
+            resources = (await conn.QueryAsync<MenuResourceInfo>(
+                """
+                SELECT DISTINCT r.Id, r.Name, r.Code, r.Icon, r.Route, r.IsHidden, r.Badge,
+                       r.SortOrder, r.PermissionCode, r.Type, r.ParentId
+                FROM Resource r
+                INNER JOIN RoleResource rr ON r.Id = rr.ResourcesId
+                WHERE rr.RoleId IN @RoleIds AND r.Status = 'Active' AND (r.Type = 'Menu' OR r.Type = 'Page')
+                """,
+                new { RoleIds = activeRoleIds })).ToList();
         }
 
         // 筛选 Menu 和 Page 类型的资源
-        var menuResources = resources
-            .Where(r => r.Type == ResourceType.Menu)
-            .ToList();
-
-        var pageResources = resources
-            .Where(r => r.Type == ResourceType.Page)
-            .ToList();
+        var menuResources = resources.Where(r => r.Type == nameof(ResourceType.Menu)).ToList();
+        var pageResources = resources.Where(r => r.Type == nameof(ResourceType.Page)).ToList();
 
         // 构建 Menu -> Page 树
         var menuItems = menuResources.Select(m => new UserMenuTreeItem
@@ -127,7 +127,7 @@ public class Handler : IRequestHandler<GetUserMenuQuery, GetUserMenuResult>
     /// <summary>
     /// 构建菜单子页面列表
     /// </summary>
-    private static List<UserMenuTreeItem> BuildPageChildren(long parentId, List<ResourceEntity> pages)
+    private static List<UserMenuTreeItem> BuildPageChildren(long parentId, List<MenuResourceInfo> pages)
     {
         return pages
             .Where(p => p.ParentId == parentId)
@@ -143,4 +143,11 @@ public class Handler : IRequestHandler<GetUserMenuQuery, GetUserMenuResult>
             })
             .ToList();
     }
+
+    private sealed record RoleInfo(long Id, string Code, string Status);
+
+    private sealed record MenuResourceInfo(
+        long Id, string Name, string Code, string? Icon, string? Route,
+        bool IsHidden, string? Badge, int SortOrder, string? PermissionCode,
+        string Type, long? ParentId);
 }

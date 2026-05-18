@@ -1,61 +1,81 @@
+using Dapper;
 using MediatR;
+using YuG.Application.Common.Interfaces;
 using YuG.Common.Models;
-using YuG.Domain.Permission.Enums;
-using YuG.Domain.Permission.Repositories;
 
 namespace YuG.Application.Permission.Resource.Queries.GetList;
 
 /// <summary>获取资源列表查询处理器。</summary>
 public class Handler : IRequestHandler<GetResourceListQuery, PageResult<ResourceListItem>>
 {
-    private readonly IResourceRepository _resourceRepository;
+    private readonly ISqlConnectionFactory _connectionFactory;
 
     /// <summary>初始化处理器。</summary>
-    /// <param name="resourceRepository">资源仓储</param>
-    public Handler(IResourceRepository resourceRepository)
+    /// <param name="connectionFactory">SQL 连接工厂</param>
+    public Handler(ISqlConnectionFactory connectionFactory)
     {
-        _resourceRepository = resourceRepository;
+        _connectionFactory = connectionFactory;
     }
 
     /// <inheritdoc />
     public async Task<PageResult<ResourceListItem>> Handle(GetResourceListQuery query, CancellationToken cancellationToken)
     {
-        ResourceType? type = !string.IsNullOrEmpty(query.Type)
-            ? Enum.Parse<ResourceType>(query.Type, ignoreCase: true)
-            : null;
+        using var conn = _connectionFactory.CreateConnection();
 
-        ResourceHttpMethod? httpMethod = !string.IsNullOrEmpty(query.HttpMethod)
-            ? Enum.Parse<ResourceHttpMethod>(query.HttpMethod, ignoreCase: true)
-            : null;
+        var whereClauses = new List<string>();
+        var parameters = new DynamicParameters();
 
-        var pageResult = await _resourceRepository.GetResourcesPagedAsync(
-            query.Page, query.PageSize, type, httpMethod, query.ParentId, query.Status, cancellationToken);
-
-        var items = pageResult.Items.Select(r => new ResourceListItem
+        if (!string.IsNullOrEmpty(query.Type))
         {
-            Id = r.Id,
-            Name = r.Name,
-            Code = r.Code,
-            Description = r.Description,
-            Type = r.Type.ToString(),
-            HttpMethod = r.HttpMethod!.ToString(),
-            Path = r.Path,
-            Icon = r.Icon,
-            Route = r.Route,
-            IsHidden = r.IsHidden,
-            Badge = r.Badge,
-            PermissionCode = r.PermissionCode,
-            ParentId = r.ParentId,
-            SortOrder = r.SortOrder,
-            Status = r.Status.ToString(),
-        }).ToList();
+            whereClauses.Add("Type = @Type");
+            parameters.Add("Type", query.Type);
+        }
+
+        if (!string.IsNullOrEmpty(query.HttpMethod))
+        {
+            whereClauses.Add("HttpMethod = @HttpMethod");
+            parameters.Add("HttpMethod", query.HttpMethod.ToUpperInvariant());
+        }
+
+        if (query.ParentId.HasValue)
+        {
+            whereClauses.Add("ParentId = @ParentId");
+            parameters.Add("ParentId", query.ParentId.Value);
+        }
+
+        if (query.Status.HasValue)
+        {
+            whereClauses.Add("Status = @Status");
+            parameters.Add("Status", query.Status.Value.ToString());
+        }
+
+        var whereSql = whereClauses.Count > 0 ? "WHERE " + string.Join(" AND ", whereClauses) : "";
+
+        var totalCount = await conn.ExecuteScalarAsync<int>(
+            $"SELECT COUNT(1) FROM Resource {whereSql}", parameters);
+
+        var offset = (query.Page - 1) * query.PageSize;
+        parameters.Add("PageSize", query.PageSize);
+        parameters.Add("Offset", offset);
+
+        var items = await conn.QueryAsync<ResourceListItem>(
+            $"""
+            SELECT Id, Name, Code, Description, Type, HttpMethod, Path,
+                   Icon, Route, IsHidden, Badge, PermissionCode,
+                   ParentId, SortOrder, Status
+            FROM Resource
+            {whereSql}
+            ORDER BY SortOrder, Id
+            LIMIT @PageSize OFFSET @Offset
+            """,
+            parameters);
 
         return new PageResult<ResourceListItem>
         {
-            Items = items,
-            TotalCount = pageResult.TotalCount,
-            Page = pageResult.Page,
-            PageSize = pageResult.PageSize,
+            Items = items.ToList(),
+            TotalCount = totalCount,
+            Page = query.Page,
+            PageSize = query.PageSize,
         };
     }
 }

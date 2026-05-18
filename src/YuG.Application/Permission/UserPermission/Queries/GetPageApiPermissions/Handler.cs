@@ -1,10 +1,8 @@
+using Dapper;
 using MediatR;
-using YuG.Domain.Identity.Enums;
+using YuG.Application.Common.Interfaces;
 using YuG.Domain.Common.Constants;
-using YuG.Domain.Identity.Repositories;
 using YuG.Domain.Permission.Enums;
-using YuG.Domain.Permission.Repositories;
-using ResourceEntity = YuG.Domain.Permission.Entities.Resource;
 
 namespace YuG.Application.Permission.UserPermission.Queries.GetPageApiPermissions;
 
@@ -13,18 +11,15 @@ namespace YuG.Application.Permission.UserPermission.Queries.GetPageApiPermission
 /// </summary>
 public class Handler : IRequestHandler<GetPageApiPermissionsQuery, GetPageApiPermissionsResult>
 {
-    private readonly IRoleRepository _roleRepository;
-    private readonly IResourceRepository _resourceRepository;
+    private readonly ISqlConnectionFactory _connectionFactory;
 
     /// <summary>
     /// 初始化获取页面 API 权限查询处理器
     /// </summary>
-    /// <param name="roleRepository">角色仓储</param>
-    /// <param name="resourceRepository">资源仓储</param>
-    public Handler(IRoleRepository roleRepository, IResourceRepository resourceRepository)
+    /// <param name="connectionFactory">SQL 连接工厂</param>
+    public Handler(ISqlConnectionFactory connectionFactory)
     {
-        _roleRepository = roleRepository;
-        _resourceRepository = resourceRepository;
+        _connectionFactory = connectionFactory;
     }
 
     /// <summary>
@@ -35,40 +30,44 @@ public class Handler : IRequestHandler<GetPageApiPermissionsQuery, GetPageApiPer
     /// <returns>页面 API 权限结果</returns>
     public async Task<GetPageApiPermissionsResult> Handle(GetPageApiPermissionsQuery query, CancellationToken cancellationToken)
     {
-        var roles = await _roleRepository.GetByUserIdWithResourcesAsync(query.UserId, cancellationToken);
+        using var conn = _connectionFactory.CreateConnection();
+
+        // 查询用户的所有角色
+        var roles = (await conn.QueryAsync<RoleInfo>(
+            "SELECT Id, Code, Status FROM Role r INNER JOIN UserRole ur ON r.Id = ur.RolesId WHERE ur.UsersId = @UserId",
+            new { query.UserId })).ToList();
 
         // 超级管理员角色拥有所有资源权限
         var isSuperAdmin = roles.Any(r => r.Code == RoleCodes.SuperAdmin);
 
-        IEnumerable<ResourceEntity> resources;
+        IEnumerable<ResourceInfo> resources;
         if (isSuperAdmin)
         {
-            resources = await _resourceRepository.GetActiveAsync(cancellationToken);
+            resources = await conn.QueryAsync<ResourceInfo>(
+                "SELECT Id, Type, ParentId, PermissionCode FROM Resource WHERE Status = 'Active'");
         }
         else
         {
-            // 收集用户所有角色下的激活资源
-            var resourceIds = new HashSet<long>();
-            var resourceList = new List<ResourceEntity>();
+            var activeRoleIds = roles.Where(r => r.Status == "Active").Select(r => r.Id).ToList();
 
-            foreach (var role in roles.Where(r => r.Status == RoleStatus.Active))
+            if (activeRoleIds.Count == 0)
             {
-                foreach (var resource in role.Resources.Where(r =>
-                    r.Status == ResourceStatus.Active))
-                {
-                    if (resourceIds.Add(resource.Id))
-                    {
-                        resourceList.Add(resource);
-                    }
-                }
+                return new GetPageApiPermissionsResult();
             }
 
-            resources = resourceList;
+            resources = await conn.QueryAsync<ResourceInfo>(
+                """
+                SELECT DISTINCT r.Id, r.Type, r.ParentId, r.PermissionCode
+                FROM Resource r
+                INNER JOIN RoleResource rr ON r.Id = rr.ResourcesId
+                WHERE rr.RoleId IN @RoleIds AND r.Status = 'Active'
+                """,
+                new { RoleIds = activeRoleIds });
         }
 
         // 筛选指定页面的 API 权限编码
         var permissionCodes = resources
-            .Where(r => r.Type == ResourceType.Api
+            .Where(r => r.Type == nameof(ResourceType.Api)
                 && r.ParentId == query.PageId
                 && !string.IsNullOrEmpty(r.PermissionCode))
             .Select(r => r.PermissionCode!)
@@ -80,4 +79,8 @@ public class Handler : IRequestHandler<GetPageApiPermissionsQuery, GetPageApiPer
             PermissionCodes = permissionCodes
         };
     }
+
+    private sealed record RoleInfo(long Id, string Code, string Status);
+
+    private sealed record ResourceInfo(long Id, string Type, long? ParentId, string? PermissionCode);
 }

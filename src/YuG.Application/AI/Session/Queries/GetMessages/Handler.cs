@@ -1,60 +1,64 @@
+using Dapper;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 using YuG.Application.Common.Exceptions;
 using YuG.Application.Common.Interfaces;
 using YuG.Common.Models;
-using YuG.Domain.AI.Entities;
-using YuG.Domain.AI.Repositories;
 
 namespace YuG.Application.AI.Session.Queries.GetMessages;
 
 /// <summary>获取会话消息历史查询处理器。</summary>
 public class Handler : IRequestHandler<GetSessionMessagesQuery, PageResult<MessageItem>>
 {
-    private readonly IAiChatSessionRepository _sessionRepository;
+    private readonly ISqlConnectionFactory _connectionFactory;
     private readonly IUserIdentity _userIdentity;
 
     /// <summary>初始化处理器。</summary>
-    /// <param name="sessionRepository">会话仓储</param>
+    /// <param name="connectionFactory">SQL 连接工厂</param>
     /// <param name="userIdentity">当前用户身份</param>
     public Handler(
-        IAiChatSessionRepository sessionRepository,
+        ISqlConnectionFactory connectionFactory,
         IUserIdentity userIdentity)
     {
-        _sessionRepository = sessionRepository;
+        _connectionFactory = connectionFactory;
         _userIdentity = userIdentity;
     }
 
     /// <inheritdoc />
     public async Task<PageResult<MessageItem>> Handle(GetSessionMessagesQuery request, CancellationToken cancellationToken)
     {
-        var userId = _userIdentity.UserId;
+        using var conn = _connectionFactory.CreateConnection();
 
-        var sessionExists = await _sessionRepository.GetQueryable()
-            .AnyAsync(s => s.SessionId == request.SessionId && s.UserId == userId, cancellationToken);
+        // 检查会话是否存在且属于当前用户
+        var sessionPkId = await conn.QueryFirstOrDefaultAsync<long?>(
+            "SELECT Id FROM AiChatSession WHERE SessionId = @SessionId AND UserId = @UserId",
+            new { request.SessionId, UserId = _userIdentity.UserId });
 
-        if (!sessionExists)
-            throw new NotFoundException(nameof(AiChatSession), request.SessionId);
+        if (sessionPkId is null)
+            throw new NotFoundException(nameof(Domain.AI.Entities.AiChatSession), request.SessionId);
 
-        var pageResult = await _sessionRepository.GetMessagesPagedAsync(
-            request.SessionId, request.Page, request.PageSize, cancellationToken);
+        // 查询总数
+        var totalCount = await conn.ExecuteScalarAsync<int>(
+            "SELECT COUNT(1) FROM AiChatMessage WHERE AiChatSessionId = @SessionPkId",
+            new { SessionPkId = sessionPkId.Value });
 
-        var items = pageResult.Items.Select(m => new MessageItem
-            {
-                Role = m.Role,
-                Content = m.Content,
-                SequenceNumber = m.SequenceNumber,
-                TokenCount = m.TokenCount,
-                CreatedAt = m.CreatedAt,
-            })
-            .ToList();
+        // 分页查询消息（倒序，Page 1 为最新）
+        var offset = (request.Page - 1) * request.PageSize;
+        var items = await conn.QueryAsync<MessageItem>(
+            """
+            SELECT Role, Content, SequenceNumber, TokenCount, CreatedAt
+            FROM AiChatMessage
+            WHERE AiChatSessionId = @SessionPkId
+            ORDER BY Id DESC
+            LIMIT @PageSize OFFSET @Offset
+            """,
+            new { SessionPkId = sessionPkId.Value, request.PageSize, Offset = offset });
 
         return new PageResult<MessageItem>
         {
-            Items = items,
-            TotalCount = pageResult.TotalCount,
-            Page = pageResult.Page,
-            PageSize = pageResult.PageSize,
+            Items = items.ToList(),
+            TotalCount = totalCount,
+            Page = request.Page,
+            PageSize = request.PageSize,
         };
     }
 }

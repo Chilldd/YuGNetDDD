@@ -1,6 +1,7 @@
+using Dapper;
 using MediatR;
+using YuG.Application.Common.Interfaces;
 using YuG.Common.Models;
-using YuG.Domain.Identity.Repositories;
 
 namespace YuG.Application.Identity.User.Queries.GetList;
 
@@ -9,36 +10,40 @@ namespace YuG.Application.Identity.User.Queries.GetList;
 /// </summary>
 public class Handler : IRequestHandler<GetUserListQuery, PageResult<UserListItem>>
 {
-    private readonly IUserRepository _userRepository;
+    private readonly ISqlConnectionFactory _connectionFactory;
 
     /// <summary>
     /// 初始化获取用户列表查询处理器
     /// </summary>
-    /// <param name="userRepository">用户仓储</param>
-    public Handler(IUserRepository userRepository)
+    /// <param name="connectionFactory">SQL 连接工厂</param>
+    public Handler(ISqlConnectionFactory connectionFactory)
     {
-        _userRepository = userRepository;
+        _connectionFactory = connectionFactory;
     }
 
     /// <inheritdoc />
     public async Task<PageResult<UserListItem>> Handle(GetUserListQuery query, CancellationToken cancellationToken)
     {
-        var pageResult = await _userRepository.GetUsersPagedAsync(query.Page, query.PageSize, cancellationToken);
+        using var conn = _connectionFactory.CreateConnection();
 
-        var items = pageResult.Items.Select(u => new UserListItem
-        {
-            Id = u.Id,
-            Username = u.Username,
-            Status = u.Status.ToString(),
-            CreatedAt = u.CreatedAt,
-        }).ToList();
+        var totalCount = await conn.ExecuteScalarAsync<int>("SELECT COUNT(1) FROM User");
+
+        var offset = (query.Page - 1) * query.PageSize;
+        var items = await conn.QueryAsync<UserListItem>(
+            """
+            SELECT Id, Username, Status, CreatedAt
+            FROM User
+            ORDER BY Id
+            LIMIT @PageSize OFFSET @Offset
+            """,
+            new { query.PageSize, Offset = offset });
 
         return new PageResult<UserListItem>
         {
-            Items = items,
-            TotalCount = pageResult.TotalCount,
-            Page = pageResult.Page,
-            PageSize = pageResult.PageSize,
+            Items = items.ToList(),
+            TotalCount = totalCount,
+            Page = query.Page,
+            PageSize = query.PageSize,
         };
     }
 }

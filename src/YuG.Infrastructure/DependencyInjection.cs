@@ -71,6 +71,13 @@ public static class DependencyInjection
         // 注册健康检查服务
         services.AddScoped<IHealthCheckService, HealthCheckService>();
 
+        // 注册 SQL 查询连接工厂
+        services.AddScoped<ISqlConnectionFactory>(sp =>
+        {
+            var tenantProvider = sp.GetRequiredService<HttpTenantProvider>();
+            return new SqlConnectionFactory(tenantProvider);
+        });
+
         // 注册 AI 聊天服务
         services.AddScoped<IChatService, ChatService>();
 

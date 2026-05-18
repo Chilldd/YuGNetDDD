@@ -1,5 +1,6 @@
+using Dapper;
 using MediatR;
-using YuG.Domain.Permission.Repositories;
+using YuG.Application.Common.Interfaces;
 
 namespace YuG.Application.Permission.Resource.Queries.Get;
 
@@ -8,15 +9,15 @@ namespace YuG.Application.Permission.Resource.Queries.Get;
 /// </summary>
 public class Handler : IRequestHandler<GetResourceQuery, GetResourceResult?>
 {
-    private readonly IResourceRepository _resourceRepository;
+    private readonly ISqlConnectionFactory _connectionFactory;
 
     /// <summary>
     /// 初始化获取资源查询处理器
     /// </summary>
-    /// <param name="resourceRepository">资源仓储</param>
-    public Handler(IResourceRepository resourceRepository)
+    /// <param name="connectionFactory">SQL 连接工厂</param>
+    public Handler(ISqlConnectionFactory connectionFactory)
     {
-        _resourceRepository = resourceRepository;
+        _connectionFactory = connectionFactory;
     }
 
     /// <summary>
@@ -27,31 +28,16 @@ public class Handler : IRequestHandler<GetResourceQuery, GetResourceResult?>
     /// <returns>资源结果</returns>
     public async Task<GetResourceResult?> Handle(GetResourceQuery query, CancellationToken cancellationToken)
     {
-        var resource = await _resourceRepository.GetByIdAsync(query.Id, cancellationToken);
-        if (resource == null)
-        {
-            return null;
-        }
+        using var conn = _connectionFactory.CreateConnection();
 
-        return new GetResourceResult
-        {
-            Id = resource.Id,
-            Name = resource.Name,
-            Code = resource.Code,
-            Description = resource.Description,
-            Type = resource.Type.ToString(),
-            HttpMethod = resource.HttpMethod?.ToString(),
-            Path = resource.Path,
-            Icon = resource.Icon,
-            Route = resource.Route,
-            IsHidden = resource.IsHidden,
-            Badge = resource.Badge,
-            PermissionCode = resource.PermissionCode,
-            ParentId = resource.ParentId,
-            SortOrder = resource.SortOrder,
-            Status = resource.Status.ToString(),
-            CreatedAt = resource.CreatedAt,
-            UpdatedAt = resource.UpdatedAt
-        };
+        return await conn.QueryFirstOrDefaultAsync<GetResourceResult>(
+            """
+            SELECT Id, Name, Code, Description, Type, HttpMethod, Path,
+                   Icon, Route, IsHidden, Badge, PermissionCode,
+                   ParentId, SortOrder, Status, CreatedAt, UpdatedAt
+            FROM Resource
+            WHERE Id = @Id
+            """,
+            new { query.Id });
     }
 }

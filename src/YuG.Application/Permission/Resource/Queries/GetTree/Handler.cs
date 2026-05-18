@@ -1,6 +1,7 @@
+using Dapper;
 using MediatR;
+using YuG.Application.Common.Interfaces;
 using YuG.Domain.Permission.Enums;
-using YuG.Domain.Permission.Repositories;
 
 namespace YuG.Application.Permission.Resource.Queries.GetTree;
 
@@ -9,15 +10,15 @@ namespace YuG.Application.Permission.Resource.Queries.GetTree;
 /// </summary>
 public class Handler : IRequestHandler<GetResourceTreeQuery, GetResourceTreeResult>
 {
-    private readonly IResourceRepository _resourceRepository;
+    private readonly ISqlConnectionFactory _connectionFactory;
 
     /// <summary>
     /// 初始化获取资源树查询处理器
     /// </summary>
-    /// <param name="resourceRepository">资源仓储</param>
-    public Handler(IResourceRepository resourceRepository)
+    /// <param name="connectionFactory">SQL 连接工厂</param>
+    public Handler(ISqlConnectionFactory connectionFactory)
     {
-        _resourceRepository = resourceRepository;
+        _connectionFactory = connectionFactory;
     }
 
     /// <summary>
@@ -28,7 +29,15 @@ public class Handler : IRequestHandler<GetResourceTreeQuery, GetResourceTreeResu
     /// <returns>资源树结果</returns>
     public async Task<GetResourceTreeResult> Handle(GetResourceTreeQuery query, CancellationToken cancellationToken)
     {
-        var resources = await _resourceRepository.GetAllAsync(cancellationToken);
+        using var conn = _connectionFactory.CreateConnection();
+
+        var resources = await conn.QueryAsync<ResourceTreeItem>(
+            """
+            SELECT Id, Name, Code, Description, Type, HttpMethod, Path,
+                   Icon, Route, IsHidden, Badge, PermissionCode,
+                   ParentId, SortOrder, Status
+            FROM Resource
+            """);
 
         // 应用筛选
         ResourceType? filterType = null;
@@ -37,12 +46,12 @@ public class Handler : IRequestHandler<GetResourceTreeQuery, GetResourceTreeResu
         if (!string.IsNullOrEmpty(query.Type))
         {
             filterType = Enum.Parse<ResourceType>(query.Type, ignoreCase: true);
-            filtered = filtered.Where(r => r.Type == filterType.Value);
+            filtered = filtered.Where(r => r.Type == filterType.Value.ToString());
         }
 
         if (query.Status.HasValue)
         {
-            filtered = filtered.Where(r => r.Status == query.Status.Value);
+            filtered = filtered.Where(r => r.Status == query.Status.Value.ToString());
         }
 
         var list = filtered.ToList();
@@ -71,27 +80,8 @@ public class Handler : IRequestHandler<GetResourceTreeQuery, GetResourceTreeResu
             }
         }
 
-        var treeItems = list.Select(r => new ResourceTreeItem
-        {
-            Id = r.Id,
-            Name = r.Name,
-            Code = r.Code,
-            Description = r.Description,
-            Type = r.Type.ToString(),
-            HttpMethod = r.HttpMethod?.ToString(),
-            Path = r.Path,
-            Icon = r.Icon,
-            Route = r.Route,
-            IsHidden = r.IsHidden,
-            Badge = r.Badge,
-            PermissionCode = r.PermissionCode,
-            ParentId = r.ParentId,
-            SortOrder = r.SortOrder,
-            Status = r.Status.ToString()
-        }).ToList();
-
         // 构建完整树形结构
-        var allRoots = BuildTree(treeItems, null);
+        var allRoots = BuildTree(list, null);
 
         // 分离顶层节点（Menu 和 Page）和孤立 Api（无父级的 Api 类型）
         var topLevelItems = allRoots.Where(x => x.Type != nameof(ResourceType.Api))
@@ -125,9 +115,6 @@ public class Handler : IRequestHandler<GetResourceTreeQuery, GetResourceTreeResu
     /// <summary>
     /// 递归构建资源树
     /// </summary>
-    /// <param name="allItems">所有资源节点</param>
-    /// <param name="parentId">父级标识</param>
-    /// <returns>子树节点列表</returns>
     private static List<ResourceTreeItem> BuildTree(List<ResourceTreeItem> allItems, long? parentId)
     {
         return allItems
