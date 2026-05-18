@@ -3,7 +3,7 @@ namespace YuG.Application.AI.Chat.DTOs;
 /// <summary>流式聊天响应的增量数据。</summary>
 public record ChatStreamDeltaResult
 {
-    /// <summary>增量类型："delta"、"usage"、"tool_call"、"tool_result"。</summary>
+    /// <summary>增量类型："delta"、"usage"、"tool_call"、"tool_result"、"done"。</summary>
     public string Type { get; init; } = "delta";
 
     /// <summary>增量文本内容。</summary>
@@ -17,6 +17,9 @@ public record ChatStreamDeltaResult
 
     /// <summary>工具调用结果（仅 Type 为 "tool_result" 时有效）。</summary>
     public ToolCallResultDeltaResult? ToolResult { get; init; }
+
+    /// <summary>会话 ID（仅 Type 为 "done" 时有效，服务端创建新会话后回传）。</summary>
+    public string? SessionId { get; init; }
 }
 
 /// <summary>工具调用事件 DTO。</summary>

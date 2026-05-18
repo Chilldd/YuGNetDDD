@@ -85,6 +85,9 @@ public class StreamChatCommandHandler : IRequestHandler<StreamChatCommand, IAsyn
             yield return delta;
         }
 
+        // 流完成后回传 sessionId
+        yield return new ChatStreamDeltaResult { Type = "done", SessionId = session.SessionId };
+
         // 流结束后保存消息（含工具调用）
         if (fullReply.Length > 0 || toolCallsList.Count > 0)
         {
