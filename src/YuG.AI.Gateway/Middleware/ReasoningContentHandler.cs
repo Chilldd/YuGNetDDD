@@ -12,9 +12,14 @@ namespace YuG.AI.Gateway.Middleware;
 /// </summary>
 internal sealed class ReasoningContentHandler : DelegatingHandler
 {
-    private static readonly ConcurrentDictionary<string, string> ReasoningCache = new();
+    private static readonly ConcurrentDictionary<string, CacheEntry> ReasoningCache = new();
     private static readonly JsonWriterOptions JsonWriterOptions = new() { Indented = false };
     private static readonly MediaTypeHeaderValue JsonMediaType = new("application/json") { CharSet = Encoding.UTF8.WebName };
+
+    private static readonly TimeSpan CacheTtl = TimeSpan.FromMinutes(2);
+
+    /// <summary>缓存条目，带时间戳用于过期清理。</summary>
+    private sealed record CacheEntry(string Content, DateTime CreatedAt);
 
     /// <inheritdoc />
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
@@ -38,12 +43,7 @@ internal sealed class ReasoningContentHandler : DelegatingHandler
         if (response.Content?.Headers.ContentType?.MediaType == "application/json")
         {
             var body = await response.Content.ReadAsStringAsync(cancellationToken);
-            var extracted = ExtractAndCacheReasoningContent(body);
-            if (extracted != body)
-            {
-                response.Content = new ByteArrayContent(Encoding.UTF8.GetBytes(extracted));
-                response.Content.Headers.ContentType = JsonMediaType;
-            }
+            ExtractAndCacheReasoningContent(body);
         }
 
         return response;
@@ -101,15 +101,30 @@ internal sealed class ReasoningContentHandler : DelegatingHandler
 
     private static string? FindCachedReasoning(JsonElement toolCalls)
     {
+        var now = DateTime.UtcNow;
+
         foreach (var tc in toolCalls.EnumerateArray())
         {
-            if (tc.TryGetProperty("id", out var idProp))
+            if (!tc.TryGetProperty("id", out var idProp))
+                continue;
+
+            var callId = idProp.GetString();
+            if (callId is null)
+                continue;
+
+            if (ReasoningCache.TryGetValue(callId, out var entry))
             {
-                var callId = idProp.GetString();
-                if (callId is not null && ReasoningCache.TryGetValue(callId, out var cached))
-                    return cached;
+                // 过期条目视为未命中，触发后续按需清理
+                if (now - entry.CreatedAt > CacheTtl)
+                {
+                    TryCleanupOne(callId);
+                    continue;
+                }
+
+                return entry.Content;
             }
         }
+
         return null;
     }
 
@@ -127,14 +142,17 @@ internal sealed class ReasoningContentHandler : DelegatingHandler
 
     /// <summary>
     /// 从响应中提取 assistant 消息的 <c>reasoning_content</c>，按 <c>tool_call.id</c> 缓存。
-    /// 返回修改后的 JSON（原样，此阶段无修改），但用于清理已消费的缓存项。
+    /// 写入新条目时顺便清扫过期数据。
     /// </summary>
-    private static string ExtractAndCacheReasoningContent(string jsonBody)
+    private static void ExtractAndCacheReasoningContent(string jsonBody)
     {
         using var doc = JsonDocument.Parse(jsonBody);
 
         if (!doc.RootElement.TryGetProperty("choices", out var choices))
-            return jsonBody;
+            return;
+
+        var now = DateTime.UtcNow;
+        var cachedCount = 0;
 
         foreach (var choice in choices.EnumerateArray())
         {
@@ -151,7 +169,6 @@ internal sealed class ReasoningContentHandler : DelegatingHandler
             if (!msg.TryGetProperty("tool_calls", out var toolCalls))
                 continue;
 
-            // 按每个 tool_call.id 缓存 reasoning_content
             foreach (var tc in toolCalls.EnumerateArray())
             {
                 if (tc.TryGetProperty("id", out var idProp))
@@ -159,12 +176,39 @@ internal sealed class ReasoningContentHandler : DelegatingHandler
                     var callId = idProp.GetString();
                     if (!string.IsNullOrEmpty(callId))
                     {
-                        ReasoningCache[callId] = reasoningContent;
+                        ReasoningCache[callId] = new CacheEntry(reasoningContent, now);
+                        cachedCount++;
                     }
                 }
             }
         }
 
-        return jsonBody;
+        // 写入新条目后按需触发批量清扫
+        if (cachedCount > 0)
+        {
+            SweepExpired();
+        }
+    }
+
+    /// <summary>尝试移除单个过期条目。</summary>
+    private static void TryCleanupOne(string key)
+    {
+        if (ReasoningCache.TryGetValue(key, out var entry) && DateTime.UtcNow - entry.CreatedAt > CacheTtl)
+        {
+            ReasoningCache.TryRemove(key, out _);
+        }
+    }
+
+    /// <summary>批量移除所有过期条目（每次写入后触发，平摊清扫成本）。</summary>
+    private static void SweepExpired()
+    {
+        var now = DateTime.UtcNow;
+        foreach (var kvp in ReasoningCache)
+        {
+            if (now - kvp.Value.CreatedAt > CacheTtl)
+            {
+                ReasoningCache.TryRemove(kvp.Key, out _);
+            }
+        }
     }
 }
