@@ -1,6 +1,7 @@
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using YuG.Api.Filters;
 using YuG.Api.Helpers;
 using YuG.Application.Monitoring.Status.Queries.GetHealth;
 using YuG.Application.Monitoring.Status.Queries.GetReady;
@@ -49,6 +50,7 @@ public class StatusController : ControllerBase
     /// <response code="503">服务不健康</response>
     [HttpGet("health")]
     [AllowAnonymous]
+    [IgnoreApiResponse]
     [ApiDescription("健康检查")]
     [ProducesResponseType(typeof(GetHealthResult), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status503ServiceUnavailable)]
@@ -66,6 +68,7 @@ public class StatusController : ControllerBase
     /// <response code="503">服务未就绪</response>
     [HttpGet("ready")]
     [AllowAnonymous]
+    [IgnoreApiResponse]
     [ApiDescription("就绪检查")]
     [ProducesResponseType(typeof(GetReadyResult), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status503ServiceUnavailable)]

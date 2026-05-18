@@ -40,7 +40,10 @@ builder.Services.AddScoped<HttpTenantProvider>();
 builder.Services.AddApiTools();
 
 // 注册控制器服务（配置 JSON 序列化，解决雪花 ID 精度丢失）
-builder.Services.AddControllers()
+builder.Services.AddControllers(options =>
+    {
+        options.Filters.Add<YuG.Api.Filters.ApiResponseFilter>();
+    })
     .AddJsonOptions(options =>
     {
         options.JsonSerializerOptions.Converters.Add(new YuG.Common.Json.LongToStringConverterFactory());

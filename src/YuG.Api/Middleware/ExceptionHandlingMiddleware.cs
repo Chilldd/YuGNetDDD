@@ -1,7 +1,10 @@
 using System.Net;
 using System.Text.Json;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using Refit;
 using YuG.Application.Common.Exceptions;
+using YuG.Common.Models;
 using YuG.Domain.Common;
 
 namespace YuG.Api.Middleware;
@@ -13,16 +16,22 @@ public class ExceptionHandlingMiddleware
 {
     private readonly ILogger<ExceptionHandlingMiddleware> _logger;
     private readonly RequestDelegate _next;
+    private readonly JsonSerializerOptions _jsonOptions;
 
     /// <summary>
     /// 初始化异常处理中间件
     /// </summary>
     /// <param name="next">下一个中间件</param>
     /// <param name="logger">日志记录器</param>
-    public ExceptionHandlingMiddleware(RequestDelegate next, ILogger<ExceptionHandlingMiddleware> logger)
+    /// <param name="jsonOptions">全局 JSON 序列化选项</param>
+    public ExceptionHandlingMiddleware(
+        RequestDelegate next,
+        ILogger<ExceptionHandlingMiddleware> logger,
+        IOptions<JsonOptions> jsonOptions)
     {
         _next = next;
         _logger = logger;
+        _jsonOptions = jsonOptions.Value.JsonSerializerOptions;
     }
 
     /// <summary>
@@ -47,44 +56,27 @@ public class ExceptionHandlingMiddleware
         {
             ValidationException validationEx => (
                 HttpStatusCode.BadRequest,
-                new ErrorResponse
-                {
-                    StatusCode = (int)HttpStatusCode.BadRequest,
-                    Message = validationEx.Message,
-                    Errors = validationEx.Errors
-                }
+                ApiResponse.Fail(40001, validationEx.Message, validationEx.Errors)
             ),
             NotFoundException => (
                 HttpStatusCode.NotFound,
-                new ErrorResponse
-                {
-                    StatusCode = (int)HttpStatusCode.NotFound,
-                    Message = exception.Message
-                }
+                ApiResponse.Fail(40400, exception.Message)
             ),
             DomainException => (
                 HttpStatusCode.BadRequest,
-                new ErrorResponse
-                {
-                    StatusCode = (int)HttpStatusCode.BadRequest,
-                    Message = exception.Message
-                }
+                ApiResponse.Fail(40000, exception.Message)
             ),
             ApiException apiEx => (
                 apiEx.StatusCode,
-                new ErrorResponse
-                {
-                    StatusCode = (int)apiEx.StatusCode,
-                    Message = apiEx.Message
-                }
+                ApiResponse.Fail((int)apiEx.StatusCode * 100, apiEx.Message)
+            ),
+            UnauthorizedAccessException => (
+                HttpStatusCode.Unauthorized,
+                ApiResponse.Fail(40100, "未授权访问")
             ),
             _ => (
                 HttpStatusCode.InternalServerError,
-                new ErrorResponse
-                {
-                    StatusCode = (int)HttpStatusCode.InternalServerError,
-                    Message = "服务器内部错误，请稍后重试。"
-                }
+                ApiResponse.Fail(50000, "服务器内部错误，请稍后重试。")
             )
         };
 
@@ -100,29 +92,7 @@ public class ExceptionHandlingMiddleware
         context.Response.StatusCode = (int)statusCode;
         context.Response.ContentType = "application/json";
 
-        var json = JsonSerializer.Serialize(response, new JsonSerializerOptions
-        {
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-        });
-
+        var json = JsonSerializer.Serialize(response, _jsonOptions);
         await context.Response.WriteAsync(json);
-    }
-
-    private class ErrorResponse
-    {
-        /// <summary>
-        /// HTTP 状态码
-        /// </summary>
-        public int StatusCode { get; set; }
-
-        /// <summary>
-        /// 错误消息
-        /// </summary>
-        public string Message { get; set; } = string.Empty;
-
-        /// <summary>
-        /// 验证错误详情
-        /// </summary>
-        public IDictionary<string, string[]>? Errors { get; set; }
     }
 }
