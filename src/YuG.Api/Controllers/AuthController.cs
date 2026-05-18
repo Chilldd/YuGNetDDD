@@ -1,9 +1,9 @@
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using YuG.Api.Helpers;
-using YuG.Application.Identity.UserLogin.Login;
-using YuG.Application.Identity.UserLogin.Logout;
-using YuG.Application.Identity.UserLogin.RefreshToken;
+using YuG.Application.Identity.UserLogin.Commands.Login;
+using YuG.Application.Identity.UserLogin.Commands.Logout;
+using YuG.Application.Identity.UserLogin.Commands.RefreshToken;
 
 namespace YuG.Api.Controllers;
 

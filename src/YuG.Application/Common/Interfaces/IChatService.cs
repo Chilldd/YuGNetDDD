@@ -1,4 +1,4 @@
-using YuG.Application.AI.Chat.Common;
+using YuG.Application.AI.Chat.DTOs;
 
 namespace YuG.Application.Common.Interfaces;
 

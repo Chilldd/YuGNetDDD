@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Routing;
-using YuG.Application.Permission.Resource.SyncApiEndpoints;
+using YuG.Application.Permission.Resource.Commands.SyncApiEndpoints;
 using YuG.Domain.Permission.Enums;
 
 namespace YuG.Api.Helpers;

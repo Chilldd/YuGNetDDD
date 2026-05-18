@@ -1,7 +1,7 @@
 using MediatR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using YuG.Application.AI.Chat.Common;
+using YuG.Application.AI.Chat.DTOs;
 using YuG.Application.Common.Interfaces;
 using YuG.Domain.AI.Entities;
 using YuG.Domain.AI.Events;

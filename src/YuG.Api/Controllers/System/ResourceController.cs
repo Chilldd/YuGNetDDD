@@ -2,16 +2,16 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using YuG.Api.Helpers;
-using YuG.Application.Permission.Resource.Delete;
+using YuG.Application.Permission.Resource.Commands.Delete;
 using YuG.Common.Models;
-using YuG.Application.Permission.Resource.Get;
-using YuG.Application.Permission.Resource.GetList;
-using YuG.Application.Permission.Resource.GetTree;
-using CreateResourceCommands = YuG.Application.Permission.Resource.Create;
-using UpdateResourceCommands = YuG.Application.Permission.Resource.Update;
-using ActivateResourceCommands = YuG.Application.Permission.Resource.Activate;
-using DisableResourceCommands = YuG.Application.Permission.Resource.Disable;
-using MoveResourceCommands = YuG.Application.Permission.Resource.Move;
+using YuG.Application.Permission.Resource.Queries.Get;
+using YuG.Application.Permission.Resource.Queries.GetList;
+using YuG.Application.Permission.Resource.Queries.GetTree;
+using CreateResourceCommands = YuG.Application.Permission.Resource.Commands.Create;
+using UpdateResourceCommands = YuG.Application.Permission.Resource.Commands.Update;
+using ActivateResourceCommands = YuG.Application.Permission.Resource.Commands.Activate;
+using DisableResourceCommands = YuG.Application.Permission.Resource.Commands.Disable;
+using MoveResourceCommands = YuG.Application.Permission.Resource.Commands.Move;
 
 namespace YuG.Api.Controllers.System;
 

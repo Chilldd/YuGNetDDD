@@ -1,6 +1,6 @@
 using System.Runtime.CompilerServices;
 using System.Text.Json;
-using YuG.Application.AI.Chat.Common;
+using YuG.Application.AI.Chat.DTOs;
 using YuG.Application.Common.Interfaces;
 using YuG.Infrastructure.HttpClients.AIGateway;
 using YuG.Infrastructure.HttpClients.AIGateway.Responses;

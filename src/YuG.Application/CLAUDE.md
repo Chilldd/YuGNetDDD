@@ -11,27 +11,47 @@ Application核心定位是用例编排层（Use Case Orchestration Layer）
 - 不负责
   - 业务规则，复杂计算逻辑（Domain 负责）
   - 数据访问实现（Infrastructure 负责）
+  
+### CQRS 输入输出模型约定
 - Command / Query = 输入模型（DTO）
 - Result = 输出模型（DTO）
-- Query 必须有 Result，Command 可选（一般返回 ID 或 Void）
-- `Common/Guards/` 下的守卫方法统一处理禁止操作，修改命令 Handler 必须调用对应守卫
+- Query 必须有 Result
+- Command 可选返回值（一般返回 ID 或 Void）
+
+### 守卫机制
+- `Common/Guards/` 统一封装业务操作前置校验
+- 所有 Command Handler 必须显式调用 Guard
+- Guard 用于阻断非法业务操作（权限 / 状态 / 规则校验）
 
 ---
 
-## 二、目录规范
+## 二、目录结构设计
+
 Application
-├── 子域  （比如Permission）
-│    ├── UseCase  （比如Role，Resource）
-│    │    ├── 命令名称 （比如CreateResource）
-│    │    │    ├── Command.cs  （命令参数，验证器。操作命令使用）
-│    │    │    ├── Query.cs  （命令参数，验证器。查询命令使用）
-│    │    │    ├── Result.cs  （查询命令返回对象）
-│    │    │    ├── Handler.cs  （处理程序）
+├── {子域}  （比如Permission，按照具体业务创建）
+│   ├── {Submodule}  （比如Role，Resource，按照具体业务创建）
+│   │   ├── Commands  （命令）
+│   │   │   ├── {命令名称} （比如CreateResource）
+│   │   │   │   ├── Handler.cs  （处理程序）
+│   │   │   │   ├── Command.cs  （命令参数，验证器。操作命令使用）
+│   │   │   ├── DTOs （不同命令之间通用的参数）
+│   │   ├── Queries   （查询）
+│   │   │   ├── {查询名称} （比如GetRoleList）
+│   │   │   │   ├── Handler.cs  （处理程序）
+│   │   │   │   ├── Query.cs  （查询参数）
+│   │   │   │   ├── Result.cs  （返回结果）
+│   │   ├── EventHandlers   (领域事件处理程序)
+│   ├── Queries   （跨模块查询）
+│   │   ├── {查询名称} （比如GetRoleList）
+│   │   │   ├── Handler.cs  （处理程序）
+│   │   │   ├── Query.cs  （查询参数）
+│   │   │   ├── Result.cs  （返回结果）
+│   ├── EventHandlers   （跨模块领域事件处理程序）
 ├── Common （通用）
-│    ├── Behaviors  （MediatR管道）
-│    ├── Guards （守卫类，如 SystemRoleGuard）
-│    ├── Exceptions （异常）
-│    ├── Interfaces （数据库上下文接口）
+│   ├── Behaviors  （MediatR管道）
+│   ├── Guards （守卫类，如 SystemRoleGuard）
+│   ├── Exceptions （异常）
+│   ├── Interfaces （数据库上下文接口）
 
 ---
 
@@ -42,13 +62,14 @@ Application
 - Query / Command 严格分离
   - Query（查询）
     - 只读
-    - 使用 Dapper / SQL 查询
-    - 可绕过 Domain
+    - 可直接使用 SQL / Dapper / EF 投影
+    - 可绕过 Domain 层
   - Command（命令）
-    - 修改状态
-    - 必须走 Domain
+    - 仅用于状态变更
+    - 必须经过 Domain 层
+    - 必须保证业务一致性
 - 事务必须在 Application 层控制
-- 必须按 UseCase 分文件夹
+- 必须按 Submodule/UseCase 分文件夹
 - Handler 必须单一职责
 - 所有输入必须通过 Command / Query，Controller 不直接调用 Domain
 - 所有外部依赖必须抽象接口

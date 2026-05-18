@@ -3,8 +3,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using YuG.Api.Helpers;
 using YuG.Application.Common.Interfaces;
-using YuG.Application.Permission.UserPermission.GetPageApiPermissions;
-using YuG.Application.Permission.UserPermission.GetUserMenu;
+using YuG.Application.Permission.UserPermission.Queries.GetPageApiPermissions;
+using YuG.Application.Permission.UserPermission.Queries.GetUserMenu;
 
 namespace YuG.Api.Controllers;
 

@@ -1,4 +1,4 @@
-using YuG.Application.Permission.Resource.SyncApiEndpoints;
+using YuG.Application.Permission.Resource.Commands.SyncApiEndpoints;
 
 namespace YuG.Api.Helpers;
 

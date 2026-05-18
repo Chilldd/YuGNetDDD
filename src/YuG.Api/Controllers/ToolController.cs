@@ -2,7 +2,7 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using YuG.Api.Helpers;
-using YuG.Application.Permission.Resource.SyncApiEndpoints;
+using YuG.Application.Permission.Resource.Commands.SyncApiEndpoints;
 
 namespace YuG.Api.Controllers;
 

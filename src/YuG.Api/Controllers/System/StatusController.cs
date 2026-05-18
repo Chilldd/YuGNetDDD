@@ -2,9 +2,9 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using YuG.Api.Helpers;
-using YuG.Application.Monitoring.Status.GetHealth;
-using YuG.Application.Monitoring.Status.GetReady;
-using YuG.Application.Monitoring.Status.GetStatus;
+using YuG.Application.Monitoring.Status.Queries.GetHealth;
+using YuG.Application.Monitoring.Status.Queries.GetReady;
+using YuG.Application.Monitoring.Status.Queries.GetStatus;
 
 namespace YuG.Api.Controllers.System;
 

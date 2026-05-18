@@ -2,16 +2,16 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using YuG.Api.Helpers;
-using YuG.Application.Identity.Role.SetUserRoles;
+using YuG.Application.Identity.Role.Commands.SetUserRoles;
 using YuG.Common.Models;
-using YuG.Application.Identity.User.Activate;
-using YuG.Application.Identity.User.Create;
-using YuG.Application.Identity.User.Delete;
-using YuG.Application.Identity.User.Disable;
-using YuG.Application.Identity.User.Get;
-using YuG.Application.Identity.User.GetList;
-using YuG.Application.Identity.User.RemoveRole;
-using YuG.Application.Identity.User.ResetPassword;
+using YuG.Application.Identity.User.Commands.Activate;
+using YuG.Application.Identity.User.Commands.Create;
+using YuG.Application.Identity.User.Commands.Delete;
+using YuG.Application.Identity.User.Commands.Disable;
+using YuG.Application.Identity.User.Queries.Get;
+using YuG.Application.Identity.User.Queries.GetList;
+using YuG.Application.Identity.User.Commands.RemoveRole;
+using YuG.Application.Identity.User.Commands.ResetPassword;
 
 namespace YuG.Api.Controllers.System;
 
