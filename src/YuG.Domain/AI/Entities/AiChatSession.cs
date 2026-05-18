@@ -47,18 +47,20 @@ public class AiChatSession : AggregateRoot
     }
 
     /// <summary>添加一条聊天消息。</summary>
-    /// <param name="role">消息角色（system/user/assistant）</param>
-    /// <param name="content">消息内容</param>
+    /// <param name="role">消息角色（system/user/assistant/tool）</param>
+    /// <param name="content">消息内容（tool_calls 的 assistant 消息可传空字符串）</param>
     /// <param name="tokenCount">Token 数（可选）</param>
-    public AiChatMessage AddMessage(string role, string content, int? tokenCount = null)
+    /// <param name="toolCallId">工具调用 ID（tool 角色消息）</param>
+    /// <param name="toolCalls">工具调用列表 JSON（assistant 角色且包含 tool_calls）</param>
+    public AiChatMessage AddMessage(string role, string content, int? tokenCount = null, string? toolCallId = null, string? toolCalls = null)
     {
         var sequence = Messages.Count;
-        var message = new AiChatMessage(role, content, sequence, tokenCount);
+        var message = new AiChatMessage(role, content, sequence, tokenCount, toolCallId, toolCalls);
         Messages.Add(message);
         LastActiveAt = DateTime.UtcNow;
 
         // 首次 assistant 回复后请求 AI 生成会话标题
-        if (Title == DefaultTitle && role == "assistant")
+        if (Title == DefaultTitle && role == "assistant" && string.IsNullOrEmpty(toolCalls))
         {
             AddDomainEvent(new SessionTitleGenerationRequested(SessionId, UserId));
         }

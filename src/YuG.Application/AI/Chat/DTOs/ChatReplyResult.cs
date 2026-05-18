@@ -20,4 +20,23 @@ public record ChatReplyResult
 
     /// <summary>会话累计输出 Token 数。</summary>
     public long TotalOutTokens { get; init; }
+
+    /// <summary>工具调用记录。</summary>
+    public List<ToolCallRecordResult>? ToolCalls { get; init; }
+}
+
+/// <summary>工具调用记录 DTO。</summary>
+public record ToolCallRecordResult
+{
+    /// <summary>工具调用 ID。</summary>
+    public string Id { get; init; } = string.Empty;
+
+    /// <summary>函数名称。</summary>
+    public string Name { get; init; } = string.Empty;
+
+    /// <summary>函数参数 JSON。</summary>
+    public string Arguments { get; init; } = string.Empty;
+
+    /// <summary>工具执行结果。</summary>
+    public string Result { get; init; } = string.Empty;
 }

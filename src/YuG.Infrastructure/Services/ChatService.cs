@@ -6,6 +6,7 @@ using YuG.Infrastructure.HttpClients.AIGateway;
 using YuG.Infrastructure.HttpClients.AIGateway.Responses;
 using InfrastructureChatRequest = YuG.Infrastructure.HttpClients.AIGateway.Requests.ChatRequest;
 using InfrastructureChatMessageDto = YuG.Infrastructure.HttpClients.AIGateway.Requests.ChatMessageDto;
+using InfrastructureToolCallDto = YuG.Infrastructure.HttpClients.AIGateway.Requests.ToolCallDto;
 
 namespace YuG.Infrastructure.Services;
 
@@ -30,7 +31,18 @@ public class ChatService : IChatService
     public async Task<ChatReplyResult> ChatAsync(List<ChatMessageDto> messages, long userId, CancellationToken ct)
     {
         var infraMessages = messages
-            .Select(m => new InfrastructureChatMessageDto { Role = m.Role, Content = m.Content })
+            .Select(m => new InfrastructureChatMessageDto
+            {
+                Role = m.Role,
+                Content = m.Content,
+                ToolCalls = m.ToolCalls?.Select(tc => new InfrastructureToolCallDto
+                {
+                    Id = tc.Id,
+                    FunctionName = tc.Name,
+                    Arguments = tc.Arguments,
+                }).ToList(),
+                ToolCallId = m.ToolCallId,
+            })
             .ToList();
 
         var request = new InfrastructureChatRequest
@@ -46,6 +58,13 @@ public class ChatService : IChatService
             Reply = response.Reply,
             Model = response.Model,
             Usage = response.Usage is not null ? MapToUsageResult(response.Usage) : null,
+            ToolCalls = response.ToolCalls?.Select(tc => new ToolCallRecordResult
+            {
+                Id = tc.Id,
+                Name = tc.Name,
+                Arguments = tc.Arguments,
+                Result = tc.Result,
+            }).ToList(),
         };
     }
 
@@ -56,7 +75,18 @@ public class ChatService : IChatService
         [EnumeratorCancellation] CancellationToken ct)
     {
         var infraMessages = messages
-            .Select(m => new InfrastructureChatMessageDto { Role = m.Role, Content = m.Content })
+            .Select(m => new InfrastructureChatMessageDto
+            {
+                Role = m.Role,
+                Content = m.Content,
+                ToolCalls = m.ToolCalls?.Select(tc => new InfrastructureToolCallDto
+                {
+                    Id = tc.Id,
+                    FunctionName = tc.Name,
+                    Arguments = tc.Arguments,
+                }).ToList(),
+                ToolCallId = m.ToolCallId,
+            })
             .ToList();
 
         var request = new InfrastructureChatRequest
@@ -94,6 +124,22 @@ public class ChatService : IChatService
                 Content = infraDelta.Content ?? string.Empty,
                 Usage = infraDelta.Usage is not null
                     ? MapToUsageResult(infraDelta.Usage)
+                    : null,
+                ToolCall = infraDelta.ToolCall is not null
+                    ? new ToolCallDeltaResult
+                    {
+                        Id = infraDelta.ToolCall.Id,
+                        Name = infraDelta.ToolCall.Name,
+                        Arguments = infraDelta.ToolCall.Arguments,
+                    }
+                    : null,
+                ToolResult = infraDelta.ToolResult is not null
+                    ? new ToolCallResultDeltaResult
+                    {
+                        Id = infraDelta.ToolResult.Id,
+                        Name = infraDelta.ToolResult.Name,
+                        Content = infraDelta.ToolResult.Content,
+                    }
                     : null,
             };
         }

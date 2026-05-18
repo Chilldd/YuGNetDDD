@@ -1,5 +1,6 @@
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Text.Json;
 using MediatR;
 using Microsoft.Extensions.Configuration;
 using YuG.Application.AI.Chat.DTOs;
@@ -42,10 +43,10 @@ public class StreamChatCommandHandler : IRequestHandler<StreamChatCommand, IAsyn
         // 1. 加载或创建会话
         var session = await LoadOrCreateSessionAsync(request.SessionId, userId, cancellationToken);
 
-        // 2. 构造完整消息列表（历史 + 当前用户输入）
+        // 2. 构造完整消息列表（历史 + 当前用户输入，含工具调用记录）
         var messages = session.Messages
             .OrderBy(m => m.SequenceNumber)
-            .Select(m => new ChatMessageDto(m.Role, m.Content))
+            .Select(ChatMessageDto.FromDomain)
             .ToList();
 
         messages.Add(new ChatMessageDto("user", request.Message));
@@ -64,18 +65,43 @@ public class StreamChatCommandHandler : IRequestHandler<StreamChatCommand, IAsyn
         [EnumeratorCancellation] CancellationToken ct)
     {
         var fullReply = new StringBuilder();
+        var toolCallsList = new List<(string Id, string Name, string Arguments)>();
+        var toolResultsList = new List<(string Id, string Name, string Content)>();
 
         await foreach (var delta in rawStream.WithCancellation(ct))
         {
-            if (delta.Type == "delta" && delta.Content is not null)
-                fullReply.Append(delta.Content);
+            switch (delta.Type)
+            {
+                case "delta" when delta.Content is not null:
+                    fullReply.Append(delta.Content);
+                    break;
+                case "tool_call" when delta.ToolCall is not null:
+                    toolCallsList.Add((delta.ToolCall.Id, delta.ToolCall.Name, delta.ToolCall.Arguments));
+                    break;
+                case "tool_result" when delta.ToolResult is not null:
+                    toolResultsList.Add((delta.ToolResult.Id, delta.ToolResult.Name, delta.ToolResult.Content));
+                    break;
+            }
             yield return delta;
         }
 
-        // 流结束后保存消息
-        if (fullReply.Length > 0)
+        // 流结束后保存消息（含工具调用）
+        if (fullReply.Length > 0 || toolCallsList.Count > 0)
         {
             session.AddMessage("user", userMessage);
+
+            if (toolCallsList.Count > 0)
+            {
+                var toolCallsJson = JsonSerializer.Serialize(
+                    toolCallsList.Select(tc => new { tc.Id, tc.Name, tc.Arguments }));
+                session.AddMessage("assistant", "", toolCalls: toolCallsJson);
+
+                foreach (var tr in toolResultsList)
+                {
+                    session.AddMessage("tool", tr.Content, toolCallId: tr.Id);
+                }
+            }
+
             session.AddMessage("assistant", fullReply.ToString());
             await _sessionRepository.SaveChangesAsync(ct);
         }

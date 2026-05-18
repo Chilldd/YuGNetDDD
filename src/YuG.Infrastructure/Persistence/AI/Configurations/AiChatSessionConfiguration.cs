@@ -74,6 +74,11 @@ public class AiChatSessionConfiguration : IEntityTypeConfiguration<AiChatSession
             msg.Property(m => m.CreatedAt)
                 .ValueGeneratedOnAdd()
                 .HasDefaultValue(DateTime.UtcNow);
+
+            msg.Property(m => m.ToolCallId)
+                .HasMaxLength(100);
+
+            msg.Property(m => m.ToolCalls);
         });
 
         builder.Navigation(s => s.Messages)

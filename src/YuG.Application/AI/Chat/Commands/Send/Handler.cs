@@ -1,3 +1,4 @@
+using System.Text.Json;
 using MediatR;
 using Microsoft.Extensions.Configuration;
 using YuG.Application.AI.Chat.DTOs;
@@ -40,10 +41,10 @@ public class ChatCommandHandler : IRequestHandler<ChatCommand, ChatReplyResult>
         // 1. 加载或创建会话
         var session = await LoadOrCreateSessionAsync(request.SessionId, userId, cancellationToken);
 
-        // 2. 构造完整消息列表（历史 + 当前用户输入）
+        // 2. 构造完整消息列表（历史 + 当前用户输入，含工具调用记录）
         var messages = session.Messages
             .OrderBy(m => m.SequenceNumber)
-            .Select(m => new ChatMessageDto(m.Role, m.Content))
+            .Select(ChatMessageDto.FromDomain)
             .ToList();
 
         messages.Add(new ChatMessageDto("user", request.Message));
@@ -51,8 +52,21 @@ public class ChatCommandHandler : IRequestHandler<ChatCommand, ChatReplyResult>
         // 3. 调 AI Gateway
         var result = await _chatService.ChatAsync(messages, userId, cancellationToken);
 
-        // 4. 持久化消息
+        // 4. 持久化消息（含工具调用记录）
         session.AddMessage("user", request.Message);
+
+        if (result.ToolCalls?.Count > 0)
+        {
+            var toolCallsJson = JsonSerializer.Serialize(
+                result.ToolCalls.Select(tc => new { tc.Id, tc.Name, tc.Arguments }));
+            session.AddMessage("assistant", "", toolCalls: toolCallsJson);
+
+            foreach (var tc in result.ToolCalls)
+            {
+                session.AddMessage("tool", tc.Result, toolCallId: tc.Id);
+            }
+        }
+
         session.AddMessage("assistant", result.Reply);
         await _sessionRepository.SaveChangesAsync(cancellationToken);
 

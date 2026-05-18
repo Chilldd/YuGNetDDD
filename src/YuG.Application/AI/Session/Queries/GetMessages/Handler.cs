@@ -40,7 +40,7 @@ public class Handler : IRequestHandler<GetSessionMessagesQuery, PageResult<Messa
         return await conn.ToPageResultAsync<MessageItem>(
             "SELECT COUNT(1) FROM AiChatMessage WHERE AiChatSessionId = @SessionPkId",
             """
-            SELECT Role, Content, SequenceNumber, TokenCount, CreatedAt
+            SELECT Role, Content, SequenceNumber, TokenCount, CreatedAt, ToolCallId, ToolCalls
             FROM AiChatMessage
             WHERE AiChatSessionId = @SessionPkId
             ORDER BY Id DESC
