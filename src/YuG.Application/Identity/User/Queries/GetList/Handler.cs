@@ -1,6 +1,6 @@
 using Dapper;
 using MediatR;
-using YuG.Application.Common;
+using YuG.Application.Common.Queries;
 using YuG.Application.Common.Interfaces;
 using YuG.Common.Models;
 

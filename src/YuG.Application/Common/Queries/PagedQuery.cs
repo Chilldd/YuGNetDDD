@@ -1,6 +1,6 @@
 using MediatR;
 
-namespace YuG.Application.Common;
+namespace YuG.Application.Common.Queries;
 
 /// <summary>
 /// 分页查询基类，所有分页查询应继承此类

@@ -2,7 +2,7 @@ using System.Data;
 using Dapper;
 using YuG.Common.Models;
 
-namespace YuG.Application.Common;
+namespace YuG.Application.Common.Queries;
 
 /// <summary>
 /// 查询通用扩展方法

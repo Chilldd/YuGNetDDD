@@ -1,4 +1,4 @@
-using YuG.Application.Common;
+using YuG.Application.Common.Queries;
 using YuG.Common.Models;
 
 namespace YuG.Application.Identity.Role.Queries.GetList;

@@ -1,5 +1,5 @@
 using FluentValidation;
-using YuG.Application.Common;
+using YuG.Application.Common.Queries;
 using YuG.Common.Models;
 using YuG.Domain.Permission.Enums;
 
